@@ -1,0 +1,6 @@
+[submodule "lib/km-core"]
+	path = lib/km-core
+	url = https://github.com/fex-team/kityminder-core
+[submodule "lib/kity"]
+	path = lib/kity
+	url = https://github.com/fex-team/kity
