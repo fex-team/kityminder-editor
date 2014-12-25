@@ -24,7 +24,6 @@
     "tests"
   ],
   "dependencies": {
-    "hotbox": "~1.0.0",
     "seajs": "~2.3.0"
   }
 }

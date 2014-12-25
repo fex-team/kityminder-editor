@@ -4,3 +4,6 @@
 [submodule "lib/kity"]
 	path = lib/kity
 	url = https://github.com/fex-team/kity
+[submodule "lib/hotbox"]
+	path = lib/hotbox
+	url = https://github.com/fex-team/hotbox.git
