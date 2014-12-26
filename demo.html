@@ -36,7 +36,7 @@
 </head>
 <body>
     <h1>KityMinder Editor - Powered By FEX</h1>
-    <script id="minder-editor" type="application/kityminder" minder-data-type="text">中心主题</script>
+    <div id="minder-editor">中心主题</div>
 </body>
 <script src="lib/kity/dist/kity.js"></script>
 <script src="lib/seajs/dist/sea-debug.js"></script>
@@ -49,13 +49,30 @@ seajs.config({
 define('demo', function(require) {
     var Minder = require('../lib/km-core/src/kityminder').Minder;
     var HotBox = require('../lib/hotbox/src/hotbox');
-    var minder = new Minder();
+    var minder = new Minder({
+        enableKeyReceiver: false
+    });
 
-    minder.setup('#minder-editor');
+    minder.renderTo('#minder-editor');
 
-    var hotbox = new HotBox('#minder-editor');
+    var hotbox = new HotBox('#minder-editor').control();
 
-    hotbox.control(minder.keyboardReceiver);
+    // hotbox.hintDeactiveMainState = true;
+    hotbox.onkeyevent = function(e) {
+        if (!e.handleResult) {
+            minder.dispatchKeyEvent(e);
+        }
+    };
+
+    hotbox.position = function() {
+        var selected = minder.getSelectedNode();
+        if (!selected) return null;
+        var box = selected.getRenderContainer().getRenderBox('top');
+        return {
+            x: box.cx,
+            y: box.cy
+        };
+    };
 
     var main = hotbox.state('main');
 
