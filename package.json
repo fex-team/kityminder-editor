@@ -1,0 +1,28 @@
+{
+  "name": "km-editor",
+  "version": "0.0.1",
+  "description": "A powerful mind map editor",
+  "main": "kityminder.editor.js",
+  "scripts": {
+    "test": "grunt test",
+    "dev": "npm run watch-less",
+    "watch-less": "wr --exec \"lessc --source-map less/editor.less kityminder.editor.css\" less"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fex-team/kityminder-editor"
+  },
+  "keywords": [
+    "kityminder",
+    "editor",
+    "html5",
+    "js",
+    "mindmap"
+  ],
+  "author": "fex <fex@baidu.com>",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/fex-team/kityminder-editor/issues"
+  },
+  "homepage": "https://github.com/fex-team/kityminder-editor"
+}
