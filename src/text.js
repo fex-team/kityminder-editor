@@ -7,16 +7,16 @@ define(function(require, exports, module) {
      */
     function textExtension() {
 
-        var runtime = this;
+        var editor = this;
         var minder, hotbox, container, textEditor, editorMask;
         var editing;
 
         init();
 
         function init() {
-            minder = runtime.minder;
-            hotbox = runtime.hotbox;
-            container = runtime.container;
+            minder = editor.minder;
+            hotbox = editor.hotbox;
+            container = editor.container;
             container.classList.add('km-editor');
             initEditorMask();
             initTextEditor();
@@ -36,7 +36,7 @@ define(function(require, exports, module) {
             textEditor = document.createElement('div');
             textEditor.contentEditable = true;
             textEditor.classList.add('text-editor');
-            textEditor.style.display = 'none';
+            // textEditor.style.display = 'none';
             // 阻止 hotbox 获得焦点
             textEditor.onmousedown = function(e) {
                 e.stopPropagation();
@@ -48,6 +48,11 @@ define(function(require, exports, module) {
         }
 
         function initHotBox() {
+            hotbox.control(function() {
+                return {
+                    active: active
+                };
+            });
             hotbox.state('main').button({
                 position: 'center',
                 label: '编辑',
@@ -60,18 +65,28 @@ define(function(require, exports, module) {
         }
 
         function handleKeyDown(e) {
-            if (!editing) return;
-            switch(key.hash(e)) {
-                case key.hash('enter'):
-                    commitEditResult();
-                    e.preventDefault();
-                    break;
-                case key.hash('esc'):
-                case key.hash('tab'):
-                case key.hash('insert'):
-                    exitEditMode();
-                    e.preventDefault();
-                    break;
+            if (!editing) {
+                if (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return;
+                if (minder.getSelectedNodes().length != 1) return;
+                if (key.is(e, 'space')) {
+                    hotbox.dispatch(e);
+                } else {
+                    edit();
+                }
+                return;
+            } else {
+                switch(key.hash(e)) {
+                    case key.hash('enter'):
+                        commitEditResult();
+                        e.preventDefault();
+                        break;
+                    case key.hash('esc'):
+                    case key.hash('tab'):
+                    case key.hash('insert'):
+                        exitEditMode();
+                        e.preventDefault();
+                        break;
+                }
             }
         }
 
@@ -88,9 +103,13 @@ define(function(require, exports, module) {
             textEditor.style.marginTop = (box.height - textEditor.clientHeight) / 2 + 'px';
             textEditor.style.marginLeft = (box.width - textEditor.clientWidth) / 2 + 'px';
             updateEditorPosition({ node: editing });
+            editorMask.style.display = 'block';
+            active();
+        }
+
+        function active() {
             textEditor.focus();
             document.execCommand('selectAll', false, null);
-            editorMask.style.display = 'block';
         }
 
         function updateEditorPosition(e) {
@@ -106,13 +125,12 @@ define(function(require, exports, module) {
         }
 
         function exitEditMode() {
-            textEditor.style.display = 'none';
+            // textEditor.style.display = 'none';
             editorMask.style.display = 'none';
-            hotbox.control();
             editing = false;
         }
 
-        runtime.editText = edit;
+        editor.editText = edit;
 
     }
 

@@ -1,6 +1,34 @@
 .km-editor {
   overflow: hidden;
 }
+.km-editor > .mask {
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: transparent;
+}
+.km-editor > .receiver {
+  position: absolute;
+  background: white;
+  outline: none;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  left: 0;
+  top: 0;
+  padding: 3px 5px;
+  max-width: 300px;
+  width: auto;
+  font-size: 14px;
+  line-height: 1.4em;
+  box-sizing: border-box;
+  overflow: hidden;
+  word-break: break-all;
+  word-wrap: break-word;
+  border: none;
+  shape-rendering: optimize;
+}
 .km-editor .text-editor {
   position: absolute;
   background: white;
