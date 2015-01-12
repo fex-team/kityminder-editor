@@ -1,3 +1,4 @@
 define(function(require, exports, module) {
-    module.exports = require('../lib/hotbox/src/hotbox');
+    var HotBox = require('../lib/hotbox/src/hotbox');
+    module.exports = HotBox;
 });

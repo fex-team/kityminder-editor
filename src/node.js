@@ -19,7 +19,7 @@ define(function(require, exports, module) {
             var buttons = [
                 '前移:Alt+Up:ArrangeUp',
                 '下级:Tab:AppendChildNode',
-                '同级:Ctrl+Enter:AppendSiblingNode',
+                '同级:Enter:AppendSiblingNode',
                 '后移:Alt+Down:ArrangeDown',
                 '删除:Delete|Backspace:RemoveNode',
                 '归纳:Shift+Tab|Shift+Insert:AppendParentNode'

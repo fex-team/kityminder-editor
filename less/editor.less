@@ -20,6 +20,8 @@
     left: 0;
     top: 0;
     padding: 3px 5px;
+    margin-left: -3px;
+    margin-top: -5px;
     max-width: 300px;
     width: auto;
     overflow: hidden;
@@ -30,6 +32,12 @@
     word-break: break-all;
     word-wrap: break-word;
     border: none;
-}
 
-@import "text";
+    &.hide {
+        // outline: 1px solid green;
+        // background: none;
+        // color: transparent;
+        pointer-events: none;
+        opacity: 0;
+    }
+}

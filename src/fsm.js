@@ -1,9 +1,25 @@
 define(function(require, exports, module) {
     function FSM(defaultState) {
-        this.currentState = defaultState;
+        var currentState = defaultState;
+        var callbacks = [];
 
-        this.jump = function(state) {
-            this.currentState = state;
+        this.jump = function(state, reason) {
+            var lastState = currentState;
+            if (state != lastState) {
+                currentState = state;
+                callbacks.forEach(function(callback) {
+                    callback(lastState, currentState, reason);
+                });
+                console.log('%s -> %s', lastState, currentState, reason);
+            }
+        };
+
+        this.state = function() {
+            return currentState;
+        };
+
+        this.listen = function(callback) {
+            callbacks.push(callback);
         };
     }
 
