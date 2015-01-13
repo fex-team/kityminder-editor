@@ -4,7 +4,7 @@
   "description": "A powerful mind map editor",
   "main": "kityminder.editor.js",
   "scripts": {
-    "test": "grunt test",
+    "init": "git submodule init && git submodule update && npm i -g wr && npm install -g less && npm install -g bower && bower install",
     "dev": "npm run watch-less",
     "watch-less": "wr --exec \"lessc --source-map less/editor.less kityminder.editor.css\" less"
   },

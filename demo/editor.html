@@ -3,9 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>KityMinder Editor - Powered By FEX</title>
-    <link rel="stylesheet" href="lib/km-core/src/kityminder.css">
-    <link rel="stylesheet" href="lib/hotbox/hotbox.css">
-    <link rel="stylesheet" href="kityminder.editor.css">
+    <link rel="stylesheet" href="../kityminder.editor.css">
     <style>
         html, body {
             margin: 0;
@@ -22,7 +20,7 @@
             height: 40px;
             font-size: 14px;
             line-height: 40px;
-            font-family: 'Hiragino Sans GB', 'Arial', 'Microsoft Yahei';
+            font-family: 'STHeiti', 'Hiragino Sans GB', 'Arial', 'Microsoft Yahei';
             font-weight: normal;
             padding: 0 20px;
         }
@@ -39,22 +37,10 @@
     <h1>KityMinder Editor - Powered By FEX</h1>
     <div id="minder-editor"></div>
 </body>
-<script src="lib/kity/dist/kity.js"></script>
-<script src="lib/seajs/dist/sea-debug.js"></script>
+<script src="../lib/kity/dist/kity.js"></script>
+<script src="../kityminder.editor.js"></script>
 <script>
-/* global seajs */
-
-seajs.config({
-    base: './src'
-});
-
-define('demo', function(require) {
-    var Editor = require('editor');
-
-    window.editor = new Editor('#minder-editor');
-});
-
-seajs.use('demo');
-
+/* global KityMinderEditor */
+window.editor = new KityMinderEditor('#minder-editor');
 </script>
 </html>

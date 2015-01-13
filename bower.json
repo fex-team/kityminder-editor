@@ -23,7 +23,7 @@
     "test",
     "tests"
   ],
-  "dependencies": {
+  "devDependencies": {
     "seajs": "~2.3.0"
   }
 }
