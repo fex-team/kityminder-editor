@@ -50,5 +50,5 @@ define(function(require, exports, module) {
         }
     }
 
-    module.exports = nodeExtension;
+    return module.exports = nodeExtension;
 });

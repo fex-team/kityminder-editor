@@ -23,5 +23,5 @@ define(function(require, exports, module) {
         };
     }
 
-    module.exports = FSM;
+    return module.exports = FSM;
 });

@@ -1,5 +1,5 @@
 define(function(require, exports, module) {
-    var Minder = require('./kityminder');
+    var Minder = require('./kityminder').Minder;
     var HotBox = require('./hotbox');
     var FSM = require('./fsm');
     var format = require('./format');
@@ -77,6 +77,7 @@ define(function(require, exports, module) {
             _minder.on('beforemousedown', function() {
                 if (_fsm.state() == 'input') _fsm.jump('normal', 'cancel');
             });
+            _minder.disableAnimation();
             _editor.minder = _minder;
         }
 
@@ -86,21 +87,26 @@ define(function(require, exports, module) {
             _receiver.classList.add('receiver');
             _container.appendChild(_receiver);
             _editor.receiver = _receiver;
-            _updateReceiverPosition();
             _exitInputMode();
+            _updateReceiverPosition();
 
             // 阻止 hotbox 获得焦点
             _receiver.onmousedown = function(e) {
                 e.stopPropagation();
             };
             _receiver.onkeydown = _receiver.onkeyup = _receiver.oninput = _handleKeyEvent;
-            _minder.on('layoutapply viewchange selectionchange', _updateReceiverPosition);
+            _minder.on('layoutallfinish viewchange selectionchange', _updateReceiverPosition);
 
             _editor.editText = function() {
                 var text = _minder.queryCommandValue('text');
-                _receiver.innerHTML = text && text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>');
+                if ('innerText' in _receiver) {
+                    _receiver.innerText = text;
+                } else {
+                    _receiver.innerHTML = text &&
+                        text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+                }
                 _fsm.jump('input');
-                document.execCommand('SelectAll');
+                _selectElementContent(_receiver);
             };
 
             _hotbox.state('main').button({
@@ -153,10 +159,19 @@ define(function(require, exports, module) {
             }
         }
 
+        function _selectElementContent(element) {
+            var range = document.createRange();
+            var selection = window.getSelection();
+            range.selectNodeContents(element);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+
         function _commitInputResult() {
-            var text = _receiver.innerHTML.replace(/<br\s*\/?>/ig, '\n');
-            text = text.replace(/^\n*|\n*$/g, '');
-            _minder.execCommand('text', text);
+            var text = _receiver.innerText || _receiver.innerHTML
+                .replace(/\&lt;br\&gt;/gi, '\n')
+                .replace(/(&lt;([^&gt;]+)&gt;)/gi, '');
+            _minder.execCommand('text', text.replace(/^\n*|\n*$/g, ''));
             _exitInputMode();
         }
 
@@ -213,15 +228,18 @@ define(function(require, exports, module) {
         }
 
         function _updateReceiverPosition() {
+            var cache = _updateReceiverPosition;
+
+            cache.fixedX = cache.fixedX || 0;
+            cache.fixedY = cache.fixedY || 0;
+
             var focusNode = _minder.getSelectedNode() || _minder.getRoot();
             if (!focusNode) return;
+
             var box = focusNode.getRenderBox('TextRenderer');
-            _receiver.style.transform = _receiver.style.webkitTransform = format('translate3d({x}px, {y}px, 0)', {
-                x: Math.round(box.x),
-                y: Math.round(box.y)
-            });
+            _receiver.style.left = Math.round(box.x) + 'px';
+            _receiver.style.top = Math.round(box.y) + 'px';
             _receiver.focus();
-            document.execCommand('SelectAll');
         }
 
         for (var i = 0; i < extensions.length; i++) {
@@ -233,10 +251,9 @@ define(function(require, exports, module) {
         extensions.push(extension);
     }
 
-    // extend(require('./input'));
     extend(require('./node'));
 
     KMEditor.extend = extend;
 
-    module.exports = KMEditor;
+    return module.exports = KMEditor;
 });

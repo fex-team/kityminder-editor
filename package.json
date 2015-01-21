@@ -24,5 +24,15 @@
   "bugs": {
     "url": "https://github.com/fex-team/kityminder-editor/issues"
   },
-  "homepage": "https://github.com/fex-team/kityminder-editor"
+  "homepage": "https://github.com/fex-team/kityminder-editor",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-clean": "^0.5.0",
+    "grunt-contrib-concat": "~0.5.0",
+    "grunt-contrib-copy": "^0.5.0",
+    "grunt-contrib-less": "^1.0.0",
+    "grunt-contrib-uglify": "^0.4.1",
+    "grunt-module-dependence": "~0.2.0",
+    "grunt-replace": "~0.8.0"
+  }
 }

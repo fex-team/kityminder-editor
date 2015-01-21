@@ -1,5 +1,5 @@
-@import (css) "../lib/km-core/src/kityminder"
-@import (less) "../lib/hotbox/less/hotbox.less"
+@import (less) "../lib/km-core/src/kityminder.css";
+@import (less) "../lib/hotbox/less/hotbox.less";
 
 .km-editor {
     overflow: hidden;
@@ -30,11 +30,13 @@
     overflow: hidden;
     font-size: 14px;
     line-height: 1.4em;
+    min-height: 1.4em;
     box-sizing: border-box;
     overflow: hidden;
     word-break: break-all;
     word-wrap: break-word;
     border: none;
+    -webkit-user-select: text;
 
     &.hide {
         // outline: 1px solid green;
@@ -42,5 +44,6 @@
         // color: transparent;
         pointer-events: none;
         opacity: 0;
+        z-index: -1000;
     }
 }

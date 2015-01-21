@@ -134,5 +134,5 @@ define(function(require, exports, module) {
 
     }
 
-    module.exports = textExtension;
+    return module.exports = textExtension;
 });

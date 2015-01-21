@@ -7,5 +7,5 @@ define(function(require, exports, module) {
             return args[$key] || $key;
         });
     }
-    module.exports = format;
+    return module.exports = format;
 });
