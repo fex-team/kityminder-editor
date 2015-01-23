@@ -32,7 +32,6 @@
   height: 70px;
   margin-left: -35px;
   margin-top: -35px;
-  background: white;
   border-radius: 100%;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
 }
@@ -72,7 +71,6 @@
 .hotbox .state .bottom .button {
   display: inline-block;
   padding: 8px 15px;
-  background: white;
   margin: 0 10px;
   border-radius: 15px;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
@@ -101,38 +99,50 @@
   content: ')';
 }
 .hotbox .state .button {
+  background: #F9F9F9;
   overflow: hidden;
   cursor: default;
 }
-.hotbox .state .button:hover {
+.hotbox .state .button .key,
+.hotbox .state .button .label {
+  opacity: 0.3;
+}
+.hotbox .state .button.enabled {
+  background: white;
+}
+.hotbox .state .button.enabled .key,
+.hotbox .state .button.enabled .label {
+  opacity: 1;
+}
+.hotbox .state .button.enabled:hover {
   background: #e87372;
 }
-.hotbox .state .button:hover .label {
+.hotbox .state .button.enabled:hover .label {
   color: white;
 }
-.hotbox .state .button:hover .key {
+.hotbox .state .button.enabled:hover .key {
   color: #fadfdf;
 }
-.hotbox .state .button.selected {
+.hotbox .state .button.enabled.selected {
   -webkit-animation: selected .1s ease;
   background: #e45d5c;
 }
-.hotbox .state .button.selected .label {
+.hotbox .state .button.enabled.selected .label {
   color: white;
 }
-.hotbox .state .button.selected .key {
+.hotbox .state .button.enabled.selected .key {
   color: #fadfdf;
 }
-.hotbox .state .button.pressed,
-.hotbox .state .button:active {
+.hotbox .state .button.enabled.pressed,
+.hotbox .state .button.enabled:active {
   background: #FF974D;
 }
-.hotbox .state .button.pressed .label,
-.hotbox .state .button:active .label {
+.hotbox .state .button.enabled.pressed .label,
+.hotbox .state .button.enabled:active .label {
   color: white;
 }
-.hotbox .state .button.pressed .key,
-.hotbox .state .button:active .key {
+.hotbox .state .button.enabled.pressed .key,
+.hotbox .state .button.enabled:active .key {
   color: #fff0e6;
 }
 .hotbox .state.active {
@@ -191,10 +201,21 @@
   word-wrap: break-word;
   border: none;
   -webkit-user-select: text;
-}
-.km-editor > .receiver.hide {
   pointer-events: none;
   opacity: 0;
   z-index: -1000;
+}
+.km-editor > .receiver.debug {
+  opacity: 1;
+  outline: 1px solid green;
+  background: none;
+  z-index: 0;
+}
+.km-editor > .receiver.input {
+  pointer-events: all;
+  opacity: 1;
+  z-index: 999;
+  background: white;
+  outline: none;
 }
 /*# sourceMappingURL=kityminder.editor.css.map */

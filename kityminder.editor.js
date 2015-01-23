@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * km-editor - v0.0.1 - 2015-01-21
+ * km-editor - v0.0.1 - 2015-01-22
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -40,232 +40,30 @@ var _p = {
 //src/editor.js
 _p[0] = {
     value: function(require, exports, module) {
-        var Minder = _p.r(7).Minder;
-        var HotBox = _p.r(4);
-        var FSM = _p.r(3);
-        var format = _p.r(2);
-        var key = _p.r(6);
         /**
-     * 扩展模块
+     * 运行时
      */
-        var extensions = [];
+        var runtimes = [];
+        function assemble(runtime) {
+            runtimes.push(runtime);
+        }
         function KMEditor(selector) {
-            var _editor = this;
-            /**
-         * 整个编辑器的容器，包含：
-         *     svg - 脑图可视化
-         *     div.hotbox - 热盒容器
-         *     div.mask - 鼠标事件屏蔽层
-         *     div.receiver - 按键/输入接收器
-         */
-            var _container;
-            /**
-         * 脑图实例
-         */
-            var _minder;
-            /**
-         * 热盒实例
-         */
-            var _hotbox;
-            /**
-         * 屏蔽层
-         */
-            var _mask;
-            /**
-         * 接收器 dom
-         */
-            var _receiver;
-            /**
-         * 当前状态
-         */
-            var _fsm;
-            _init();
-            function _init() {
-                _initFSM();
-                _initContainer();
-                _initMinder();
-                _initHotBox();
-                _initReceiver();
-            }
-            function _initFSM() {
-                _fsm = new FSM("normal");
-                _editor.fsm = _fsm;
-            }
-            function _initContainer() {
-                _container = document.querySelector(selector);
-                _container.classList.add("km-editor");
-                _editor.container = _container;
-            }
-            function _initMinder() {
-                _minder = new Minder({
-                    enableKeyReceiver: false
-                });
-                _minder.renderTo(selector);
-                _minder.setTheme(null);
-                _minder.select(_minder.getRoot(), true);
-                _minder.execCommand("text", "中心主题");
-                _minder.on("beforemousedown", function() {
-                    if (_fsm.state() == "input") _fsm.jump("normal", "cancel");
-                });
-                _editor.minder = _minder;
-            }
-            function _initReceiver() {
-                _receiver = document.createElement("div");
-                _receiver.contentEditable = true;
-                _receiver.classList.add("receiver");
-                _container.appendChild(_receiver);
-                _editor.receiver = _receiver;
-                _exitInputMode();
-                _updateReceiverPosition();
-                // 阻止 hotbox 获得焦点
-                _receiver.onmousedown = function(e) {
-                    e.stopPropagation();
-                };
-                _receiver.onkeydown = _receiver.onkeyup = _receiver.oninput = _handleKeyEvent;
-                _minder.on("layoutapply viewchange selectionchange", _updateReceiverPosition);
-                _editor.editText = function() {
-                    var text = _minder.queryCommandValue("text");
-                    if ("innerText" in _receiver) {
-                        _receiver.innerText = text;
-                    } else {
-                        _receiver.innerHTML = text && text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
-                    }
-                    _fsm.jump("input");
-                    _selectElementContent(_receiver);
-                };
-                _hotbox.state("main").button({
-                    position: "center",
-                    label: "编辑",
-                    key: "F2",
-                    enable: function() {
-                        return _minder.queryCommandState("text") != -1;
-                    },
-                    action: function() {
-                        _editor.editText();
-                    }
-                });
-                _fsm.listen(function(exit, enter, reason) {
-                    if (enter == "input") _enterInputMode();
-                    if (exit == "input") {
-                        switch (reason) {
-                          case "commit":
-                            return _commitInputResult();
-
-                          case "cancel":
-                            return _exitInputMode();
-                        }
-                    }
-                });
-            }
-            function _initHotBox() {
-                _hotbox = new HotBox(_container);
-                _fsm.listen(function(exit, enter, reason) {
-                    if (enter == "hotbox") {
-                        var node = _minder.getSelectedNode();
-                        var box = node.getRenderBox();
-                        _hotbox.active("main", {
-                            x: box.cx,
-                            y: box.cy
-                        });
-                    }
-                });
-                _editor.hotbox = _hotbox;
-            }
-            function _enterInputMode() {
-                var node = _minder.getSelectedNode();
-                if (node) {
-                    var fontSize = node.getData("font-size") || node.getStyle("font-size");
-                    _receiver.style.fontSize = fontSize + "px";
-                    _receiver.style.minWidth = 0;
-                    _receiver.style.minWidth = _receiver.clientWidth + "px";
-                    _receiver.classList.remove("hide");
-                    _receiver.focus();
+            this.selector = selector;
+            for (var i = 0; i < runtimes.length; i++) {
+                if (typeof runtimes[i] == "function") {
+                    runtimes[i].call(this, this);
                 }
             }
-            function _selectElementContent(element) {
-                var range = document.createRange();
-                var selection = window.getSelection();
-                range.selectNodeContents(element);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-            function _commitInputResult() {
-                var text = _receiver.innerText || _receiver.innerHTML.replace(/\&lt;br\&gt;/gi, "\n").replace(/(&lt;([^&gt;]+)&gt;)/gi, "");
-                _minder.execCommand("text", text.replace(/^\n*|\n*$/g, ""));
-                _exitInputMode();
-            }
-            function _exitInputMode() {
-                _receiver.classList.add("hide");
-                _receiver.innerHTML = null;
-            }
-            function _handleKeyEvent(e) {
-                var handleResult;
-                switch (_fsm.state()) {
-                  case "normal":
-                    if (e.type == "keydown" && key.is(e, "Space") && _minder.getSelectedNode()) {
-                        _fsm.jump("hotbox");
-                        return;
-                    }
-                    if (e.type == "input") {
-                        // 阻止换行
-                        if (key.is(e, "Enter")) {
-                            e.preventDefault();
-                        }
-                        _fsm.jump("input");
-                    } else {
-                        handleResult = _hotbox.dispatch(e);
-                        if (handleResult) {
-                            e.preventDefault();
-                        } else {
-                            _minder.dispatchKeyEvent(e);
-                        }
-                    }
-                    break;
-
-                  case "input":
-                    if (e.type == "keydown") {
-                        if (key.is(e, "Enter")) {
-                            e.preventDefault();
-                            _fsm.jump("normal", "commit");
-                            return;
-                        }
-                        if (key.is(e, "Esc") || key.is(e, "Tab") || key.is(e, "Shift + Tab")) {
-                            e.preventDefault();
-                            _fsm.jump("normal", "cancel");
-                            return;
-                        }
-                    }
-                    break;
-
-                  case "hotbox":
-                    e.preventDefault();
-                    handleResult = _hotbox.dispatch(e);
-                    if (handleResult == "back" && _hotbox.state() == HotBox.STATE_IDLE) {
-                        _fsm.jump("normal");
-                    }
-                    break;
-                }
-            }
-            function _updateReceiverPosition() {
-                var cache = _updateReceiverPosition;
-                cache.fixedX = cache.fixedX || 0;
-                cache.fixedY = cache.fixedY || 0;
-                var focusNode = _minder.getSelectedNode() || _minder.getRoot();
-                if (!focusNode) return;
-                var box = focusNode.getRenderBox("TextRenderer");
-                _receiver.style.left = Math.round(box.x) + "px";
-                _receiver.style.top = Math.round(box.y) + "px";
-                _receiver.focus();
-            }
-            for (var i = 0; i < extensions.length; i++) {
-                if (typeof extensions[i] == "function") extensions[i].call(this, this);
-            }
         }
-        function extend(extension) {
-            extensions.push(extension);
-        }
-        extend(_p.r(9));
-        KMEditor.extend = extend;
+        KMEditor.assemble = assemble;
+        assemble(_p.r(5));
+        assemble(_p.r(6));
+        assemble(_p.r(10));
+        assemble(_p.r(12));
+        assemble(_p.r(7));
+        assemble(_p.r(8));
+        assemble(_p.r(11));
+        assemble(_p.r(9));
         return module.exports = KMEditor;
     }
 };
@@ -281,13 +79,602 @@ _p[0] = {
  */
 _p[1] = {
     value: function(require, exports, module) {
-        var kityminder = window.kityminder = _p.r(7);
+        var kityminder = window.kityminder = _p.r(54);
         return module.exports = kityminder.Editor = _p.r(0);
     }
 };
 
-//src/format.js
+//src/hotbox.js
 _p[2] = {
+    value: function(require, exports, module) {
+        var HotBox = _p.r(18);
+        return module.exports = HotBox;
+    }
+};
+
+//src/lang.js
+_p[3] = {
+    value: function(require, exports, module) {}
+};
+
+//src/minder.js
+_p[4] = {
+    value: function(require, exports, module) {
+        return module.exports = _p.r(54).Minder;
+    }
+};
+
+//src/runtime/container.js
+/**
+ * @fileOverview
+ *
+ * 初始化编辑器的容器
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[5] = {
+    value: function(require, exports, module) {
+        /**
+     * 最先执行的 Runtime，初始化编辑器容器
+     */
+        function ContainerRuntime() {
+            var container = document.querySelector(this.selector);
+            if (!container) throw new Error("Invalid selector: " + this.selector);
+            // 这个类名用于给编辑器添加样式
+            container.classList.add("km-editor");
+            // 暴露容器给其他运行时使用
+            this.container = container;
+        }
+        return module.exports = ContainerRuntime;
+    }
+};
+
+//src/runtime/fsm.js
+/**
+ * @fileOverview
+ *
+ * 编辑器状态机
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[6] = {
+    value: function(require, exports, module) {
+        var Debug = _p.r(13);
+        var debug = new Debug("fsm");
+        function handlerConditionMatch(condition, when, exit, enter) {
+            if (condition.when != when) return false;
+            if (condition.enter != "*" && condition.enter != enter) return false;
+            if (condition.exit != "*" && condition.exit != exit) return;
+            return true;
+        }
+        function FSM(defaultState) {
+            var currentState = defaultState;
+            var BEFORE_ARROW = " - ";
+            var AFTER_ARROW = " -> ";
+            var handlers = [];
+            /**
+         * 状态跳转
+         *
+         * 会通知所有的状态跳转监视器
+         *
+         * @param  {string} newState  新状态名称
+         * @param  {any} reason 跳转的原因，可以作为参数传递给跳转监视器
+         */
+            this.jump = function(newState, reason) {
+                if (!reason) throw new Error("Please tell fsm the reason to jump");
+                var oldState = currentState;
+                var notify = [ oldState, newState ].concat([].slice.call(arguments, 1));
+                var i, handler;
+                // 跳转前
+                for (i = 0; i < handlers.length; i++) {
+                    handler = handlers[i];
+                    if (handlerConditionMatch(handler.condition, "before", oldState, newState)) {
+                        if (handler.apply(null, notify)) return;
+                    }
+                }
+                currentState = newState;
+                debug.log("[{0}] {1} -> {2}", reason, oldState, newState);
+                // 跳转后
+                for (i = 0; i < handlers.length; i++) {
+                    handler = handlers[i];
+                    if (handlerConditionMatch(handler.condition, "after", oldState, newState)) {
+                        handler.apply(null, notify);
+                    }
+                }
+                return currentState;
+            };
+            /**
+         * 返回当前状态
+         * @return {string}
+         */
+            this.state = function() {
+                return currentState;
+            };
+            /**
+         * 添加状态跳转监视器
+         *
+         * @param  {Function} listener
+         *     监视函数，当状态跳转的时候，会接收三个参数
+         *         * from - 跳转前的状态
+         *         * to - 跳转后的状态
+         *         * reason - 跳转的原因
+         *
+         * @param {string} condition
+         *     监视的时机
+         *         "* => *" （默认）
+         *
+         */
+            this.when = function(condition, handler) {
+                if (arguments.length == 1) {
+                    handler = condition;
+                    condition = "* -> *";
+                }
+                var when, resolved, exit, enter;
+                resolved = condition.split(BEFORE_ARROW);
+                if (resolved.length == 2) {
+                    when = "before";
+                } else {
+                    resolved = condition.split(AFTER_ARROW);
+                    if (resolved.length == 2) {
+                        when = "after";
+                    }
+                }
+                if (!when) throw new Error("Illegal fsm condition: " + condition);
+                exit = resolved[0];
+                enter = resolved[1];
+                handler.condition = {
+                    when: when,
+                    exit: exit,
+                    enter: enter
+                };
+                handlers.push(handler);
+            };
+        }
+        function FSMRumtime() {
+            this.fsm = new FSM("normal");
+        }
+        return module.exports = FSMRumtime;
+    }
+};
+
+//src/runtime/hotbox.js
+/**
+ * @fileOverview
+ *
+ * 热盒 Runtime
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[7] = {
+    value: function(require, exports, module) {
+        var Hotbox = _p.r(2);
+        function HotboxRuntime() {
+            var fsm = this.fsm;
+            var minder = this.minder;
+            var receiver = this.receiver;
+            var container = this.container;
+            var hotbox = new Hotbox(container);
+            fsm.when("normal -> hotbox", function(exit, enter, reason) {
+                var node = minder.getSelectedNode();
+                var position;
+                if (node) {
+                    var box = node.getRenderBox();
+                    position = {
+                        x: box.cx,
+                        y: box.cy
+                    };
+                }
+                hotbox.active("main", position);
+            });
+            fsm.when("normal -> normal", function(exit, enter, reason, e) {
+                if (reason == "shortcut-handle") {
+                    var handleResult = hotbox.dispatch(e);
+                    if (handleResult) {
+                        e.preventDefault();
+                    } else {
+                        minder.dispatchKeyEvent(e);
+                    }
+                }
+            });
+            this.hotbox = hotbox;
+        }
+        return module.exports = HotboxRuntime;
+    }
+};
+
+//src/runtime/input.js
+/**
+ * @fileOverview
+ *
+ * 文本输入支持
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[8] = {
+    value: function(require, exports, module) {
+        _p.r(15);
+        var Debug = _p.r(13);
+        var debug = new Debug("input");
+        function InputRuntime() {
+            var fsm = this.fsm;
+            var minder = this.minder;
+            var hotbox = this.hotbox;
+            var receiver = this.receiver;
+            var receiverElement = receiver.element;
+            // setup them
+            setupReciverElement();
+            setupFsm();
+            setupHotbox();
+            // expose editText()
+            this.editText = editText;
+            function setupFsm() {
+                fsm.when("* -> input", enterInputMode);
+                fsm.when("input -> *", function(exit, enter, reason) {
+                    switch (reason) {
+                      case "input-commit":
+                        return commitInputResult();
+
+                      case "input-cancel":
+                        return exitInputMode();
+                    }
+                });
+                minder.on("beforemousedown", function() {
+                    if (fsm.state() == "input") {
+                        fsm.jump("normal", "input-commit");
+                    }
+                });
+            }
+            function setupReciverElement() {
+                if (debug.flaged) {
+                    receiverElement.classList.add("debug");
+                }
+                receiverElement.onmousedown = function(e) {
+                    e.stopPropagation();
+                };
+                minder.on("layoutallfinish viewchange viewchanged selectionchange", function(e) {
+                    if (e.type == "viewchange" && fsm.state() != "input") return;
+                    updatePosition();
+                });
+                updatePosition();
+            }
+            function setupHotbox() {
+                hotbox.state("main").button({
+                    position: "center",
+                    label: "编辑",
+                    key: "F2",
+                    enable: function() {
+                        return minder.queryCommandState("text") != -1;
+                    },
+                    action: editText
+                });
+            }
+            function editText() {
+                var text = minder.queryCommandValue("text");
+                if ("innerText" in receiverElement) {
+                    receiverElement.innerText = text;
+                } else {
+                    receiverElement.innerHTML = text && text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+                }
+                fsm.jump("input", "input-request");
+                receiver.selectAll();
+            }
+            function enterInputMode() {
+                var node = minder.getSelectedNode();
+                if (node) {
+                    var fontSize = node.getData("font-size") || node.getStyle("font-size");
+                    receiverElement.style.fontSize = fontSize + "px";
+                    receiverElement.style.minWidth = 0;
+                    receiverElement.style.minWidth = receiverElement.clientWidth + "px";
+                    receiverElement.classList.add("input");
+                    receiverElement.focus();
+                }
+            }
+            function commitInputResult() {
+                var text = receiverElement.innerText;
+                minder.execCommand("text", text.replace(/^\n*|\n*$/g, ""));
+                exitInputMode();
+            }
+            function exitInputMode() {
+                receiverElement.classList.remove("input");
+                receiver.selectAll();
+            }
+            function updatePosition() {
+                var cache = updatePosition;
+                cache.fixedX = cache.fixedX || 0;
+                cache.fixedY = cache.fixedY || 0;
+                var focusNode = minder.getSelectedNode() || minder.getRoot();
+                if (!focusNode) return;
+                var box = focusNode.getRenderBox("TextRenderer");
+                receiverElement.style.left = Math.round(box.x) + "px";
+                receiverElement.style.top = Math.round(box.y) + "px";
+                receiverElement.focus();
+            }
+        }
+        return module.exports = InputRuntime;
+    }
+};
+
+//src/runtime/jumping.js
+/**
+ * @fileOverview
+ *
+ * 根据按键控制状态机的跳转
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[9] = {
+    value: function(require, exports, module) {
+        var Hotbox = _p.r(2);
+        // Nice: http://unixpapa.com/js/key.html
+        function isIntendToInput(e) {
+            if (e.ctrlKey || e.metaKey || e.altKey) return false;
+            // a-zA-Z
+            if (e.keyCode >= 65 && e.keyCode <= 90) return true;
+            // 0-9 以及其上面的符号
+            if (e.keyCode >= 48 && e.keyCode <= 57) return true;
+            // 输入法
+            if (e.keyCode == 229) return true;
+        }
+        function JumpingRuntime() {
+            var fsm = this.fsm;
+            var minder = this.minder;
+            var receiver = this.receiver;
+            var receiverElement = receiver.element;
+            var hotbox = this.hotbox;
+            // normal -> *
+            receiver.listen("normal", function(e) {
+                // normal -> hotbox
+                if (e.type == "keydown" && e.is("Space")) {
+                    e.preventDefault();
+                    return fsm.jump("hotbox", "space-trigger");
+                }
+                // normal -> input
+                if (e.type == "keydown" && isIntendToInput(e)) {
+                    if (minder.getSelectedNode()) {
+                        return fsm.jump("input", "user-input");
+                    } else {
+                        receiverElement.innerHTML = "";
+                    }
+                }
+                // normal -> normal
+                if (e.type == "keydown") {
+                    return fsm.jump("normal", "shortcut-handle", e);
+                }
+            });
+            // hotbox -> normal
+            receiver.listen("hotbox", function(e) {
+                e.preventDefault();
+                var handleResult = hotbox.dispatch(e);
+                if (handleResult == "back" && hotbox.state() == Hotbox.STATE_IDLE) {
+                    return fsm.jump("normal", "hotbox-idle");
+                }
+            });
+            // input => normal
+            receiver.listen("input", function(e) {
+                if (e.type == "keydown") {
+                    if (e.is("Enter")) {
+                        e.preventDefault();
+                        return fsm.jump("normal", "input-commit");
+                    }
+                    if (e.is("Esc")) {
+                        e.preventDefault();
+                        return fsm.jump("normal", "input-cancel");
+                    }
+                    if (e.is("Tab") || e.is("Shift + Tab")) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
+        return module.exports = JumpingRuntime;
+    }
+};
+
+//src/runtime/minder.js
+/**
+ * @fileOverview
+ *
+ * 脑图示例运行时
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[10] = {
+    value: function(require, exports, module) {
+        var Minder = _p.r(4);
+        function MinderRuntime() {
+            // 不使用 kityminder 的按键处理，由 ReceiverRuntime 统一处理
+            var minder = new Minder({
+                enableKeyReceiver: false,
+                enableAnimation: false
+            });
+            // 渲染，初始化
+            minder.renderTo(this.selector);
+            minder.setTheme(null);
+            minder.select(minder.getRoot(), true);
+            minder.execCommand("text", "中心主题");
+            // 导出给其它 Runtime 使用
+            this.minder = minder;
+        }
+        return module.exports = MinderRuntime;
+    }
+};
+
+//src/runtime/node.js
+_p[11] = {
+    value: function(require, exports, module) {
+        function NodeRuntime() {
+            var runtime = this;
+            var minder = this.minder;
+            var hotbox = this.hotbox;
+            var fsm = this.fsm;
+            var main = hotbox.state("main");
+            var buttons = [ "前移:Alt+Up:ArrangeUp", "下级:Tab:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "归纳:Shift+Tab|Shift+Insert:AppendParentNode" ];
+            buttons.forEach(function(button) {
+                var parts = button.split(":");
+                var label = parts.shift();
+                var key = parts.shift();
+                var command = parts.shift();
+                main.button({
+                    position: "ring",
+                    label: label,
+                    key: key,
+                    action: function() {
+                        if (command.indexOf("Append") === 0) {
+                            minder.execCommand(command, "新主题");
+                            // provide in input runtime
+                            runtime.editText();
+                        } else {
+                            minder.execCommand(command);
+                            fsm.jump("normal", "command-executed");
+                        }
+                    },
+                    enable: function() {
+                        return minder.queryCommandState(command) != -1;
+                    }
+                });
+            });
+        }
+        return module.exports = NodeRuntime;
+    }
+};
+
+//src/runtime/receiver.js
+/**
+ * @fileOverview
+ *
+ * 键盘事件接收/分发器
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[12] = {
+    value: function(require, exports, module) {
+        var key = _p.r(16);
+        function ReceiverRuntime() {
+            var fsm = this.fsm;
+            var minder = this.minder;
+            // 接收事件的 div
+            var element = document.createElement("div");
+            element.contentEditable = true;
+            element.classList.add("receiver");
+            element.onkeydown = element.onkeypress = element.onkeyup = dispatchKeyEvent;
+            this.container.appendChild(element);
+            // receiver 对象
+            var receiver = {
+                element: element,
+                selectAll: function() {
+                    // 保证有被选中的
+                    if (!element.innerHTML) element.innerHTML = "&nbsp;";
+                    var range = document.createRange();
+                    var selection = window.getSelection();
+                    range.selectNodeContents(element);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    element.focus();
+                }
+            };
+            receiver.selectAll();
+            minder.on("beforemousedown", receiver.selectAll);
+            // 侦听器，接收到的事件会派发给所有侦听器
+            var listeners = [];
+            // 侦听指定状态下的事件，如果不传 state，侦听所有状态
+            receiver.listen = function(state, listener) {
+                if (arguments.length == 1) {
+                    listener = state;
+                    state = "*";
+                }
+                listener.notifyState = state;
+                listeners.push(listener);
+            };
+            function dispatchKeyEvent(e) {
+                e.is = function(keyExpression) {
+                    var subs = keyExpression.split("|");
+                    for (var i = 0; i < subs.length; i++) {
+                        if (key.is(this, subs[i])) return true;
+                    }
+                    return false;
+                };
+                var listener, jumpState;
+                for (var i = 0; i < listeners.length; i++) {
+                    listener = listeners[i];
+                    // 忽略不在侦听状态的侦听器
+                    if (listener.notifyState != "*" && listener.notifyState != fsm.state()) {
+                        continue;
+                    }
+                    /**
+                 *
+                 * 对于所有的侦听器，只允许一种处理方式：跳转状态。
+                 * 如果侦听器确定要跳转，则返回要跳转的状态。
+                 * 每个事件只允许一个侦听器进行状态跳转
+                 * 跳转动作由侦听器自行完成（因为可能需要在跳转时传递 reason），返回跳转结果即可。
+                 * 比如：
+                 *
+                 * ```js
+                 *  receiver.listen('normal', function(e) {
+                 *      if (isSomeReasonForJumpState(e)) {
+                 *          return fsm.jump('newstate', e);
+                 *      }
+                 *  });
+                 * ```
+                 */
+                    if (listener.call(null, e)) {
+                        return;
+                    }
+                }
+            }
+            this.receiver = receiver;
+        }
+        return module.exports = ReceiverRuntime;
+    }
+};
+
+//src/tool/debug.js
+/**
+ * @fileOverview
+ *
+ * 支持各种调试后门
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[13] = {
+    value: function(require, exports, module) {
+        var format = _p.r(14);
+        function noop() {}
+        function stringHash(str) {
+            var hash = 0;
+            for (var i = 0; i < str.length; i++) {
+                hash += str.charCodeAt(i);
+            }
+            return hash;
+        }
+        /* global console */
+        function Debug(flag) {
+            var debugMode = this.flaged = window.location.search.indexOf(flag) != -1;
+            if (debugMode) {
+                var h = stringHash(flag) % 360;
+                var flagStyle = format("background: hsl({0}, 50%, 80%); " + "color: hsl({0}, 100%, 30%); " + "padding: 2px 3px; " + "margin: 1px 3px 0 0;" + "border-radius: 2px;", h);
+                var textStyle = "background: none; color: black;";
+                this.log = function() {
+                    var output = format.apply(null, arguments);
+                    console.log(format("%c{0}%c{1}", flag, output), flagStyle, textStyle);
+                };
+            } else {
+                this.log = noop;
+            }
+        }
+        return module.exports = Debug;
+    }
+};
+
+//src/tool/format.js
+_p[14] = {
     value: function(require, exports, module) {
         function format(template, args) {
             if (typeof args != "object") {
@@ -301,262 +688,67 @@ _p[2] = {
     }
 };
 
-//src/fsm.js
-_p[3] = {
+//src/tool/innertext.js
+/**
+ * @fileOverview
+ *
+ *
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[15] = {
     value: function(require, exports, module) {
-        function FSM(defaultState) {
-            var currentState = defaultState;
-            var callbacks = [];
-            this.jump = function(state, reason) {
-                var lastState = currentState;
-                if (state != lastState) {
-                    currentState = state;
-                    callbacks.forEach(function(callback) {
-                        callback(lastState, currentState, reason);
-                    });
-                    console.log("%s -> %s", lastState, currentState, reason);
+        if (!("innerText" in document.createElement("a")) && "getSelection" in window) {
+            HTMLElement.prototype.__defineGetter__("innerText", function() {
+                var selection = window.getSelection(), ranges = [], str, i;
+                // Save existing selections.
+                for (i = 0; i < selection.rangeCount; i++) {
+                    ranges[i] = selection.getRangeAt(i);
                 }
-            };
-            this.state = function() {
-                return currentState;
-            };
-            this.listen = function(callback) {
-                callbacks.push(callback);
-            };
-        }
-        return module.exports = FSM;
-    }
-};
-
-//src/hotbox.js
-_p[4] = {
-    value: function(require, exports, module) {
-        var HotBox = _p.r(12);
-        return module.exports = HotBox;
-    }
-};
-
-//src/i18n/zh-cn.js
-_p[5] = {
-    value: function(require, exports, module) {
-        module.exports = {
-            default_central_topic_text: "中心主题",
-            new_topic_text: "新主题",
-            label_edit: "编辑",
-            label_move_up: "前移",
-            label_append_child: "下级",
-            label_append_sibling: "同级",
-            label_move_down: "后移",
-            label_delete: "删除",
-            label_append_parent: "归纳",
-            label_hyperlink: "超链接",
-            label_image: "图片"
-        };
-    }
-};
-
-//src/key.js
-_p[6] = {
-    value: function(require, exports, module) {
-        return module.exports = _p.r(13);
-    }
-};
-
-//src/kityminder.js
-_p[7] = {
-    value: function(require, exports, module) {
-        return module.exports = _p.r(47);
-    }
-};
-
-//src/lang.js
-_p[8] = {
-    value: function(require, exports, module) {}
-};
-
-//src/node.js
-_p[9] = {
-    value: function(require, exports, module) {
-        function nodeExtension() {
-            var runtime = this;
-            var minder;
-            var hotbox;
-            init();
-            function init() {
-                minder = runtime.minder;
-                initHotBox();
-            }
-            function initHotBox() {
-                hotbox = runtime.hotbox;
-                var main = hotbox.state("main");
-                var buttons = [ "前移:Alt+Up:ArrangeUp", "下级:Tab:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "归纳:Shift+Tab|Shift+Insert:AppendParentNode" ];
-                buttons.forEach(function(button) {
-                    var parts = button.split(":");
-                    var label = parts.shift();
-                    var key = parts.shift();
-                    var command = parts.shift();
-                    main.button({
-                        position: "ring",
-                        label: label,
-                        key: key,
-                        action: function() {
-                            if (command.indexOf("Append") === 0) {
-                                minder.execCommand(command, "新主题");
-                                if (runtime.editText) runtime.editText();
-                            } else {
-                                minder.execCommand(command);
-                            }
-                        },
-                        enable: function() {
-                            return minder.queryCommandState(command) != -1;
-                        }
-                    });
-                });
-            }
-        }
-        return module.exports = nodeExtension;
-    }
-};
-
-//src/text.js
-_p[10] = {
-    value: function(require, exports, module) {
-        var key = _p.r(6);
-        /**
-     * 文本编辑扩展
-     */
-        function textExtension() {
-            var editor = this;
-            var minder, hotbox, container, textEditor, editorMask;
-            var editing;
-            init();
-            function init() {
-                minder = editor.minder;
-                hotbox = editor.hotbox;
-                container = editor.container;
-                container.classList.add("km-editor");
-                initEditorMask();
-                initTextEditor();
-                initHotBox();
-                editing = false;
-            }
-            function initEditorMask() {
-                editorMask = document.createElement("div");
-                editorMask.classList.add("text-editor-mask");
-                editorMask.style.display = "none";
-                editorMask.onmousedown = exitEditMode;
-                container.appendChild(editorMask);
-            }
-            function initTextEditor() {
-                textEditor = document.createElement("div");
-                textEditor.contentEditable = true;
-                textEditor.classList.add("text-editor");
-                // textEditor.style.display = 'none';
-                // 阻止 hotbox 获得焦点
-                textEditor.onmousedown = function(e) {
-                    e.stopPropagation();
-                };
-                textEditor.onkeydown = handleKeyDown;
-                minder.on("layoutapply", updateEditorPosition);
-                minder.on("viewchange", updateEditorPosition);
-                container.appendChild(textEditor);
-            }
-            function initHotBox() {
-                hotbox.control(function() {
-                    return {
-                        active: active
-                    };
-                });
-                hotbox.state("main").button({
-                    position: "center",
-                    label: "编辑",
-                    key: "Enter|F2",
-                    action: edit,
-                    enable: function() {
-                        return minder.queryCommandState("text") != -1;
-                    }
-                });
-            }
-            function handleKeyDown(e) {
-                if (!editing) {
-                    if (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return;
-                    if (minder.getSelectedNodes().length != 1) return;
-                    if (key.is(e, "space")) {
-                        hotbox.dispatch(e);
-                    } else {
-                        edit();
-                    }
-                    return;
-                } else {
-                    switch (key.hash(e)) {
-                      case key.hash("enter"):
-                        commitEditResult();
-                        e.preventDefault();
-                        break;
-
-                      case key.hash("esc"):
-                      case key.hash("tab"):
-                      case key.hash("insert"):
-                        exitEditMode();
-                        e.preventDefault();
-                        break;
-                    }
+                // Deselect everything.
+                selection.removeAllRanges();
+                // Select `el` and all child nodes.
+                // 'this' is the element .innerText got called on
+                selection.selectAllChildren(this);
+                // Get the string representation of the selected nodes.
+                str = selection.toString();
+                // Deselect everything. Again.
+                selection.removeAllRanges();
+                // Restore all formerly existing selections.
+                for (i = 0; i < ranges.length; i++) {
+                    selection.addRange(ranges[i]);
                 }
-            }
-            function edit() {
-                editing = minder.getSelectedNode();
-                var box = editing.getRenderBox("TextRenderer");
-                var text = minder.queryCommandValue("text");
-                textEditor.style.display = "block";
-                textEditor.innerHTML = text && text.replace("<", "&lt;").replace(">", "&gt;");
-                textEditor.style.minWidth = box.width + "px";
-                textEditor.style.minHeight = box.height + "px";
-                textEditor.style.minWidth = textEditor.clientWidth + "px";
-                textEditor.style.minHeight = textEditor.clientHeight + "px";
-                textEditor.style.marginTop = (box.height - textEditor.clientHeight) / 2 + "px";
-                textEditor.style.marginLeft = (box.width - textEditor.clientWidth) / 2 + "px";
-                updateEditorPosition({
-                    node: editing
-                });
-                editorMask.style.display = "block";
-                active();
-            }
-            function active() {
-                textEditor.focus();
-                document.execCommand("selectAll", false, null);
-            }
-            function updateEditorPosition(e) {
-                if (!editing || e.node && e.node != editing) return;
-                var box = editing.getRenderBox("TextRenderer");
-                textEditor.style.transform = textEditor.style.webkitTransform = "translate3d(" + Math.round(box.x) + "px, " + Math.round(box.y) + "px, 0)";
-            }
-            function commitEditResult() {
-                minder.execCommand("text", textEditor.innerHTML.replace(/<br\s*\/?>/gi, "\n"));
-                exitEditMode();
-            }
-            function exitEditMode() {
-                // textEditor.style.display = 'none';
-                editorMask.style.display = "none";
-                editing = false;
-            }
-            editor.editText = edit;
+                // Oh look, this is what we wanted.
+                // String representation of the element, close to as rendered.
+                return str;
+            });
+            HTMLElement.prototype.__defineSetter__("innerText", function(text) {
+                this.innerHTML = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+            });
         }
-        return module.exports = textExtension;
+    }
+};
+
+//src/tool/key.js
+_p[16] = {
+    value: function(require, exports, module) {
+        return module.exports = _p.r(19);
     }
 };
 
 //lib/hotbox/src/expose.js
-_p[11] = {
+_p[17] = {
     value: function(require, exports, module) {
-        module.exports = window.HotBox = _p.r(12);
+        module.exports = window.HotBox = _p.r(18);
     }
 };
 
 //lib/hotbox/src/hotbox.js
-_p[12] = {
+_p[18] = {
     value: function(require, exports, module) {
-        var key = _p.r(13);
-        var KeyControl = _p.r(14);
+        var key = _p.r(19);
+        var KeyControl = _p.r(20);
         /**** Dom Utils ****/
         function createElement(name) {
             return document.createElement(name);
@@ -852,6 +1044,9 @@ _p[12] = {
                     }
                 }
             }
+            function alwaysEnable() {
+                return true;
+            }
             // 为状态创建按钮
             function createButton(option) {
                 var $button = createElement(div);
@@ -877,7 +1072,7 @@ _p[12] = {
                 }
                 return {
                     action: option.action,
-                    enable: option.enable,
+                    enable: option.enable || alwaysEnable,
                     key: option.key,
                     next: option.next,
                     label: option.label,
@@ -912,6 +1107,12 @@ _p[12] = {
                     $state.style.left = position.x + "px";
                     $state.style.top = position.y + "px";
                 }
+                allButtons.forEach(function(button) {
+                    var $button = button.$button;
+                    if ($button) {
+                        $button.classList[button.enable() ? "add" : "remove"]("enabled");
+                    }
+                });
                 addElementClass($state, STATE_ACTIVE_CLASS);
                 if (needLayout) {
                     layout();
@@ -1003,6 +1204,9 @@ _p[12] = {
                                 return;
                             }
                             var neighbor = selectedButton.neighbor[dir];
+                            while (neighbor && !neighbor.enable()) {
+                                neighbor = neighbor.neighbor[dir];
+                            }
                             if (neighbor) {
                                 select(neighbor);
                             }
@@ -1044,9 +1248,9 @@ _p[12] = {
 };
 
 //lib/hotbox/src/key.js
-_p[13] = {
+_p[19] = {
     value: function(require, exports, module) {
-        var keymap = _p.r(15);
+        var keymap = _p.r(21);
         var CTRL_MASK = 4096;
         var ALT_MASK = 8192;
         var SHIFT_MASK = 16384;
@@ -1072,7 +1276,10 @@ _p[13] = {
             if (keyEvent.shiftKey) {
                 hashCode |= SHIFT_MASK;
             }
-            hashCode |= keyEvent.keyCode;
+            // Shift, Control, Alt KeyCode ignored.
+            if ([ 16, 17, 18, 91 ].indexOf(keyEvent.keyCode) == -1) {
+                hashCode |= keyEvent.keyCode;
+            }
             return hashCode;
         }
         function hashKeyExpression(keyExpression) {
@@ -1102,9 +1309,9 @@ _p[13] = {
 };
 
 //lib/hotbox/src/keycontrol.js
-_p[14] = {
+_p[20] = {
     value: function(require, exports, module) {
-        var key = _p.r(13);
+        var key = _p.r(19);
         var FOCUS_CLASS = "hotbox-focus";
         var RECEIVER_CLASS = "hotbox-key-receiver";
         function KeyControl(hotbox) {
@@ -1165,7 +1372,7 @@ _p[14] = {
 };
 
 //lib/hotbox/src/keymap.js
-_p[15] = {
+_p[21] = {
     value: function(require, exports, module) {
         var keymap = {
             Shift: 16,
@@ -1244,10 +1451,10 @@ _p[15] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[16] = {
+_p[22] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var connect = _p.r(24);
+        var kity = _p.r(37);
+        var connect = _p.r(31);
         var connectMarker = new kity.Marker().pipe(function() {
             var r = 7;
             var dot = new kity.Circle(r - 1);
@@ -1284,10 +1491,10 @@ _p[16] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[17] = {
+_p[23] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var connect = _p.r(24);
+        var kity = _p.r(37);
+        var connect = _p.r(31);
         connect.register("bezier", function(node, parent, connection) {
             // 连线起点和终点
             var po = parent.getLayoutVertexOut(), pi = node.getLayoutVertexIn();
@@ -1321,10 +1528,10 @@ _p[17] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[18] = {
+_p[24] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var connect = _p.r(24);
+        var kity = _p.r(37);
+        var connect = _p.r(31);
         connect.register("fish-bone-master", function(node, parent, connection) {
             var pout = parent.getLayoutVertexOut(), pin = node.getLayoutVertexIn();
             var abs = Math.abs;
@@ -1348,10 +1555,10 @@ _p[18] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[19] = {
+_p[25] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var connect = _p.r(24);
+        var kity = _p.r(37);
+        var connect = _p.r(31);
         connect.register("l", function(node, parent, connection) {
             var po = parent.getLayoutVertexOut();
             var pi = node.getLayoutVertexIn();
@@ -1379,10 +1586,10 @@ _p[19] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[20] = {
+_p[26] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var connect = _p.r(24);
+        var kity = _p.r(37);
+        var connect = _p.r(31);
         connect.register("poly", function(node, parent, connection, width) {
             // 连线起点和终点
             var po = parent.getLayoutVertexOut(), pi = node.getLayoutVertexIn();
@@ -1436,10 +1643,10 @@ _p[20] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[21] = {
+_p[27] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var connect = _p.r(24);
+        var kity = _p.r(37);
+        var connect = _p.r(31);
         connect.register("under", function(node, parent, connection, width, color) {
             var box = node.getLayoutBox(), pBox = parent.getLayoutBox();
             var start, end, vector;
@@ -1469,14 +1676,57 @@ _p[21] = {
     }
 };
 
-//lib/km-core/src/core/command.js
-_p[22] = {
+//lib/km-core/src/core/animate.js
+/**
+ * @fileOverview
+ *
+ * 动画控制
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[28] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var MinderEvent = _p.r(26);
+        var Minder = _p.r(39);
+        var animateDefaultOptions = {
+            enableAnimation: true,
+            layoutAnimationDuration: 300,
+            viewAnimationDuration: 100,
+            zoomAnimationDuration: 300
+        };
+        var resoredAnimationOptions = {};
+        Minder.registerInitHook(function() {
+            this.setDefaultOptions(animateDefaultOptions);
+            if (!this.getOption("enableAnimation")) {
+                this.disableAnimation();
+            }
+        });
+        Minder.prototype.enableAnimation = function() {
+            for (var name in animateDefaultOptions) {
+                if (animateDefaultOptions.hasOwnProperty(name)) {
+                    this.setOption(resoredAnimationOptions[name]);
+                }
+            }
+        };
+        Minder.prototype.disableAnimation = function() {
+            for (var name in animateDefaultOptions) {
+                if (animateDefaultOptions.hasOwnProperty(name)) {
+                    resoredAnimationOptions[name] = this.getOption(name);
+                    this.setOption(name, 0);
+                }
+            }
+        };
+    }
+};
+
+//lib/km-core/src/core/command.js
+_p[29] = {
+    value: function(require, exports, module) {
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var MinderEvent = _p.r(33);
         var COMMAND_STATE_NORMAL = 0;
         var COMMAND_STATE_DISABLED = -1;
         var COMMAND_STATE_ACTIVED = 1;
@@ -1616,9 +1866,9 @@ _p[22] = {
 };
 
 //lib/km-core/src/core/compatibility.js
-_p[23] = {
+_p[30] = {
     value: function(require, exports, module) {
-        var utils = _p.r(45);
+        var utils = _p.r(52);
         function compatibility(json) {
             var version = json.version || (json.root ? "1.4.0" : "1.1.3");
             switch (version) {
@@ -1702,13 +1952,13 @@ _p[23] = {
 };
 
 //lib/km-core/src/core/connect.js
-_p[24] = {
+_p[31] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Module = _p.r(33);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Module = _p.r(40);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
         // 连线提供方
         var _connectProviders = {};
         function register(name, provider) {
@@ -1804,15 +2054,15 @@ _p[24] = {
 };
 
 //lib/km-core/src/core/data.js
-_p[25] = {
+_p[32] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var MinderEvent = _p.r(26);
-        var compatibility = _p.r(23);
-        var Promise = _p.r(37);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var MinderEvent = _p.r(33);
+        var compatibility = _p.r(30);
+        var Promise = _p.r(44);
         var protocols = {};
         function registerProtocol(name, protocol) {
             protocols[name] = protocol;
@@ -1979,11 +2229,11 @@ _p[25] = {
 };
 
 //lib/km-core/src/core/event.js
-_p[26] = {
+_p[33] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
         /**
      * @class MinderEvent
      * @description 表示一个脑图中发生的事件
@@ -2211,10 +2461,10 @@ _p[26] = {
 };
 
 //lib/km-core/src/core/focus.js
-_p[27] = {
+_p[34] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var Minder = _p.r(32);
+        var kity = _p.r(37);
+        var Minder = _p.r(39);
         Minder.registerInitHook(function() {
             this.on("beforemousedown", function(e) {
                 this.focus();
@@ -2252,7 +2502,7 @@ _p[27] = {
 };
 
 //lib/km-core/src/core/keymap.js
-_p[28] = {
+_p[35] = {
     value: function(require, exports, module) {
         var keymap = {
             Backspace: 8,
@@ -2363,18 +2613,18 @@ _p[28] = {
 };
 
 //lib/km-core/src/core/keyreceiver.js
-_p[29] = {
+_p[36] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
         function listen(element, type, handler) {
             type.split(" ").forEach(function(name) {
                 element.addEventListener(name, handler, false);
             });
         }
         Minder.registerInitHook(function(option) {
-            this.addDefaultOption({
+            this.setDefaultOptions({
                 enableKeyReceiver: true
             });
             if (this.getOption("enableKeyReceiver")) {
@@ -2433,21 +2683,21 @@ _p[29] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[30] = {
+_p[37] = {
     value: function(require, exports, module) {
         module.exports = window.kity;
     }
 };
 
 //lib/km-core/src/core/layout.js
-_p[31] = {
+_p[38] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var MinderEvent = _p.r(26);
-        var Command = _p.r(22);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var MinderEvent = _p.r(33);
+        var Command = _p.r(29);
         var _layouts = {};
         var _defaultLayout;
         function register(name, layout) {
@@ -2628,8 +2878,8 @@ _p[31] = {
                 }
                 return this;
             },
-            layout: function(name, duration) {
-                this.setLayout(name).getMinder().layout(duration);
+            layout: function(name) {
+                this.setLayout(name).getMinder().layout();
                 return this;
             },
             getLayoutInstance: function() {
@@ -2770,7 +3020,8 @@ _p[31] = {
      * Minder 上的布局支持
      */
         kity.extendClass(Minder, {
-            layout: function(duration) {
+            layout: function() {
+                var duration = this.getOption("layoutAnimationDuration");
                 this.getRoot().traverse(function(node) {
                     // clear last results
                     node.setLayoutTransform(null);
@@ -2793,16 +3044,15 @@ _p[31] = {
                 layoutNode(this.getRoot(), 1);
                 // 第二轮布局
                 layoutNode(this.getRoot(), 2);
-                duration = duration ? 300 : 0;
                 var minder = this;
                 this.applyLayoutResult(this.getRoot(), duration, function() {
                     minder.fire("layoutallfinish");
                 });
                 return this.fire("layout");
             },
-            refresh: function(duration) {
+            refresh: function() {
                 this.getRoot().renderTree();
-                this.layout(duration).fire("contentchange")._interactChange();
+                this.layout().fire("contentchange")._interactChange();
                 return this;
             },
             applyLayoutResult: function(root, duration, callback) {
@@ -2879,10 +3129,10 @@ _p[31] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[32] = {
+_p[39] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
         var _initHooks = [];
         var Minder = kity.createClass("Minder", {
             constructor: function(options) {
@@ -2907,11 +3157,11 @@ _p[32] = {
 };
 
 //lib/km-core/src/core/module.js
-_p[33] = {
+_p[40] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
         /* 已注册的模块 */
         var _modules = {};
         exports.register = function(name, module) {
@@ -2944,7 +3194,7 @@ _p[33] = {
                     this._modules[name] = moduleDeals;
                     if (!moduleDeals) continue;
                     if (moduleDeals.defaultOptions) {
-                        me.addDefaultOption(moduleDeals.defaultOptions);
+                        me.setDefaultOptions(moduleDeals.defaultOptions);
                     }
                     if (moduleDeals.init) {
                         moduleDeals.init.call(me, this._options);
@@ -3007,11 +3257,11 @@ _p[33] = {
 };
 
 //lib/km-core/src/core/node.js
-_p[34] = {
+_p[41] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
         /**
      * @class MinderNode
      *
@@ -3324,16 +3574,16 @@ _p[34] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[35] = {
+_p[42] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
         Minder.registerInitHook(function(options) {
             this._defaultOptions = {};
         });
         kity.extendClass(Minder, {
-            addDefaultOption: function(options) {
+            setDefaultOptions: function(options) {
                 utils.extend(this._defaultOptions, options);
                 return this;
             },
@@ -3343,6 +3593,9 @@ _p[35] = {
                 } else {
                     return utils.extend({}, this._defaultOptions, this._options);
                 }
+            },
+            setOption: function(key, value) {
+                this._options[key] = value;
             }
         });
     }
@@ -3357,11 +3610,11 @@ _p[35] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[36] = {
+_p[43] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
         Minder.registerInitHook(function() {
             this._initPaper();
         });
@@ -3417,7 +3670,7 @@ _p[36] = {
 };
 
 //lib/km-core/src/core/promise.js
-_p[37] = {
+_p[44] = {
     value: function(require, exports, module) {
         /*!
     **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
@@ -3606,10 +3859,10 @@ _p[37] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[38] = {
+_p[45] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var Minder = _p.r(32);
+        var kity = _p.r(37);
+        var Minder = _p.r(39);
         Minder.registerInitHook(function(options) {
             if (options.readOnly) {
                 this.setDisabled();
@@ -3656,11 +3909,11 @@ _p[38] = {
 };
 
 //lib/km-core/src/core/render.js
-_p[39] = {
+_p[46] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
+        var kity = _p.r(37);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
         var Renderer = kity.createClass("Renderer", {
             constructor: function(node) {
                 this.node = node;
@@ -3868,12 +4121,12 @@ _p[39] = {
 };
 
 //lib/km-core/src/core/select.js
-_p[40] = {
+_p[47] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
         Minder.registerInitHook(function() {
             this._initSelection();
         });
@@ -4001,13 +4254,13 @@ _p[40] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[41] = {
+_p[48] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var keymap = _p.r(28);
-        var Minder = _p.r(32);
-        var MinderEvent = _p.r(26);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var keymap = _p.r(35);
+        var Minder = _p.r(39);
+        var MinderEvent = _p.r(33);
         /**
      * 计算包含 meta 键的 keycode
      *
@@ -4131,10 +4384,10 @@ _p[41] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[42] = {
+_p[49] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var Minder = _p.r(32);
+        var kity = _p.r(37);
+        var Minder = _p.r(39);
         var sf = ~window.location.href.indexOf("status");
         var tf = ~window.location.href.indexOf("trace");
         Minder.registerInitHook(function() {
@@ -4179,14 +4432,14 @@ _p[42] = {
 };
 
 //lib/km-core/src/core/template.js
-_p[43] = {
+_p[50] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var Command = _p.r(22);
-        var MinderNode = _p.r(34);
-        var Module = _p.r(33);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var Command = _p.r(29);
+        var MinderNode = _p.r(41);
+        var Module = _p.r(40);
         var _templates = {};
         function register(name, supports) {
             _templates[name] = supports;
@@ -4261,14 +4514,14 @@ _p[43] = {
 };
 
 //lib/km-core/src/core/theme.js
-_p[44] = {
+_p[51] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Module = _p.r(33);
-        var Command = _p.r(22);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Module = _p.r(40);
+        var Command = _p.r(29);
         var cssLikeValueMatcher = {
             left: function(value) {
                 return 3 in value && value[3] || 1 in value && value[1] || value[0];
@@ -4413,9 +4666,9 @@ _p[44] = {
 };
 
 //lib/km-core/src/core/utils.js
-_p[45] = {
+_p[52] = {
     value: function(require, exports) {
-        var kity = _p.r(30);
+        var kity = _p.r(37);
         var uuidMap = {};
         exports.extend = kity.Utils.extend.bind(kity.Utils);
         exports.each = kity.Utils.each.bind(kity.Utils);
@@ -4472,9 +4725,9 @@ _p[45] = {
 };
 
 //lib/km-core/src/expose-kityminder.js
-_p[46] = {
+_p[53] = {
     value: function(require, exports, module) {
-        module.exports = window.kityminder = _p.r(47);
+        module.exports = window.kityminder = _p.r(54);
     }
 };
 
@@ -4487,44 +4740,38 @@ _p[46] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[47] = {
+_p[54] = {
     value: function(require, exports, module) {
         var kityminder = {
-            version: _p.r(32).version
+            version: _p.r(39).version
         };
         // 核心导出，大写的部分导出类，小写的部分简单 require 一下
         // 这里顺序是有讲究的，调整前先弄清楚依赖关系。
-        _p.r(45);
-        kityminder.Minder = _p.r(32);
-        kityminder.Command = _p.r(22);
-        kityminder.Node = _p.r(34);
-        _p.r(35);
-        kityminder.Event = _p.r(26);
-        kityminder.data = _p.r(25);
-        _p.r(23);
-        kityminder.KeyMap = _p.r(28);
-        _p.r(41);
+        _p.r(52);
+        kityminder.Minder = _p.r(39);
+        kityminder.Command = _p.r(29);
+        kityminder.Node = _p.r(41);
         _p.r(42);
+        _p.r(28);
+        kityminder.Event = _p.r(33);
+        kityminder.data = _p.r(32);
+        _p.r(30);
+        kityminder.KeyMap = _p.r(35);
+        _p.r(48);
+        _p.r(49);
+        _p.r(43);
+        _p.r(47);
+        _p.r(34);
         _p.r(36);
-        _p.r(40);
-        _p.r(27);
-        _p.r(29);
-        kityminder.Module = _p.r(33);
-        _p.r(38);
-        kityminder.Render = _p.r(39);
-        kityminder.Connect = _p.r(24);
-        kityminder.Layout = _p.r(31);
-        kityminder.Theme = _p.r(44);
-        kityminder.Template = _p.r(43);
-        kityminder.Promise = _p.r(37);
+        kityminder.Module = _p.r(40);
+        _p.r(45);
+        kityminder.Render = _p.r(46);
+        kityminder.Connect = _p.r(31);
+        kityminder.Layout = _p.r(38);
+        kityminder.Theme = _p.r(51);
+        kityminder.Template = _p.r(50);
+        kityminder.Promise = _p.r(44);
         // 模块依赖
-        _p.r(53);
-        _p.r(54);
-        _p.r(55);
-        _p.r(56);
-        _p.r(57);
-        _p.r(58);
-        _p.r(59);
         _p.r(60);
         _p.r(61);
         _p.r(62);
@@ -4541,40 +4788,47 @@ _p[47] = {
         _p.r(73);
         _p.r(74);
         _p.r(75);
-        _p.r(79);
         _p.r(76);
-        _p.r(78);
         _p.r(77);
-        _p.r(52);
-        _p.r(48);
-        _p.r(49);
-        _p.r(50);
-        _p.r(51);
-        _p.r(85);
-        _p.r(88);
-        _p.r(87);
-        _p.r(86);
-        _p.r(88);
-        _p.r(16);
-        _p.r(17);
-        _p.r(18);
-        _p.r(19);
-        _p.r(20);
-        _p.r(21);
+        _p.r(78);
+        _p.r(79);
         _p.r(80);
-        _p.r(84);
         _p.r(81);
-        _p.r(83);
         _p.r(82);
+        _p.r(86);
+        _p.r(83);
+        _p.r(85);
+        _p.r(84);
+        _p.r(59);
+        _p.r(55);
+        _p.r(56);
+        _p.r(57);
+        _p.r(58);
+        _p.r(92);
+        _p.r(95);
+        _p.r(94);
+        _p.r(93);
+        _p.r(95);
+        _p.r(22);
+        _p.r(23);
+        _p.r(24);
+        _p.r(25);
+        _p.r(26);
+        _p.r(27);
+        _p.r(87);
+        _p.r(91);
+        _p.r(88);
+        _p.r(90);
+        _p.r(89);
         module.exports = kityminder;
     }
 };
 
 //lib/km-core/src/layout/btree.js
-_p[48] = {
+_p[55] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var Layout = _p.r(31);
+        var kity = _p.r(37);
+        var Layout = _p.r(38);
         [ "left", "right", "top", "bottom" ].forEach(registerLayoutForDirection);
         function registerLayoutForDirection(name) {
             var axis = name == "left" || name == "right" ? "x" : "y";
@@ -4695,10 +4949,10 @@ _p[48] = {
 };
 
 //lib/km-core/src/layout/filetree.js
-_p[49] = {
+_p[56] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var Layout = _p.r(31);
+        var kity = _p.r(37);
+        var Layout = _p.r(38);
         [ -1, 1 ].forEach(registerLayoutForDir);
         function registerLayoutForDir(dir) {
             var name = "filetree-" + (dir > 0 ? "down" : "up");
@@ -4777,10 +5031,10 @@ _p[49] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[50] = {
+_p[57] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var Layout = _p.r(31);
+        var kity = _p.r(37);
+        var Layout = _p.r(38);
         Layout.register("fish-bone-master", kity.createClass("FishBoneMasterLayout", {
             base: Layout,
             doLayout: function(parent, children, round) {
@@ -4831,10 +5085,10 @@ _p[50] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[51] = {
+_p[58] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var Layout = _p.r(31);
+        var kity = _p.r(37);
+        var Layout = _p.r(38);
         Layout.register("fish-bone-slave", kity.createClass("FishBoneSlaveLayout", {
             base: Layout,
             doLayout: function(parent, children, round) {
@@ -4884,11 +5138,11 @@ _p[51] = {
 };
 
 //lib/km-core/src/layout/mind.js
-_p[52] = {
+_p[59] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var Layout = _p.r(31);
-        var Minder = _p.r(32);
+        var kity = _p.r(37);
+        var Layout = _p.r(38);
+        var Minder = _p.r(39);
         Layout.register("mind", kity.createClass({
             base: Layout,
             doLayout: function(node, children) {
@@ -4940,12 +5194,12 @@ _p[52] = {
 };
 
 //lib/km-core/src/module/arrange.js
-_p[53] = {
+_p[60] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
+        var kity = _p.r(37);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
         kity.extendClass(MinderNode, {
             arrange: function(index) {
                 var parent = this.parent;
@@ -5078,15 +5332,15 @@ _p[53] = {
 };
 
 //lib/km-core/src/module/basestyle.js
-_p[54] = {
+_p[61] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var TextRenderer = _p.r(72);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var TextRenderer = _p.r(79);
         Module.register("basestylemodule", function() {
             var km = this;
             function getNodeDataOrStyle(node, name) {
@@ -5193,13 +5447,13 @@ _p[54] = {
 };
 
 //lib/km-core/src/module/clipboard.js
-_p[55] = {
+_p[62] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
         Module.register("ClipboardModule", function() {
             var km = this, _clipboardNodes = [], _selectedNodes = [];
             function appendChildNode(parent, child) {
@@ -5207,7 +5461,9 @@ _p[55] = {
                 km.appendNode(child, parent);
                 child.render();
                 child.setLayoutOffset(null);
-                var children = utils.cloneArr(child.children);
+                var children = child.children.map(function(node) {
+                    return node.clone();
+                });
                 for (var i = 0, ci; ci = children[i]; i++) {
                     appendChildNode(child, ci);
                 }
@@ -5300,13 +5556,13 @@ _p[55] = {
 };
 
 //lib/km-core/src/module/dragtree.js
-_p[56] = {
+_p[63] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
         // 矩形的变形动画定义
         var MoveToParentCommand = kity.createClass("MoveToParentCommand", {
             base: Command,
@@ -5624,15 +5880,15 @@ _p[56] = {
 };
 
 //lib/km-core/src/module/expand.js
-_p[57] = {
+_p[64] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var keymap = _p.r(28);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var keymap = _p.r(35);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         Module.register("Expand", function() {
             var minder = this;
             var EXPAND_STATE_DATA = "expandState", STATE_EXPAND = "expand", STATE_COLLAPSE = "collapse";
@@ -5866,15 +6122,15 @@ _p[57] = {
 };
 
 //lib/km-core/src/module/font.js
-_p[58] = {
+_p[65] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var TextRenderer = _p.r(72);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var TextRenderer = _p.r(79);
         function getNodeDataOrStyle(node, name) {
             return node.getData(name) || node.getStyle(name);
         }
@@ -6013,14 +6269,14 @@ _p[58] = {
 };
 
 //lib/km-core/src/module/history.js
-_p[59] = {
+_p[66] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
         function compareObject(source, target) {
             var tmp;
             if (isEmptyObject(source) !== isEmptyObject(target)) {
@@ -6333,15 +6589,15 @@ _p[59] = {
 };
 
 //lib/km-core/src/module/hyperlink.js
-_p[60] = {
+_p[67] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         // jscs:disable maximumLineLength
         var linkShapePath = "M16.614,10.224h-1.278c-1.668,0-3.07-1.07-3.599-2.556h4.877c0.707,0,1.278-0.571,1.278-1.278V3.834 c0-0.707-0.571-1.278-1.278-1.278h-4.877C12.266,1.071,13.668,0,15.336,0h1.278c2.116,0,3.834,1.716,3.834,3.834V6.39 C20.448,8.508,18.73,10.224,16.614,10.224z M5.112,5.112c0-0.707,0.573-1.278,1.278-1.278h7.668c0.707,0,1.278,0.571,1.278,1.278 S14.765,6.39,14.058,6.39H6.39C5.685,6.39,5.112,5.819,5.112,5.112z M2.556,3.834V6.39c0,0.707,0.573,1.278,1.278,1.278h4.877 c-0.528,1.486-1.932,2.556-3.599,2.556H3.834C1.716,10.224,0,8.508,0,6.39V3.834C0,1.716,1.716,0,3.834,0h1.278 c1.667,0,3.071,1.071,3.599,2.556H3.834C3.129,2.556,2.556,3.127,2.556,3.834z";
         Module.register("hyperlink", {
@@ -6437,15 +6693,15 @@ _p[60] = {
 };
 
 //lib/km-core/src/module/image.js
-_p[61] = {
+_p[68] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         Module.register("image", function() {
             function loadImageSize(url, callback) {
                 var img = document.createElement("img");
@@ -6559,16 +6815,16 @@ _p[61] = {
 };
 
 //lib/km-core/src/module/keynav.js
-_p[62] = {
+_p[69] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var keymap = _p.r(28);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var keymap = _p.r(35);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         Module.register("KeyboardModule", function() {
             var min = Math.min, max = Math.max, abs = Math.abs, sqrt = Math.sqrt, exp = Math.exp;
             function buildPositionNetwork(root) {
@@ -6707,11 +6963,11 @@ _p[62] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[63] = {
+_p[70] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
+        var kity = _p.r(37);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
         /**
      * @command Layout
      * @description 设置选中节点的布局
@@ -6782,15 +7038,15 @@ _p[63] = {
 };
 
 //lib/km-core/src/module/node.js
-_p[64] = {
+_p[71] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         /**
      * @command AppendChildNode
      * @description 添加子节点到选中的节点中
@@ -6877,14 +7133,10 @@ _p[64] = {
             base: Command,
             execute: function(km, text) {
                 var nodes = km.getSelectedNodes();
-                if (!nodes.length) return;
-                var parent = nodes[0].parent;
-                for (var i = 1; i < nodes.length; i++) {
-                    if (nodes[i].parent != parent) return -1;
-                }
                 nodes.sort(function(a, b) {
                     return a.getIndex() - b.getIndex();
                 });
+                var parent = nodes[0].parent;
                 var newParent = km.createNode(text, parent, nodes[0].getIndex());
                 nodes.forEach(function(node) {
                     newParent.appendChild(node);
@@ -6897,6 +7149,7 @@ _p[64] = {
                 var nodes = km.getSelectedNodes();
                 if (!nodes.length) return;
                 var parent = nodes[0].parent;
+                if (!parent) return -1;
                 for (var i = 1; i < nodes.length; i++) {
                     if (nodes[i].parent != parent) return -1;
                 }
@@ -6931,15 +7184,15 @@ _p[64] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[65] = {
+_p[72] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         Module.register("NoteModule", function() {
             var NOTE_PATH = "M9,9H3V8h6L9,9L9,9z M9,7H3V6h6V7z M9,5H3V4h6V5z M8.5,11H2V2h8v7.5 M9,12l2-2V1H1v11";
             /**
@@ -7029,15 +7282,15 @@ _p[65] = {
 };
 
 //lib/km-core/src/module/outline.js
-_p[66] = {
+_p[73] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         var OutlineRenderer = kity.createClass("OutlineRenderer", {
             base: Renderer,
             create: function(node) {
@@ -7125,15 +7378,15 @@ _p[66] = {
 };
 
 //lib/km-core/src/module/priority.js
-_p[67] = {
+_p[74] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         Module.register("PriorityModule", function() {
             var minder = this;
             // Designed by Akikonata
@@ -7251,15 +7504,15 @@ _p[67] = {
 };
 
 //lib/km-core/src/module/progress.js
-_p[68] = {
+_p[75] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         Module.register("ProgressModule", function() {
             var minder = this;
             var PROGRESS_DATA = "progress";
@@ -7376,15 +7629,15 @@ _p[68] = {
 };
 
 //lib/km-core/src/module/resource.js
-_p[69] = {
+_p[76] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         Module.register("Resource", function() {
             /**
          * 自动使用的颜色序列
@@ -7604,15 +7857,15 @@ _p[69] = {
 };
 
 //lib/km-core/src/module/select.js
-_p[70] = {
+_p[77] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         Module.register("Select", function() {
             var minder = this;
             var rc = minder.getRenderContainer();
@@ -7749,15 +8002,15 @@ _p[70] = {
 };
 
 //lib/km-core/src/module/style.js
-_p[71] = {
+_p[78] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         Module.register("StyleModule", function() {
             var styleNames = [ "font-size", "font-family", "font-weight", "font-style", "background", "color" ];
             var styleClipBoard = null;
@@ -7854,15 +8107,15 @@ _p[71] = {
 };
 
 //lib/km-core/src/module/text.js
-_p[72] = {
+_p[79] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         var FONT_ADJUST = {
             "微软雅黑,Microsoft YaHei": -.15,
             "arial black,avant garde": -.17,
@@ -7911,6 +8164,9 @@ _p[72] = {
                 }
                 for (i = 0, text, textShape; text = textArr[i], textShape = textGroup.getItem(i); i++) {
                     textShape.setContent(text);
+                    if (kity.Browser.ie) {
+                        textShape.fixPosition();
+                    }
                 }
                 this.setTextStyle(node, textGroup);
                 var textHash = node.getText() + [ "font-size", "font-name", "font-weight", "font-style" ].map(getDataOrStyle).join("/");
@@ -7977,15 +8233,15 @@ _p[72] = {
 };
 
 //lib/km-core/src/module/view.js
-_p[73] = {
+_p[80] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         var ViewDragger = kity.createClass("ViewDragger", {
             constructor: function(minder) {
                 this._minder = minder;
@@ -8055,6 +8311,7 @@ _p[73] = {
                     }
                     var paper = dragger._minder.getPaper();
                     paper.setStyle("cursor", dragger._minder.getStatus() == "hand" ? "-webkit-grab" : "default");
+                    dragger._minder.fire("viewchanged");
                 }
                 this._minder.on("normal.mousedown normal.touchstart " + "inputready.mousedown inputready.touchstart " + "readonly.mousedown readonly.touchstart", function(e) {
                     if (e.originEvent.button == 2) {
@@ -8136,12 +8393,13 @@ _p[73] = {
          */
             var CameraCommand = kity.createClass("CameraCommand", {
                 base: Command,
-                execute: function(km, focusNode, duration) {
+                execute: function(km, focusNode) {
                     focusNode = focusNode || km.getRoot();
                     var viewport = km.getPaper().getViewPort();
                     var offset = focusNode.getRenderContainer().getRenderBox("view");
                     var dx = viewport.center.x - offset.x - offset.width / 2, dy = viewport.center.y - offset.y;
                     var dragger = km._viewDragger;
+                    var duration = km.getOption("viewAnimationDuration");
                     dragger.move(new kity.Point(dx, dy), duration);
                     this.setContentChanged(false);
                 },
@@ -8161,9 +8419,10 @@ _p[73] = {
          */
             var MoveCommand = kity.createClass("MoveCommand", {
                 base: Command,
-                execute: function(km, dir, duration) {
+                execute: function(km, dir) {
                     var dragger = km._viewDragger;
                     var size = km._lastClientSize;
+                    var duration = km.getOption("viewAnimationDuration");
                     switch (dir) {
                       case "up":
                         dragger.move(new kity.Point(0, size.height / 2), duration);
@@ -8212,6 +8471,11 @@ _p[73] = {
                             x: dx / 2.5,
                             y: dy / 2.5
                         });
+                        var me = this;
+                        clearTimeout(this._mousewheeltimer);
+                        this._mousewheeltimer = setTimeout(function() {
+                            me.fire("viewchanged");
+                        }, 100);
                         e.preventDefault();
                     },
                     "normal.dblclick readonly.dblclick": function(e) {
@@ -8255,7 +8519,7 @@ _p[73] = {
                             dy += view.top - focus.top + space;
                         }
                         if (dx || dy) {
-                            dragger.move(new kity.Point(dx, dy), 100);
+                            dragger.move(new kity.Point(dx, dy));
                         }
                     }
                 }
@@ -8265,15 +8529,15 @@ _p[73] = {
 };
 
 //lib/km-core/src/module/zoom.js
-_p[74] = {
+_p[81] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var utils = _p.r(45);
-        var Minder = _p.r(32);
-        var MinderNode = _p.r(34);
-        var Command = _p.r(22);
-        var Module = _p.r(33);
-        var Renderer = _p.r(39);
+        var kity = _p.r(37);
+        var utils = _p.r(52);
+        var Minder = _p.r(39);
+        var MinderNode = _p.r(41);
+        var Command = _p.r(29);
+        var Module = _p.r(40);
+        var Renderer = _p.r(46);
         Module.register("Zoom", function() {
             var me = this;
             var timeline;
@@ -8308,7 +8572,8 @@ _p[74] = {
                 var viewport = paper.getViewPort();
                 if (!value) return;
                 setTextRendering();
-                if (minder.getRoot().getComplex() > 200) {
+                var duration = minder.getOption("zoomAnimationDuration");
+                if (minder.getRoot().getComplex() > 200 || !duration) {
                     minder._zoomValue = value;
                     minder.zoom(value);
                     minder.fire("viewchange");
@@ -8324,7 +8589,7 @@ _p[74] = {
                     if (timeline) {
                         timeline.pause();
                     }
-                    timeline = animator.start(minder, 300, "easeInOutSine");
+                    timeline = animator.start(minder, duration, "easeInOutSine");
                     timeline.on("finish", function() {
                         minder.fire("viewchange");
                     });
@@ -8400,7 +8665,7 @@ _p[74] = {
             return {
                 init: function() {
                     this._zoomValue = 100;
-                    this.addDefaultOption({
+                    this.setDefaultOptions({
                         zoom: [ 10, 20, 50, 100, 200 ]
                     });
                     setTextRendering();
@@ -8446,9 +8711,9 @@ _p[74] = {
 };
 
 //lib/km-core/src/protocol/json.js
-_p[75] = {
+_p[82] = {
     value: function(require, exports, module) {
-        var data = _p.r(25);
+        var data = _p.r(32);
         data.registerProtocol("json", module.exports = {
             fileDescription: "KityMinder 格式",
             fileExtension: ".km",
@@ -8465,9 +8730,9 @@ _p[75] = {
 };
 
 //lib/km-core/src/protocol/markdown.js
-_p[76] = {
+_p[83] = {
     value: function(require, exports, module) {
-        var data = _p.r(25);
+        var data = _p.r(32);
         var LINE_ENDING_SPLITER = /\r\n|\r|\n/;
         var EMPTY_LINE = "";
         var NOTE_MARK_START = "<!--Note-->";
@@ -8596,11 +8861,11 @@ _p[76] = {
 };
 
 //lib/km-core/src/protocol/png.js
-_p[77] = {
+_p[84] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var data = _p.r(25);
-        var Promise = _p.r(37);
+        var kity = _p.r(37);
+        var data = _p.r(32);
+        var Promise = _p.r(44);
         var DomURL = window.URL || window.webkitURL || window;
         function loadImage(url, callback) {
             return new Promise(function(resolve, reject) {
@@ -8710,9 +8975,9 @@ _p[77] = {
 };
 
 //lib/km-core/src/protocol/svg.js
-_p[78] = {
+_p[85] = {
     value: function(require, exports, module) {
-        var data = _p.r(25);
+        var data = _p.r(32);
         data.registerProtocol("svg", module.exports = {
             fileDescription: "SVG 矢量图",
             fileExtension: ".svg",
@@ -8744,9 +9009,9 @@ _p[78] = {
 };
 
 //lib/km-core/src/protocol/text.js
-_p[79] = {
+_p[86] = {
     value: function(require, exports, module) {
-        var data = _p.r(25);
+        var data = _p.r(32);
         var LINE_ENDING = "\r", LINE_ENDING_SPLITER = /\r\n|\r|\n/, TAB_CHAR = "	";
         function repeat(s, n) {
             var result = "";
@@ -8830,9 +9095,9 @@ _p[79] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[80] = {
+_p[87] = {
     value: function(require, exports, module) {
-        var template = _p.r(43);
+        var template = _p.r(50);
         template.register("default", {
             getLayout: function(node) {
                 if (node.getData("layout")) return node.getData("layout");
@@ -8864,9 +9129,9 @@ _p[80] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[81] = {
+_p[88] = {
     value: function(require, exports, module) {
-        var template = _p.r(43);
+        var template = _p.r(50);
         template.register("filetree", {
             getLayout: function(node) {
                 if (node.getData("layout")) return node.getData("layout");
@@ -8892,9 +9157,9 @@ _p[81] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[82] = {
+_p[89] = {
     value: function(require, exports, module) {
-        var template = _p.r(43);
+        var template = _p.r(50);
         template.register("fish-bone", {
             getLayout: function(node) {
                 if (node.getData("layout")) return node.getData("layout");
@@ -8934,9 +9199,9 @@ _p[82] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[83] = {
+_p[90] = {
     value: function(require, exports, module) {
-        var template = _p.r(43);
+        var template = _p.r(50);
         template.register("right", {
             getLayout: function(node) {
                 return node.getData("layout") || "right";
@@ -8958,9 +9223,9 @@ _p[83] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[84] = {
+_p[91] = {
     value: function(require, exports, module) {
-        var template = _p.r(43);
+        var template = _p.r(50);
         template.register("structure", {
             getLayout: function(node) {
                 return node.getData("layout") || "bottom";
@@ -8973,9 +9238,9 @@ _p[84] = {
 };
 
 //lib/km-core/src/theme/default.js
-_p[85] = {
+_p[92] = {
     value: function(require, exports, module) {
-        var theme = _p.r(44);
+        var theme = _p.r(51);
         [ "classic", "classic-compact" ].forEach(function(name) {
             var compact = name == "classic-compact";
             /* jscs:disable maximumLineLength */
@@ -9032,9 +9297,9 @@ _p[85] = {
 };
 
 //lib/km-core/src/theme/fish.js
-_p[86] = {
+_p[93] = {
     value: function(require, exports, module) {
-        var theme = _p.r(44);
+        var theme = _p.r(51);
         theme.register("fish", {
             background: "#3A4144 url(ui/theme/default/images/grid.png) repeat",
             "root-color": "#430",
@@ -9083,10 +9348,10 @@ _p[86] = {
 };
 
 //lib/km-core/src/theme/fresh.js
-_p[87] = {
+_p[94] = {
     value: function(require, exports, module) {
-        var kity = _p.r(30);
-        var theme = _p.r(44);
+        var kity = _p.r(37);
+        var theme = _p.r(51);
         function hsl(h, s, l) {
             return kity.Color.createHSL(h, s, l);
         }
@@ -9152,9 +9417,9 @@ _p[87] = {
 };
 
 //lib/km-core/src/theme/snow.js
-_p[88] = {
+_p[95] = {
     value: function(require, exports, module) {
-        var theme = _p.r(44);
+        var theme = _p.r(51);
         [ "snow", "snow-compact" ].forEach(function(name) {
             var compact = name == "snow-compact";
             /* jscs:disable maximumLineLength */
@@ -9207,9 +9472,9 @@ _p[88] = {
 };
 
 //lib/km-core/src/theme/wire.js
-_p[89] = {
+_p[96] = {
     value: function(require, exports, module) {
-        var theme = _p.r(44);
+        var theme = _p.r(51);
         theme.register("wire", {
             background: "black",
             color: "#999",
