@@ -54,7 +54,7 @@
   font-size: 12px;
   color: #999;
 }
-.hotbox .state .ring .ring-shape {
+.hotbox .state .ring-shape {
   position: absolute;
   left: -25px;
   top: -25px;

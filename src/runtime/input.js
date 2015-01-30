@@ -20,7 +20,7 @@ define(function(require, exports, module) {
         var receiver = this.receiver;
         var receiverElement = receiver.element;
 
-        // setup them
+        // setup everything to go
         setupReciverElement();
         setupFsm();
         setupHotbox();
@@ -28,9 +28,14 @@ define(function(require, exports, module) {
         // expose editText()
         this.editText = editText;
 
+
+        // listen the fsm changes, make action.
         function setupFsm() {
 
+            // when jumped to input mode, enter
             fsm.when('* -> input', enterInputMode);
+
+            // when exited, commit or exit depends on the exit reason
             fsm.when('input -> *', function(exit, enter, reason) {
                 switch (reason) {
                     case 'input-commit': return commitInputResult();
@@ -38,6 +43,7 @@ define(function(require, exports, module) {
                 }
             });
 
+            // lost focus to commit
             minder.on('beforemousedown', function() {
                 if (fsm.state() == 'input') {
                     fsm.jump('normal', 'input-commit');
@@ -45,6 +51,8 @@ define(function(require, exports, module) {
             });
         }
 
+
+        // let the receiver follow the current selected node position
         function setupReciverElement() {
             if (debug.flaged) {
                 receiverElement.classList.add('debug');
@@ -55,13 +63,18 @@ define(function(require, exports, module) {
             };
 
             minder.on('layoutallfinish viewchange viewchanged selectionchange', function(e) {
+
+                // viewchange event is too frequenced, lazy it
                 if (e.type == 'viewchange' && fsm.state() != 'input') return;
+
                 updatePosition();
             });
 
             updatePosition();
         }
 
+
+        // edit entrance in hotbox
         function setupHotbox() {
             hotbox.state('main').button({
                 position: 'center',
@@ -74,14 +87,10 @@ define(function(require, exports, module) {
             });
         }
 
+
+        // edit for the selected node
         function editText() {
-            var text = minder.queryCommandValue('text');
-            if ('innerText' in receiverElement) {
-                receiverElement.innerText = text;
-            } else {
-                receiverElement.innerHTML = text &&
-                    text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
-            }
+            receiverElement.innerText = minder.queryCommandValue('text');
             fsm.jump('input', 'input-request');
             receiver.selectAll();
         }
@@ -110,18 +119,20 @@ define(function(require, exports, module) {
         }
 
         function updatePosition() {
-            var cache = updatePosition;
+            var planed = updatePosition;
 
-            cache.fixedX = cache.fixedX || 0;
-            cache.fixedY = cache.fixedY || 0;
-
-            var focusNode = minder.getSelectedNode() || minder.getRoot();
+            var focusNode = minder.getSelectedNode();
             if (!focusNode) return;
 
-            var box = focusNode.getRenderBox('TextRenderer');
-            receiverElement.style.left = Math.round(box.x) + 'px';
-            receiverElement.style.top = Math.round(box.y) + 'px';
-            receiverElement.focus();
+            if (!planed.timer) {
+                planed.timer = setTimeout(function() {
+                    var box = focusNode.getRenderBox('TextRenderer');
+                    receiverElement.style.left = Math.round(box.x) + 'px';
+                    receiverElement.style.top = (debug.flaged ? Math.round(box.bottom + 30) : Math.round(box.y)) + 'px';
+                    receiverElement.focus();
+                    planed.timer = 0;
+                });
+            }
         }
     }
 

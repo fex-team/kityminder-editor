@@ -29,6 +29,7 @@ define(function(require, exports, module) {
         var fsm = this.fsm;
         var minder = this.minder;
         var receiver = this.receiver;
+        var container = this.container;
         var receiverElement = receiver.element;
         var hotbox = this.hotbox;
 
@@ -77,6 +78,42 @@ define(function(require, exports, module) {
                     e.preventDefault();
                 }
             }
+        });
+
+
+        //////////////////////////////////////////////
+        /// 右键呼出热盒
+        /// 判断的标准是：按下的位置和结束的位置一致
+        //////////////////////////////////////////////
+        var downX, downY;
+        var MOUSE_RB = 2; // 右键
+
+        container.addEventListener('mousedown', function(e) {
+            if (fsm.state() == 'hotbox') {
+                hotbox.active(Hotbox.STATE_IDLE);
+                fsm.jump('normal', 'blur');
+            } else if (fsm.state() == 'normal' && e.button == MOUSE_RB) {
+                downX = e.clientX;
+                downY = e.clientY;
+            }
+        }, false);
+
+        container.addEventListener('mouseup', function(e) {
+            if (fsm.state() != 'normal') {
+                return;
+            }
+            if (e.button != MOUSE_RB || e.clientX != downX || e.clientY != downY) {
+                return;
+            }
+            if (!minder.getSelectedNode()) {
+                return;
+            }
+            fsm.jump('hotbox', 'content-menu');
+        }, false);
+
+        // 阻止热盒事件冒泡，在热盒正确执行前导致热盒关闭
+        hotbox.$element.addEventListener('mousedown', function(e) {
+            e.stopPropagation();
         });
     }
 
