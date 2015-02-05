@@ -1,0 +1,57 @@
+@import (less) "../lib/km-core/src/kityminder.css";
+@import (less) "../lib/hotbox/less/hotbox.less";
+
+.km-editor {
+    overflow: hidden;
+}
+
+.km-editor > .mask {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: transparent;
+}
+
+.km-editor > .receiver {
+    position: absolute;
+    background: white;
+    outline: none;
+    box-shadow: 0 0 20px fadeout(black, 50%);
+    left: 0;
+    top: 0;
+    padding: 3px 5px;
+    margin-left: -3px;
+    margin-top: -5px;
+    max-width: 300px;
+    width: auto;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 1.4em;
+    min-height: 1.4em;
+    box-sizing: border-box;
+    overflow: hidden;
+    word-break: break-all;
+    word-wrap: break-word;
+    border: none;
+    -webkit-user-select: text;
+    pointer-events: none;
+    opacity: 0;
+    z-index: -1000;
+    &.debug {
+        opacity: 1;
+        outline: 1px solid green;
+        background: none;
+        z-index: 0;
+    }
+
+    &.input {
+        pointer-events: all;
+        opacity: 1;
+        z-index: 999;
+        background: white;
+        outline: none;
+    }
+}

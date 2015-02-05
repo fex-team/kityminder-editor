@@ -1,0 +1,29 @@
+{
+  "name": "km-editor",
+  "version": "0.1.0",
+  "authors": [
+    "fex<fex@baidu.com>"
+  ],
+  "description": "Kity Minder Editor",
+  "main": "kityminder.editor.js",
+  "keywords": [
+    "kityminder",
+    "fex",
+    "ui",
+    "javascript",
+    "html5",
+    "svg"
+  ],
+  "license": "BSD",
+  "homepage": "https://github.com/fex-team/kityminder-editor",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "seajs": "~2.3.0"
+  }
+}
