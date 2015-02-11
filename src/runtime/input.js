@@ -49,6 +49,12 @@ define(function(require, exports, module) {
                     fsm.jump('normal', 'input-commit');
                 }
             });
+
+            minder.on('dblclick', function() {
+                if (minder.getSelectedNode()) {
+                    editText();
+                }
+            });
         }
 
 

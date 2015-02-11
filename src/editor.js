@@ -27,6 +27,7 @@ define(function(require, exports, module) {
     assemble(require('./runtime/hotbox'));
     assemble(require('./runtime/input'));
     assemble(require('./runtime/node'));
+    assemble(require('./runtime/history'));
     assemble(require('./runtime/jumping'));
 
     return module.exports = KMEditor;

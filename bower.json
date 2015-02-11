@@ -25,5 +25,8 @@
   ],
   "devDependencies": {
     "seajs": "~2.3.0"
+  },
+  "dependencies": {
+    "jsondiffpatch": "~0.1.27"
   }
 }
