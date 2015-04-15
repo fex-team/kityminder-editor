@@ -34,6 +34,13 @@ define(function(require, exports, module){
             }
         });
 
+        progress.button({
+            position: 'top',
+            label: '返回',
+            key: 'esc',
+            next: 'back'
+        });
+
 
     }
 

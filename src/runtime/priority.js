@@ -34,6 +34,12 @@ define(function(require, exports, module){
             }
         });
 
+        priority.button({
+            position: 'top',
+            label: '返回',
+            key: 'esc',
+            next: 'back'
+        });
 
     }
 
