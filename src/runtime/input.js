@@ -38,8 +38,11 @@ define(function(require, exports, module) {
             // when exited, commit or exit depends on the exit reason
             fsm.when('input -> *', function(exit, enter, reason) {
                 switch (reason) {
-                    case 'input-commit': return commitInputResult();
-                    case 'input-cancel': return exitInputMode();
+                    case 'input-cancel':
+                        return exitInputMode();
+                    case 'input-commit':
+                    default:
+                        return commitInputResult();
                 }
             });
 

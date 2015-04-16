@@ -70,17 +70,16 @@ define(function(require, exports, module) {
 
         /**
          * 添加状态跳转监视器
-         *
-         * @param  {Function} listener
-         *     监视函数，当状态跳转的时候，会接收三个参数
-         *         * from - 跳转前的状态
-         *         * to - 跳转后的状态
-         *         * reason - 跳转的原因
-         *
+         * 
          * @param {string} condition
          *     监视的时机
          *         "* => *" （默认）
          *
+         * @param  {Function} handler
+         *     监视函数，当状态跳转的时候，会接收三个参数
+         *         * from - 跳转前的状态
+         *         * to - 跳转后的状态
+         *         * reason - 跳转的原因
          */
         this.when = function(condition, handler) {
             if (arguments.length == 1) {

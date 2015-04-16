@@ -58,7 +58,7 @@ define(function(require, exports, module) {
         receiver.listen('hotbox', function(e) {
             e.preventDefault();
             var handleResult = hotbox.dispatch(e);
-            if (handleResult && hotbox.state() == Hotbox.STATE_IDLE) {
+            if (hotbox.state() == Hotbox.STATE_IDLE && fsm.state() == 'hotbox') {
                 return fsm.jump('normal', 'hotbox-idle');
             }
         });
