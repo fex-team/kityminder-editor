@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>KityMinder Editor - Powered By FEX</title>
+    <link rel="stylesheet" href="kityminder.editor.css">
+    <link href="favicon.ico" type="image/x-icon" rel="shortcut icon">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css"/>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        h1.editor-title {
+            background: #393F4F;
+            color: white;
+            margin: 0;
+            height: 40px;
+            font-size: 14px;
+            line-height: 40px;
+            font-family: 'Hiragino Sans GB', 'Arial', 'Microsoft Yahei';
+            font-weight: normal;
+            padding: 0 20px;
+        }
+        #minder-editor {
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 250px;
+            bottom: 0;
+        }
+
+        #control-panel {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            width: 250px;
+            bottom: 0;
+            border-left: 1px solid #CCC;
+        }
+    </style>
+</head>
+<body ng-app="kmEditorUI" ng-controller="uiController">
+    <h1 class="editor-title">KityMinder Editor - Powered By FEX</h1>
+    <div id="minder-editor" km-editor="#minder-editor"></div>
+    <div id="control-panel" control-panel ng-if="minder"></div>
+</body>
+<script src="lib/kity/dist/kity.js"></script>
+<script src="bower_components/seajs/dist/sea-debug.js"></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<script src="ui/ui.controller.js"></script>
+<script src="ui/directive/kmEditor/kmEditor.directive.js"></script>
+<script src="ui/directive/controlPanel/controlPanel.directive.js"></script>
+<script src="ui/directive/resourceEditor/resourceEditor.directive.js"></script>
+</html>

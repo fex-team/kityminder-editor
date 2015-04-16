@@ -1,0 +1,10 @@
+<input class="form-control" type="text" ng-model="newResourceName" />
+<button class="btn btn-primary" ng-click="addResource(newResourceName)">添加</button>
+<ul>
+    <li ng-repeat="resource in used">
+        <label style="background: {{resourceColor(resource.name)}}">
+            <input type="checkbox" ng-model="resource.selected" />
+            <span>{{resource.name}}</span>
+        </label>
+    </li>
+</ul>
