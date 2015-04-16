@@ -9,7 +9,6 @@
 
 
 define(function(require, exports, module) {
-    // var jsonDiff = require('../../bower_components/jsondiffpatch/public/build/jsondiffpatch');
     var jsonDiff = require('../tool/jsondiff');
 
     function HistoryRuntime() {
@@ -81,6 +80,22 @@ define(function(require, exports, module) {
             return !!redoDiffs.length;
         }
 
+        function updateSelection(e) {
+            if (!patchLock) return;
+            var patch = e.patch;
+            switch (patch.express) {
+                case 'node.add':
+                    minder.select(patch.node.getChild(patch.index), true);
+                    break;
+                case 'node.remove':
+                case 'data.replace':
+                case 'data.remove':
+                case 'data.add':
+                    minder.select(patch.node, true);
+                    break;
+            }
+        }
+
         this.history = {
             reset: reset,
             undo: undo,
@@ -91,6 +106,7 @@ define(function(require, exports, module) {
         reset();
         minder.on('contentchange', changed);
         minder.on('import', reset);
+        minder.on('patch', updateSelection);
 
         var main = hotbox.state('main');
         main.button({
