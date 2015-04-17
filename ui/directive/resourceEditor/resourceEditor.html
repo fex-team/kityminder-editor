@@ -1,5 +1,12 @@
-<input class="form-control" type="text" ng-model="newResourceName" />
-<button class="btn btn-primary" ng-click="addResource(newResourceName)">添加</button>
+
+<div class="input-group">
+    <input class="form-control" type="text" ng-model="newResourceName"
+        ng-required
+        ng-keypress="$event.keyCode == 13 && addResource(newResourceName)" />
+    <span class="input-group-btn">
+        <button class="btn btn-default" ng-click="addResource(newResourceName)">添加</button>
+    </span>
+</div>
 <ul>
     <li ng-repeat="resource in used">
         <label style="background: {{resourceColor(resource.name)}}">

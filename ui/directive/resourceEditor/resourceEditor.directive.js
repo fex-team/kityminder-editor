@@ -39,6 +39,7 @@ angular.module('kmEditorUI')
                 };
 
                 $scope.addResource = function (resourceName) {
+                    if (!resourceName || !/\S/.test(resourceName)) return;
                     $scope.used.push({
                         name: resourceName,
                         selected: true
