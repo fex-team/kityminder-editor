@@ -10,6 +10,7 @@ angular.module('kmEditorUI')
             controller: function ($scope) {
                 var minder = $scope.minder;
 
+	            var isInteracting = false;
                 minder.on('interactchange', function () {
                     var enabled = $scope.enabled = minder.queryCommandState('resource') != -1;
                     var selected = enabled ? minder.queryCommandValue('resource') : [];
@@ -20,7 +21,10 @@ angular.module('kmEditorUI')
                         }
                     });
                     $scope.used = used;
+
+	                isInteracting = true;
                     $scope.$apply();
+	                isInteracting = false;
                 });
 
                 $scope.$watch('used', function (used) {
@@ -30,6 +34,11 @@ angular.module('kmEditorUI')
                         }).map(function (resource) {
                             return resource.name;
                         });
+
+	                    // 由于 interactchange 带来的改变则不用执行 resource 命令
+	                    if (isInteracting) {
+		                    return;
+	                    }
                         minder.execCommand('resource', resource);
                     }
                 }, true);
