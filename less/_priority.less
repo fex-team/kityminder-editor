@@ -1,0 +1,18 @@
+.priority-sprite(@count) when (@count >= 0) {
+    .priority-sprite(@count - 1);
+    &.priority-@{count} {
+        background-position: 0 (-20px * (@count - 1));
+    }
+}
+
+#control-panel .km-priority {
+
+    .km-priority-item {
+
+        .km-priority-icon {
+            .priority-sprite(9);
+            background: url(./ui/images/iconpriority.png) repeat-y;
+            background-color: transparent;
+        }
+  }
+}

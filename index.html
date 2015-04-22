@@ -5,7 +5,8 @@
     <title>KityMinder Editor - Powered By FEX</title>
     <link rel="stylesheet" href="kityminder.editor.css">
     <link href="favicon.ico" type="image/x-icon" rel="shortcut icon">
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css"/>
+	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css"/>
+	<link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css">
     <style>
         html, body {
             margin: 0;
@@ -46,6 +47,7 @@
     <h1 class="editor-title">KityMinder Editor - Powered By FEX</h1>
     <div id="minder-editor" km-editor="#minder-editor"></div>
     <div id="control-panel" control-panel ng-if="minder"></div>
+    <div id="note-previewer" note-previewer ng-if="minder"></div>
 </body>
 <script src="lib/kity/dist/kity.js"></script>
 <script src="bower_components/seajs/dist/sea-debug.js"></script>
@@ -54,8 +56,23 @@
 <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap.js"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<script src="bower_components/codemirror/lib/codemirror.js"></script>
+<script src="bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
+<script src="bower_components/codemirror/mode/xml/xml.js"></script>
+<script src="bower_components/codemirror/mode/javascript/javascript.js"></script>
+<script src="bower_components/codemirror/mode/css/css.js"></script>
+<script src="bower_components/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="bower_components/codemirror/mode/markdown/markdown.js"></script>
+<script src="bower_components/codemirror/addon/mode/overlay.js"></script>
+<script src="bower_components/codemirror/mode/gfm/gfm.js"></script>
+<script src="bower_components/marked/marked.min.js"></script>
 <script src="ui/ui.controller.js"></script>
+<script src="ui/service/commandBinder.service.js"></script>
 <script src="ui/directive/kmEditor/kmEditor.directive.js"></script>
 <script src="ui/directive/controlPanel/controlPanel.directive.js"></script>
 <script src="ui/directive/resourceEditor/resourceEditor.directive.js"></script>
+<script src="ui/directive/priorityEditor/priorityEditor.directive.js"></script>
+<script src="ui/directive/progressEditor/progressEditor.directive.js"></script>
+<script src="ui/directive/noteEditor/noteEditor.directive.js"></script>
+<script src="ui/directive/notePreviewer/notePreviewer.directive.js"></script>
 </html>
