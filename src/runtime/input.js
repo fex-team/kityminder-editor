@@ -138,7 +138,7 @@ define(function(require, exports, module) {
                     var box = focusNode.getRenderBox('TextRenderer');
                     receiverElement.style.left = Math.round(box.x) + 'px';
                     receiverElement.style.top = (debug.flaged ? Math.round(box.bottom + 30) : Math.round(box.y)) + 'px';
-                    receiverElement.focus();
+                    //receiverElement.focus();
                     planed.timer = 0;
                 });
             }
