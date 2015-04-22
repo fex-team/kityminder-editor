@@ -1,0 +1,16 @@
+<div class="km-note"
+     ng-show="noteEnabled"
+     ui-codemirror="{ onLoad: codemirrorLoaded }"
+     ng-model="noteContent"
+	 ui-codemirror-opts="{
+		gfm: true,
+		breaks: true,
+		lineWrapping : true,
+		mode: 'gfm',
+        dragDrop: false,
+        lineNumbers:true
+	 }">
+</div>
+<p ng-show="!noteEnabled" class="km-note-tips">
+	请选择节点编辑备注
+</p>
