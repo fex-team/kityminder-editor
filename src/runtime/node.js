@@ -59,7 +59,7 @@ define(function(require, exports, module) {
             beforeShow: function() {
                 if (!minder.queryCommandState('expand')) {
                     this.$button.children[0].innerHTML = '展开';
-                } else if (!minder.queryCommandState('collapse')) {
+                } else {
                     this.$button.children[0].innerHTML = '收起';
                 }
             }
