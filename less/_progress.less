@@ -1,0 +1,18 @@
+.progress-sprite(@count) when (@count >= 0) {
+    .progress-sprite(@count - 1);
+    &.progress-@{count} {
+        background-position: 0 (-20px * (@count - 1));
+    }
+}
+
+#control-panel .km-progress {
+
+    .km-progress-item {
+
+        .km-progress-icon {
+            .progress-sprite(9);
+            background: url(./ui/images/iconprogress.png) repeat-y;
+            background-color: transparent;
+        }
+    }
+}
