@@ -1,3 +1,3 @@
 define(function(require, exports, module) {
-    return module.exports = require('../lib/km-core/src/kityminder').Minder;
+    return module.exports = window.kityminder.Minder;
 });

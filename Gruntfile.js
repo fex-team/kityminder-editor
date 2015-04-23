@@ -90,11 +90,13 @@ module.exports = function(grunt) {
         less: {
             compile: {
                 options: {
-                    sourceMap: true
+                    sourceMap: true,
+                    sourceMapFilename: 'kityminder.editor.css.map'
                 },
-                files: {
-                    'kityminder.editor.css': 'less/editor.less'
-                }
+                files: [{
+                    dest: 'kityminder.editor.css',
+                    src: 'less/editor.less'
+                }]
             }
         }
 
