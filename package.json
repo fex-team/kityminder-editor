@@ -33,6 +33,7 @@
     "grunt-contrib-less": "^1.0.0",
     "grunt-contrib-uglify": "^0.4.1",
     "grunt-module-dependence": "~0.2.0",
-    "grunt-replace": "~0.8.0"
+    "grunt-replace": "~0.8.0",
+    "grunt-angular-templates": "~0.5.0"
   }
 }
