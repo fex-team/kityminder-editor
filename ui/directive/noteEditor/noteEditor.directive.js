@@ -30,6 +30,9 @@ angular.module('kmEditorUI')
 
 					isInteracting = true;
 					$scope.$apply();
+					setTimeout(function() {
+						cmEditor.refresh();
+					});
 					isInteracting = false;
 				}
 
