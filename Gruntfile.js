@@ -14,6 +14,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-inject');
+	grunt.loadNpmTasks('grunt-angular-templates');
 
     var pkg = grunt.file.readJSON('package.json');
 
@@ -98,11 +99,25 @@ module.exports = function(grunt) {
                     src: 'less/editor.less'
                 }]
             }
-        }
+        },
+
+	    ngtemplates: {
+		    kmEditorUI: {
+			    src: 'ui/directive/**/*.html',
+			    dest: 'ui/templates.js',
+			    options: {
+				    htmlmin: {
+					    collapseBooleanAttributes: true,
+					    collapseWhitespace: true,
+					    removeComments: true
+				    }
+			    }
+		    }
+	    }
 
     });
 
     // Build task(s).
-    grunt.registerTask('default', ['clean', 'dependence', 'concat', 'uglify', 'less']);
+    grunt.registerTask('default', ['clean', 'dependence', 'concat', 'uglify', 'less', 'ngtemplates']);
 
 };
