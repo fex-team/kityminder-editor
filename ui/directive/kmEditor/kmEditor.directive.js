@@ -3,32 +3,42 @@ angular.module('kmEditorUI').directive('kmEditor', function() {
         restrict: 'A',
         link: function(scope, element, attributes) {
 
-            /* global seajs */
-            seajs.config({
-                base: './src'
-            });
+	        if (typeof(seajs) != 'undefined') {
+		        /* global seajs */
+		        seajs.config({
+			        base: './src'
+		        });
 
-            define('demo', function(require) {
-                var Editor = require('editor');
+		        define('demo', function(require) {
+			        var Editor = require('editor');
 
-                var editor = window.editor = new Editor(element.attr('km-editor'));
+			        var editor = window.editor = new Editor(element.attr('km-editor'));
 
-                if (window.localStorage.__dev_minder_content) {
-                    editor.minder.importJson(JSON.parse(window.localStorage.__dev_minder_content));
-                }
+			        if (window.localStorage.__dev_minder_content) {
+				        editor.minder.importJson(JSON.parse(window.localStorage.__dev_minder_content));
+			        }
 
-                editor.minder.on('contentchange', function() {
-                    window.localStorage.__dev_minder_content = JSON.stringify(editor.minder.exportJson());
-                });
+			        editor.minder.on('contentchange', function() {
+				        window.localStorage.__dev_minder_content = JSON.stringify(editor.minder.exportJson());
+			        });
 
-                window.minder = window.km = editor.minder;
+			        window.minder = window.km = editor.minder;
 
-                scope.editor = editor;
-                scope.minder = minder;
-                scope.$apply();
-            });
+			        scope.editor = editor;
+			        scope.minder = minder;
+			        scope.$apply();
+		        });
 
-            seajs.use('demo');
+		        seajs.use('demo');
+
+	        } else if (window.kityminder && window.kityminder.Editor) {
+		        var editor = new kityminder.Editor('#minder-editor');
+
+		        window.editor = scope.editor = editor;
+		        window.minder = scope.minder = editor.minder;
+	        }
+
+
         }
     }
 });
