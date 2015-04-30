@@ -11,6 +11,7 @@ angular.module('kmEditorUI')
                 var minder = $scope.minder;
 
 	            var isInteracting = false;
+
                 minder.on('interactchange', function () {
                     var enabled = $scope.enabled = minder.queryCommandState('resource') != -1;
                     var selected = enabled ? minder.queryCommandValue('resource') : [];
@@ -48,11 +49,16 @@ angular.module('kmEditorUI')
                 };
 
                 $scope.addResource = function (resourceName) {
+	                var origin = minder.queryCommandValue('resource');
                     if (!resourceName || !/\S/.test(resourceName)) return;
-                    $scope.used.push({
-                        name: resourceName,
-                        selected: true
-                    });
+
+	                if (origin.indexOf(resourceName) == -1) {
+		                $scope.used.push({
+			                name: resourceName,
+			                selected: true
+		                });
+	                }
+
                     $scope.newResourceName = null;
                 }
             }
