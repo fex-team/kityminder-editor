@@ -55,9 +55,7 @@ module.exports = function(grunt) {
             merge: {
                 files: [{
                     src: [
-                        'src/**/*.js',
-                        'lib/hotbox/src/**/*.js',
-                        'lib/km-core/src/**/*.js'
+                        'src/**/*.js'
                     ],
                     dest: 'kityminder.editor.js'
                 }]

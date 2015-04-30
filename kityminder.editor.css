@@ -48,6 +48,9 @@
   background: white;
   outline: none;
 }
+.panel-body {
+  padding: 10px;
+}
 .tool-group {
   padding: 0;
 }
@@ -372,5 +375,8 @@ li[disabled] {
   display: block!important;
   left: -99999px !important;
   top: -99999px !important;
+}
+.panel-body {
+  padding: 10px;
 }
 /*# sourceMappingURL=kityminder.editor.css.map */

@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * km-editor - v0.0.1 - 2015-04-24
+ * km-editor - v0.0.1 - 2015-04-30
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -769,7 +769,7 @@ _p[13] = {
                 next: "back"
             });
         }
-        module.exports = PriorityRuntime;
+        return module.exports = PriorityRuntime;
     }
 };
 
@@ -812,7 +812,7 @@ _p[14] = {
                 next: "back"
             });
         }
-        module.exports = ProgressRuntime;
+        return module.exports = ProgressRuntime;
     }
 };
 

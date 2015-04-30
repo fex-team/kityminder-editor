@@ -44,6 +44,6 @@ define(function(require, exports, module){
 
     }
 
-    module.exports = ProgressRuntime;
+    return module.exports = ProgressRuntime;
 
 });

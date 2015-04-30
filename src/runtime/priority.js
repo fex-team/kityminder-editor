@@ -43,6 +43,6 @@ define(function(require, exports, module){
 
     }
 
-    module.exports = PriorityRuntime;
+    return module.exports = PriorityRuntime;
 
 });
