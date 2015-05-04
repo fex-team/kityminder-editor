@@ -12,4 +12,7 @@ angular.module('kmEditorUI', [
 		]);
 	})
 .controller('uiController', function($scope, $element) {
+	$scope.initEditor = function(editor, minder) {
+		console.log(editor, minder);
+	};
 });

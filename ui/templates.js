@@ -6,6 +6,11 @@ angular.module('kmEditorUI').run(['$templateCache', function($templateCache) {
   );
 
 
+  $templateCache.put('ui/directive/kityminderEditor/kityminderEditor.html',
+    "<div class=\"minder-editor-container\"><div class=\"minder-editor\"></div><div class=\"control-panel\" control-panel ng-if=\"minder\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div></div>"
+  );
+
+
   $templateCache.put('ui/directive/noteEditor/noteEditor.html',
     "<div class=\"km-note\" ng-show=\"noteEnabled\" ui-codemirror=\"{ onLoad: codemirrorLoaded }\" ng-model=\"noteContent\" ui-codemirror-opts=\"{\n" +
     "\t\tgfm: true,\n" +

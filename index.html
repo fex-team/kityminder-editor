@@ -3,12 +3,17 @@
 <head>
     <meta charset="utf-8">
     <title>KityMinder Editor - Powered By FEX</title>
-    <link rel="stylesheet" href="kityminder.editor.css">
-    <link href="favicon.ico" type="image/x-icon" rel="shortcut icon">
-    <link rel="stylesheet" href="bower_components/hotbox/dist/hotbox.css"/>
-    <link rel="stylesheet" href="bower_components/kityminder-core/dist/kityminder.core.css"/>
-	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css"/>
-	<link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css">
+
+	<link href="favicon.ico" type="image/x-icon" rel="shortcut icon">
+
+	<!-- bower:css -->
+	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+	<link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css" />
+	<link rel="stylesheet" href="bower_components/kityminder-core/dist/kityminder.core.css" />
+	<!-- endbower -->
+
+	<link rel="stylesheet" href="dist/kityminder.editor.css">
+
     <style>
         html, body {
             margin: 0;
@@ -27,41 +32,26 @@
             font-weight: normal;
             padding: 0 20px;
         }
-        #minder-editor {
-            position: absolute;
-            top: 40px;
-            left: 0;
-            right: 250px;
-            bottom: 0;
-        }
-
-        #control-panel {
-            position: absolute;
-            top: 40px;
-            right: 0;
-            width: 250px;
-            bottom: 0;
-            border-left: 1px solid #CCC;
-        }
+	    div.minder-editor-container {
+		    position: absolute;
+		    top: 40px;
+		    bottom: 0;
+		    left: 0;
+		    right: 0;
+	    }
     </style>
 </head>
 <body ng-app="kmEditorUI" ng-controller="uiController">
     <h1 class="editor-title">KityMinder Editor - Powered By FEX</h1>
-    <div id="minder-editor" km-editor="#minder-editor"></div>
-    <div id="control-panel" control-panel ng-if="minder"></div>
-    <div id="note-previewer" note-previewer ng-if="minder"></div>
+    <kityminder-editor on-init="initEditor(editor, minder)"></kityminder-editor>
 </body>
-<script src="bower_components/kity/dist/kity.js"></script>
-<script src="bower_components/hotbox/dist/hotbox.js"></script>
-<script src="bower_components/kityminder-core/dist/kityminder.core.js"></script>
-<script src="bower_components/seajs/dist/sea-debug.js"></script>
-<script src="bower_components/angular/angular.js"></script>
+
+<!-- bower:js -->
 <script src="bower_components/jquery/dist/jquery.js"></script>
 <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-<script src="bower_components/angular-bootstrap/ui-bootstrap.js"></script>
+<script src="bower_components/angular/angular.js"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 <script src="bower_components/codemirror/lib/codemirror.js"></script>
-<script src="bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
 <script src="bower_components/codemirror/mode/xml/xml.js"></script>
 <script src="bower_components/codemirror/mode/javascript/javascript.js"></script>
 <script src="bower_components/codemirror/mode/css/css.js"></script>
@@ -69,16 +59,23 @@
 <script src="bower_components/codemirror/mode/markdown/markdown.js"></script>
 <script src="bower_components/codemirror/addon/mode/overlay.js"></script>
 <script src="bower_components/codemirror/mode/gfm/gfm.js"></script>
-<script src="bower_components/marked/marked.min.js"></script>
-<!--<script src="kityminder.editor.js"></script>-->
+<script src="bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
+<script src="bower_components/marked/lib/marked.js"></script>
+<script src="bower_components/kity/dist/kity.min.js"></script>
+<script src="bower_components/hotbox/hotbox.min.js"></script>
+<script src="bower_components/kityminder-core/dist/kityminder.core.min.js"></script>
+<script src="bower_components/seajs/dist/sea.js"></script>
+<!-- endbower -->
+
 <script src="ui/ui.controller.js"></script>
-<script src="ui/templates.js"></script>
 <script src="ui/service/commandBinder.service.js"></script>
-<script src="ui/directive/kmEditor/kmEditor.directive.js"></script>
 <script src="ui/directive/controlPanel/controlPanel.directive.js"></script>
 <script src="ui/directive/resourceEditor/resourceEditor.directive.js"></script>
 <script src="ui/directive/priorityEditor/priorityEditor.directive.js"></script>
 <script src="ui/directive/progressEditor/progressEditor.directive.js"></script>
 <script src="ui/directive/noteEditor/noteEditor.directive.js"></script>
 <script src="ui/directive/notePreviewer/notePreviewer.directive.js"></script>
+<script src="ui/directive/kityminderEditor/kityminderEditor.directive.js"></script>
+
+
 </html>

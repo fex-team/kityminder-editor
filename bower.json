@@ -1,6 +1,6 @@
 {
   "name": "km-editor",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "authors": [
     "fex<fex@baidu.com>"
   ],
@@ -21,20 +21,43 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "less",
+    "ui",
+    "src",
+    "favicon.ico",
+    "Gruntfile.js",
+    "index.html",
+    "package.json"
   ],
   "devDependencies": {
     "seajs": "~2.3.0"
   },
   "dependencies": {
-    "jsondiffpatch": "~0.1.27",
     "bootstrap": "~3.3.4",
     "angular": "~1.3.15",
     "angular-bootstrap": "~0.12.1",
     "angular-ui-codemirror": "~0.2.3",
+    "codemirror": "~4.8.0",
     "marked": "~0.3.3",
     "kity": "~2.0.0",
-    "hotbox": "~1.0.1",
-    "kityminder-core": "~1.4.0"
+    "hotbox": "~1.0.2",
+    "kityminder-core": "~1.4.3"
+
+  },
+  "overrides": {
+    "codemirror": {
+      "main": [
+        "lib/codemirror.js",
+        "lib/codemirror.css",
+        "mode/xml/xml.js",
+        "mode/javascript/javascript.js",
+        "mode/css/css.js",
+        "mode/htmlmixed/htmlmixed.js",
+        "mode/markdown/markdown.js",
+        "addon/mode/overlay.js",
+        "mode/gfm/gfm.js"
+      ]
+    }
   }
 }

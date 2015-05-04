@@ -12,7 +12,14 @@ define(function(require, exports, module) {
      * 最先执行的 Runtime，初始化编辑器容器
      */
     function ContainerRuntime() {
-        var container = document.querySelector(this.selector);
+        var container;
+
+	    if (typeof(this.selector) == 'string') {
+		    container = document.querySelector(this.selector);
+	    } else {
+		    container = this.selector;
+	    }
+
         if (!container) throw new Error('Invalid selector: ' + this.selector);
 
         // 这个类名用于给编辑器添加样式
