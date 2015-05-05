@@ -7,6 +7,7 @@ angular.module('kmEditorUI')
 			templateUrl: 'ui/directive/notePreviewer/notePreviewer.html',
 			link: function(scope, element) {
 				var minder = scope.minder;
+				var $container = element.parent();
 				var $previewer = element.children();
 				scope.showNotePreviewer = false;
 
@@ -48,17 +49,17 @@ angular.module('kmEditorUI')
 					scope.noteContent = $sce.trustAsHtml(html);
 					scope.$apply(); // 让浏览器重新渲染以获取 previewer 提示框的尺寸
 
-					var cw = $(document).width();
-					var ch = $(document).height();
+					var cw = $($container[0]).width();
+					var ch = $($container[0]).height();
 					var pw = $($previewer).outerWidth();
 					var ph = $($previewer).outerHeight();
 
-					var x = b.cx - pw / 2;
-					var y = b.bottom + 10;
+					var x = b.cx - pw / 2 - $container.offset().left;
+					var y = b.bottom + 10 - $container.offset().top;
 
 					if (x < 0) x = 10;
-					if (x + pw > cw) x = cw - pw - 10;
-					if (y + ph > ch) y = b.top - ph - 10;
+					if (x + pw > cw) x = b.left - pw - 10 - $container.offset().left;
+					if (y + ph > ch) y = b.top - ph - 10 - $container.offset().top;
 
 
 					scope.previewerStyle = {
