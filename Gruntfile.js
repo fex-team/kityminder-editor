@@ -73,7 +73,7 @@ module.exports = function(grunt) {
                 files: {
 	                'dist/kityminder.editor.js': [
 		                '.tmp/scripts/kityminder.editor.js',
-		                '.tmp/scripts/ui.controller.annotated.js',
+		                '.tmp/scripts/kityminder.app.annotated.js',
 		                '.tmp/scripts/templates.annotated.js',
 		                '.tmp/scripts/service/*.js',
 		                '.tmp/scripts/filter/*.js',
