@@ -1,4 +1,4 @@
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 	.directive('kityminderEditor', function() {
 		return {
 			restrict: 'E',
@@ -9,7 +9,7 @@ angular.module('kmEditorUI')
 			},
 			link: function(scope, element, attributes) {
 
-				var $minderEditor = element.find('.minder-editor')[0];
+				var $minderEditor = element.children('.minder-editor')[0];
 
 				function onInit(editor, minder) {
 					scope.onInit({

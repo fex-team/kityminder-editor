@@ -1,4 +1,4 @@
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 
     .directive('priorityEditor', ['commandBinder', function(commandBinder) {
         return {

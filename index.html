@@ -42,7 +42,7 @@
 	    }
     </style>
 </head>
-<body ng-app="kmEditorUI" ng-controller="uiController">
+<body ng-app="kityminderDemo" ng-controller="MainController">
     <h1 class="editor-title">KityMinder Editor - Powered By FEX</h1>
     <kityminder-editor on-init="initEditor(editor, minder)"></kityminder-editor>
 </body>
@@ -68,7 +68,7 @@
 <script src="bower_components/seajs/dist/sea.js"></script>
 <!-- endbower -->
 
-<script src="ui/ui.controller.js"></script>
+<script src="ui/kityminder.app.js"></script>
 <script src="ui/service/commandBinder.service.js"></script>
 <script src="ui/directive/controlPanel/controlPanel.directive.js"></script>
 <script src="ui/directive/resourceEditor/resourceEditor.directive.js"></script>
@@ -78,5 +78,16 @@
 <script src="ui/directive/notePreviewer/notePreviewer.directive.js"></script>
 <script src="ui/directive/kityminderEditor/kityminderEditor.directive.js"></script>
 
+
+<script>
+	angular.module('kityminderDemo', ['kityminderEditor'])
+			.controller('MainController', function($scope) {
+				$scope.initEditor = function(editor, minder) {
+					window.editor = editor;
+					window.minder = minder;
+				};
+			});
+
+</script>
 
 </html>

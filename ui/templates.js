@@ -1,4 +1,4 @@
-angular.module('kmEditorUI').run(['$templateCache', function($templateCache) {
+angular.module('kityminderEditor').run(['$templateCache', function($templateCache) {
   'use strict';
 
   $templateCache.put('ui/directive/controlPanel/controlPanel.html',

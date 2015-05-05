@@ -1,4 +1,4 @@
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 	.directive('progressEditor', ['commandBinder', function(commandBinder) {
 		return {
 			restrict: 'E',

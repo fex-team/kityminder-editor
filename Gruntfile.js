@@ -43,7 +43,8 @@ module.exports = function(grunt) {
 	            'dist/*.js',
 	            'dist/*.css',
 	            'dist/*.css.map'
-            ]
+            ],
+	        clstmp: ['.tmp']
         },
 
         // resolve dependence
@@ -117,7 +118,7 @@ module.exports = function(grunt) {
 	    },
 
 	    ngtemplates: {
-		    kmEditorUI: {
+		    kityminderEditor: {
 			    src: 'ui/directive/**/*.html',
 			    dest: 'ui/templates.js',
 			    options: {
@@ -174,7 +175,7 @@ module.exports = function(grunt) {
     });
 
     // Build task(s).
-	grunt.registerTask('build', ['clean', 'wiredep:dist', 'ngtemplates', 'dependence', 'ngAnnotate', 'concat', 'uglify', 'less', 'cssmin', 'copy']);
-	grunt.registerTask('serve', ['clean', 'wiredep:dev', 'ngtemplates', 'dependence', 'ngAnnotate', 'concat', 'uglify', 'less', 'cssmin', 'copy']);
+	grunt.registerTask('build', ['clean:last', 'wiredep:dist', 'ngtemplates', 'dependence', 'ngAnnotate', 'concat', 'uglify', 'less', 'cssmin', 'copy', 'clean:clstmp']);
+	grunt.registerTask('serve', ['clean:last', 'wiredep:dev', 'ngtemplates', 'dependence', 'ngAnnotate', 'concat', 'uglify', 'less', 'cssmin', 'copy', 'clean:clstmp']);
 
 };

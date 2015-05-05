@@ -1,4 +1,4 @@
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
     .filter('commandState', function() {
         return function(minder, command) {
             return minder.queryCommandState(command);

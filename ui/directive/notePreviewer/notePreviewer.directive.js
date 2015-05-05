@@ -1,5 +1,5 @@
 // TODO: 使用一个 div 容器作为 previewer，而不是两个
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 
 	.directive('notePreviewer', ['$sce', function($sce) {
 		return {

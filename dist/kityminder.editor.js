@@ -1240,7 +1240,7 @@ var moduleMapping = {
 function use(name) {
     _p.r([ moduleMapping[name] ]);
 }
-angular.module('kmEditorUI', [
+angular.module('kityminderEditor', [
     'ui.bootstrap',
 	'ui.codemirror'
 ])
@@ -1258,7 +1258,7 @@ angular.module('kmEditorUI', [
 		console.log(editor, minder);
 	};
 }]);
-angular.module('kmEditorUI').run(['$templateCache', function($templateCache) {
+angular.module('kityminderEditor').run(['$templateCache', function($templateCache) {
   'use strict';
 
   $templateCache.put('ui/directive/controlPanel/controlPanel.html',
@@ -1304,7 +1304,7 @@ angular.module('kmEditorUI').run(['$templateCache', function($templateCache) {
 
 }]);
 
-angular.module('kmEditorUI').service('commandBinder', function() {
+angular.module('kityminderEditor').service('commandBinder', function() {
 	return {
 		bind: function(minder, command, scope) {
 
@@ -1316,7 +1316,7 @@ angular.module('kmEditorUI').service('commandBinder', function() {
 		}
 	};
 });
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
     .filter('commandState', function() {
         return function(minder, command) {
             return minder.queryCommandState(command);
@@ -1329,7 +1329,7 @@ angular.module('kmEditorUI')
     });
 
 
-angular.module('kmEditorUI').directive('controlPanel', function() {
+angular.module('kityminderEditor').directive('controlPanel', function() {
     return {
         templateUrl: 'ui/directive/controlPanel/controlPanel.html',
         restrict: 'A',
@@ -1341,7 +1341,7 @@ angular.module('kmEditorUI').directive('controlPanel', function() {
         }
     }
 });
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 	.directive('kityminderEditor', function() {
 		return {
 			restrict: 'E',
@@ -1352,7 +1352,7 @@ angular.module('kmEditorUI')
 			},
 			link: function(scope, element, attributes) {
 
-				var $minderEditor = element.find('.minder-editor')[0];
+				var $minderEditor = element.children('.minder-editor')[0];
 
 				function onInit(editor, minder) {
 					scope.onInit({
@@ -1403,7 +1403,7 @@ angular.module('kmEditorUI')
 			}
 		}
 	});
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 
 	.directive('noteEditor', function() {
 		return {
@@ -1460,7 +1460,7 @@ angular.module('kmEditorUI')
 		}
 	});
 // TODO: 使用一个 div 容器作为 previewer，而不是两个
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 
 	.directive('notePreviewer', ['$sce', function($sce) {
 		return {
@@ -1541,7 +1541,7 @@ angular.module('kmEditorUI')
 			}
 		}
 }]);
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 
     .directive('priorityEditor', ['commandBinder', function(commandBinder) {
         return {
@@ -1572,7 +1572,7 @@ angular.module('kmEditorUI')
 
         }
     }]);
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 	.directive('progressEditor', ['commandBinder', function(commandBinder) {
 		return {
 			restrict: 'E',
@@ -1604,7 +1604,7 @@ angular.module('kmEditorUI')
 			}
 		}
 	}])
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 
     .directive('resourceEditor', function () {
         return {
