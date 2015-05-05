@@ -54,8 +54,8 @@ angular.module('kityminderEditor')
 					var pw = $($previewer).outerWidth();
 					var ph = $($previewer).outerHeight();
 
-					var x = b.cx - pw / 2 - $container.offset().left;
-					var y = b.bottom + 10 - $container.offset().top;
+					var x = b.cx - pw / 2 - $container.offsetLeft;
+					var y = b.bottom + 10 - $container.offsetTop;
 
 					if (x < 0) x = 10;
 					if (x + pw > cw) x = b.left - pw - 10 - $container.offset().left;
