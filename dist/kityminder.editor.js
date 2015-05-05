@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * km-editor - v0.0.1 - 2015-05-04
+ * km-editor - v0.0.1 - 2015-05-05
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -392,6 +392,7 @@ _p[8] = {
                         y: box.cy
                     };
                 }
+                debugger;
                 hotbox.active("main", position);
             });
             fsm.when("normal -> normal", function(exit, enter, reason, e) {

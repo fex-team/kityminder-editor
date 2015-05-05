@@ -25,9 +25,7 @@
     "less",
     "ui",
     "src",
-    "favicon.ico",
     "Gruntfile.js",
-    "index.html",
     "package.json"
   ],
   "devDependencies": {
