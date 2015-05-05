@@ -1240,24 +1240,6 @@ var moduleMapping = {
 function use(name) {
     _p.r([ moduleMapping[name] ]);
 }
-angular.module('kityminderEditor', [
-    'ui.bootstrap',
-	'ui.codemirror'
-])
-	.config(["$sceDelegateProvider", function($sceDelegateProvider) {
-		$sceDelegateProvider.resourceUrlWhitelist([
-			// Allow same origin resource loads.
-			'self',
-			// Allow loading from our assets domain.  Notice the difference between * and **.
-			'http://agroup.baidu.com:8910/**',
-			'http://agroup.baidu.com:8911/**'
-		]);
-	}])
-.controller('uiController', ["$scope", "$element", function($scope, $element) {
-	$scope.initEditor = function(editor, minder) {
-		console.log(editor, minder);
-	};
-}]);
 angular.module('kityminderEditor').run(['$templateCache', function($templateCache) {
   'use strict';
 
@@ -1515,8 +1497,8 @@ angular.module('kityminderEditor')
 					var pw = $($previewer).outerWidth();
 					var ph = $($previewer).outerHeight();
 
-					var x = b.cx - pw / 2 - $container.offset().left;
-					var y = b.bottom + 10 - $container.offset().top;
+					var x = b.cx - pw / 2 - $container.offsetLeft;
+					var y = b.bottom + 10 - $container.offsetTop;
 
 					if (x < 0) x = 10;
 					if (x + pw > cw) x = b.left - pw - 10 - $container.offset().left;
