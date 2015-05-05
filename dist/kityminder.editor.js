@@ -392,7 +392,6 @@ _p[8] = {
                         y: box.cy
                     };
                 }
-                debugger;
                 hotbox.active("main", position);
             });
             fsm.when("normal -> normal", function(exit, enter, reason, e) {
