@@ -54,12 +54,12 @@ angular.module('kityminderEditor')
 					var pw = $($previewer).outerWidth();
 					var ph = $($previewer).outerHeight();
 
-					var x = b.cx - pw / 2 - $container.offsetLeft;
-					var y = b.bottom + 10 - $container.offsetTop;
+					var x = b.cx - pw / 2 - $container[0].offsetLeft;
+					var y = b.bottom + 10 - $container[0].offsetTop;
 
 					if (x < 0) x = 10;
-					if (x + pw > cw) x = b.left - pw - 10 - $container.offsetLeft;
-					if (y + ph > ch) y = b.top - ph - 10 - $container.offsetTop;
+					if (x + pw > cw) x = b.left - pw - 10 - $container[0].offsetLeft;
+					if (y + ph > ch) y = b.top - ph - 10 - $container[0].offsetTop;
 
 
 					scope.previewerStyle = {
