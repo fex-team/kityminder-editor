@@ -1,7 +1,7 @@
 angular.module('kityminderEditor')
-	.directive('kityminderEditor', function() {
+	.directive('kityminderEditor', ['config', function(config) {
 		return {
-			restrict: 'E',
+			restrict: 'EA',
 			templateUrl: 'ui/directive/kityminderEditor/kityminderEditor.html',
 			replace: true,
 			scope: {
@@ -57,6 +57,8 @@ angular.module('kityminderEditor')
 					onInit(editor, editor.minder);
 				}
 
+				scope.config = config.getConfig();
+
 			}
 		}
-	});
+	}]);

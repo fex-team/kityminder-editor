@@ -53,6 +53,19 @@
     }
 }
 
+div.minder-editor-container {
+    position: absolute;
+    top: 40px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+}
+
 
 .minder-editor {
     position: absolute;
@@ -70,6 +83,15 @@
     bottom: 0;
     border-left: 1px solid #CCC;
 }
+.minder-divider {
+    position: absolute;
+    top: 0;
+    right: 250px;
+    bottom: 0;
+    width: 2px;
+    background-color: rgb(251, 251, 251);
+    cursor: ew-resize;
+}
 
 // @override bootstrap
 .panel-body {
@@ -82,3 +104,5 @@
 @import (less) "_progress.less";
 @import (less) "_resource.less";
 @import (less) "_note.less";
+@import (less) "_templatePanel.less";
+@import (less) "_themePanel.less";

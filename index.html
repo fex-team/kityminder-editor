@@ -33,13 +33,6 @@
             font-weight: normal;
             padding: 0 20px;
         }
-	    div.minder-editor-container {
-		    position: absolute;
-		    top: 40px;
-		    bottom: 0;
-		    left: 0;
-		    right: 0;
-	    }
     </style>
 </head>
 <body ng-app="kityminderDemo" ng-controller="MainController">
@@ -64,12 +57,16 @@
 <script src="bower_components/marked/lib/marked.js"></script>
 <script src="bower_components/kity/dist/kity.min.js"></script>
 <script src="bower_components/hotbox/hotbox.js"></script>
+<script src="bower_components/json-diff/json-diff.js"></script>
 <script src="bower_components/kityminder-core/dist/kityminder.core.min.js"></script>
 <script src="bower_components/seajs/dist/sea.js"></script>
 <!-- endbower -->
 
 <script src="ui/kityminder.app.js"></script>
 <script src="ui/service/commandBinder.service.js"></script>
+<script src="ui/service/config.service.js"></script>
+<script src="ui/service/lang.zh-cn.service.js"></script>
+<script src="ui/filter/lang.filter.js"></script>
 <script src="ui/directive/controlPanel/controlPanel.directive.js"></script>
 <script src="ui/directive/resourceEditor/resourceEditor.directive.js"></script>
 <script src="ui/directive/priorityEditor/priorityEditor.directive.js"></script>
@@ -77,6 +74,9 @@
 <script src="ui/directive/noteEditor/noteEditor.directive.js"></script>
 <script src="ui/directive/notePreviewer/notePreviewer.directive.js"></script>
 <script src="ui/directive/kityminderEditor/kityminderEditor.directive.js"></script>
+<script src="ui/directive/templateList/templateList.directive.js"></script>
+<script src="ui/directive/themeList/themeList.directive.js"></script>
+<script src="ui/directive/minderDivider/minderDivider.directive.js"></script>
 
 
 <script>

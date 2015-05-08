@@ -1,26 +1,37 @@
+<div class="divider"></div>
 <tabset>
-    <tab heading="思路">
+    <tab heading="{{ 'idea' | lang: 'ui/tabs'; }}">
         <accordion close-others="false">
-            <accordion-group heading="优先级" is-open="true">
+            <accordion-group heading="{{ 'priority' | lang: 'panels'; }}" is-open="true">
                 <priority-editor minder="minder"></priority-editor>
             </accordion-group>
 
-	        <accordion-group heading="进度" is-open="true">
+	        <accordion-group heading="{{ 'progress' | lang: 'panels'; }}" is-open="true">
 		        <progress-editor minder="minder"></progress-editor>
 	        </accordion-group>
 
-            <accordion-group heading="资源" is-open="true">
+            <accordion-group heading="{{ 'resource' | lang: 'panels'; }}" is-open="true">
                 <resource-editor minder="minder"></resource-editor>
             </accordion-group>
         </accordion>
     </tab>
-    <!--<tab heading="外观">-->
+    <tab heading="{{ 'appearence' | lang: 'ui/tabs'; }}">
+	    <accordion close-others="false">
+		    <accordion-group heading="{{ 'template' | lang: 'panels'; }}" is-open="true">
+			    <template-list minder="minder"></template-list>
+		    </accordion-group>
+	    </accordion>
+
+	    <accordion close-others="false">
+		    <accordion-group heading="{{ 'theme' | lang: 'panels'; }}" is-open="true">
+			    <theme-list minder="minder"></theme-list>
+		    </accordion-group>
+	    </accordion>
+    </tab>
+    <!--<tab heading="{{ 'view' | lang: 'ui/tabs'; }}">-->
 
     <!--</tab>-->
-    <!--<tab heading="视图">-->
-
-    <!--</tab>-->
-	<tab heading="备注" select="refreshNotePanel()">
+	<tab heading="{{ 'note' | lang: 'panels'; }}" select="refreshNotePanel()">
 		<note-editor minder="minder" class="km-note"></note-editor>
 	</tab>
 </tabset>
