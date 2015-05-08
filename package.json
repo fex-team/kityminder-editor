@@ -6,7 +6,7 @@
   "scripts": {
     "init": "git submodule update --init && npm i -g wr && npm install -g less && npm install -g bower && bower install && npm install",
     "dev": "npm run watch-less",
-    "watch-less": "wr --exec \"lessc --source-map less/editor.less kityminder.editor.css\" less"
+    "watch-less": "wr --exec \"lessc --source-map less/editor.less dist/kityminder.editor.css\" less"
   },
   "repository": {
     "type": "git",
