@@ -48,6 +48,18 @@
   background: white;
   outline: none;
 }
+div.minder-editor-container {
+  position: absolute;
+  top: 40px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -khtml-user-select: none;
+  user-select: none;
+}
 .minder-editor {
   position: absolute;
   top: 0;
@@ -62,6 +74,15 @@
   width: 250px;
   bottom: 0;
   border-left: 1px solid #CCC;
+}
+.minder-divider {
+  position: absolute;
+  top: 0;
+  right: 250px;
+  bottom: 0;
+  width: 2px;
+  background-color: #fbfbfb;
+  cursor: ew-resize;
 }
 .panel-body {
   padding: 10px;
@@ -393,5 +414,73 @@ li[disabled] {
 }
 .panel-body {
   padding: 10px;
+}
+.temp-list {
+  min-width: 124px;
+}
+.temp-item-wrap {
+  width: 50px;
+  height: 40px;
+  padding: 0 2px;
+  margin: 5px;
+  display: inline-block;
+}
+.temp-item {
+  display: inline-block;
+  width: 50px;
+  height: 40px;
+  background-image: url(images/template.png);
+  background-repeat: no-repeat;
+}
+.temp-item.default {
+  background-position: 0 0;
+}
+.temp-item.structure {
+  background-position: -50px 0;
+}
+.temp-item.filetree {
+  background-position: -100px 0;
+}
+.temp-item.right {
+  background-position: -150px 0;
+}
+.temp-item.fish-bone {
+  background-position: -200px 0;
+}
+.temp-item.tianpan {
+  background-position: -250px 0;
+}
+.current-temp-item {
+  width: 74px;
+}
+.temp-item-selected {
+  background-color: #87a9da;
+}
+.theme-list {
+  min-width: 162px;
+}
+div a.theme-item {
+  display: inline-block;
+  width: 70px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  padding: 0 5px;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  color: #000;
+}
+.theme-item-selected {
+  width: 100px;
+}
+.theme-item-wrap {
+  display: inline-block;
+  width: 80px;
+  height: 40px;
+  padding: 5px;
+}
+.theme-item-wrap:hover {
+  background-color: #eff3fa;
 }
 /*# sourceMappingURL=kityminder.editor.css.map */
