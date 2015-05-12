@@ -1242,7 +1242,8 @@ function use(name) {
 }
 angular.module('kityminderEditor', [
     'ui.bootstrap',
-	'ui.codemirror'
+	'ui.codemirror',
+	'colorpicker.module'
 ])
 	.config(["$sceDelegateProvider", function($sceDelegateProvider) {
 		$sceDelegateProvider.resourceUrlWhitelist([
@@ -1256,13 +1257,28 @@ angular.module('kityminderEditor', [
 angular.module('kityminderEditor').run(['$templateCache', function($templateCache) {
   'use strict';
 
+  $templateCache.put('ui/directive/colorPanel/colorPanel.html',
+    "<ul class=\"color-list\"><li ng-repeat=\"c in seriesColor\" class=\"color-wrap\" ng-class=\"{'color-wrap-selected': minder.queryCommandValue('background') == c}\" ng-disabled=\"minder.queryCommandState('background') === -1\"><span ng-click=\"minder.execCommand('background', c)\" ng-style=\"{ 'background-color': c }\" class=\"color-item\" title=\"{{ c }}\"></span></li><li class=\"color-wrap\" ng-class=\"{'color-wrap-selected': minder.queryCommandValue('background') == customColor}\"><span colorpicker class=\"color-item\" ng-model=\"hexPicker\" ng-style=\"{ 'background-color': customColor }\" title=\"{{ hexPicker }}\"></span></li></ul>"
+  );
+
+
   $templateCache.put('ui/directive/controlPanel/controlPanel.html',
-    "<div class=\"divider\"></div><tabset><tab heading=\"{{ 'idea' | lang: 'ui/tabs'; }}\"><accordion close-others=\"false\"><accordion-group heading=\"{{ 'priority' | lang: 'panels'; }}\" is-open=\"true\"><priority-editor minder=\"minder\"></priority-editor></accordion-group><accordion-group heading=\"{{ 'progress' | lang: 'panels'; }}\" is-open=\"true\"><progress-editor minder=\"minder\"></progress-editor></accordion-group><accordion-group heading=\"{{ 'resource' | lang: 'panels'; }}\" is-open=\"true\"><resource-editor minder=\"minder\"></resource-editor></accordion-group></accordion></tab><tab heading=\"{{ 'appearence' | lang: 'ui/tabs'; }}\"><accordion close-others=\"false\"><accordion-group heading=\"{{ 'template' | lang: 'panels'; }}\" is-open=\"true\"><template-list minder=\"minder\"></template-list></accordion-group></accordion><accordion close-others=\"false\"><accordion-group heading=\"{{ 'theme' | lang: 'panels'; }}\" is-open=\"true\"><theme-list minder=\"minder\"></theme-list></accordion-group></accordion></tab><tab heading=\"{{ 'note' | lang: 'panels'; }}\" select=\"refreshNotePanel()\"><note-editor minder=\"minder\" class=\"km-note\"></note-editor></tab></tabset>"
+    "<div class=\"divider\"></div><tabset><tab heading=\"{{ 'idea' | lang: 'ui/tabs'; }}\"><accordion close-others=\"false\"><accordion-group heading=\"{{ 'priority' | lang: 'panels'; }}\" is-open=\"true\"><priority-editor minder=\"minder\"></priority-editor></accordion-group><accordion-group heading=\"{{ 'progress' | lang: 'panels'; }}\" is-open=\"true\"><progress-editor minder=\"minder\"></progress-editor></accordion-group><accordion-group heading=\"{{ 'resource' | lang: 'panels'; }}\" is-open=\"true\"><resource-editor minder=\"minder\"></resource-editor></accordion-group></accordion></tab><tab heading=\"{{ 'appearence' | lang: 'ui/tabs'; }}\"><accordion close-others=\"false\"><accordion-group heading=\"{{ 'template' | lang: 'panels'; }}\" is-open=\"true\"><template-list minder=\"minder\" class=\"inline-directive\"></template-list><layout minder=\"minder\" class=\"inline-directive\"></layout></accordion-group></accordion><accordion close-others=\"false\"><accordion-group heading=\"{{ 'theme' | lang: 'panels'; }}\" is-open=\"true\"><theme-list minder=\"minder\"></theme-list></accordion-group></accordion><accordion close-others=\"false\"><accordion-group heading=\"{{ 'style' | lang: 'panels'; }}\" is-open=\"true\"><style-operator minder=\"minder\" class=\"inline-directive\"></style-operator></accordion-group></accordion><accordion close-others=\"false\"><accordion-group heading=\"{{ 'font' | lang: 'panels'; }}\" is-open=\"true\"><font-operator minder=\"minder\" class=\"inline-directive\"></font-operator></accordion-group></accordion><accordion close-others=\"false\"><accordion-group heading=\"{{ 'background' | lang: 'panels'; }}\" is-open=\"true\"><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></accordion-group></accordion></tab><tab heading=\"{{ 'note' | lang: 'panels'; }}\" select=\"refreshNotePanel()\"><note-editor minder=\"minder\" class=\"km-note\"></note-editor></tab></tabset>"
+  );
+
+
+  $templateCache.put('ui/directive/fontOperator/fontOperator.html',
+    "<span class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-item\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || '默认字号' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></span> <span class=\"s-btn-icon font-bold\" ng-click=\"minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\"></span> <span class=\"s-btn-icon font-italics\" ng-click=\"minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"></span><div class=\"font-color-wrap\"><span colorpicker class=\"font-color\" ng-model=\"hexPicker\" ng-style=\"{ 'background-color': customColor }\" title=\"{{ hexPicker }}\"></span></div>"
   );
 
 
   $templateCache.put('ui/directive/kityminderEditor/kityminderEditor.html',
     "<div class=\"minder-editor-container\"><div class=\"minder-editor\" ng-style=\"{'right': (config.dividerWidth + config.ctrlPanelWidth) + 'px' }\"></div><div class=\"minder-divider\" minder-divider=\"config\" ng-if=\"minder\" ng-style=\"{'width': config.dividerWidth + 'px', 'right': config.ctrlPanelWidth + 'px'}\"></div><div class=\"control-panel\" control-panel ng-if=\"minder\" ng-style=\"{'width': config.ctrlPanelWidth + 'px'}\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div></div>"
+  );
+
+
+  $templateCache.put('ui/directive/layout/layout.html',
+    "<a ng-click=\"minder.execCommand('resetlayout')\" class=\"btn-wrap\"><span class=\"btn-icon reset-layout-icon\"></span> <span class=\"btn-label\">{{ 'resetlayout' | lang: 'ui/command' }}</span></a>"
   );
 
 
@@ -1295,6 +1311,11 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
   $templateCache.put('ui/directive/resourceEditor/resourceEditor.html',
     "<div><div class=\"input-group\"><input class=\"form-control\" type=\"text\" ng-model=\"newResourceName\" ng-required ng-keypress=\"$event.keyCode == 13 && addResource(newResourceName)\" ng-disabled=\"!enabled\"> <span class=\"input-group-btn\"><button class=\"btn btn-default\" ng-click=\"addResource(newResourceName)\" ng-disabled=\"!enabled\">添加</button></span></div><ul class=\"km-resource\"><li ng-repeat=\"resource in used\" ng-disabled=\"!enabled\"><label style=\"background: {{resourceColor(resource.name)}}\"><input type=\"checkbox\" ng-model=\"resource.selected\" ng-disabled=\"!enabled\"> <span>{{resource.name}}</span></label></li></ul></div>"
+  );
+
+
+  $templateCache.put('ui/directive/styleOperator/styleOperator.html',
+    "<a ng-click=\"minder.execCommand('clearstyle')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('clearstyle') === -1;\"><span class=\"btn-icon clear-style-icon\"></span> <span class=\"btn-label\">{{ 'clearstyle' | lang: 'ui' }}</span></a><div class=\"s-btn-group-vertical\"><a class=\"s-btn-wrap\" href ng-click=\"minder.execCommand('copystyle')\" ng-disabled=\"minder.queryCommandState('copystyle') === -1;\"><span class=\"s-btn-icon copy-style-icon\"></span> <span class=\"s-btn-label\">{{ 'copystyle' | lang: 'ui' }}</span></a> <a class=\"s-btn-wrap paste-style-wrap\" href ng-click=\"minder.execCommand('pastestyle')\" ng-disabled=\"minder.queryCommandState('pastestyle') === -1;\"><span class=\"s-btn-icon paste-style-icon\"></span> <span class=\"s-btn-label\">{{ 'pastestyle' | lang: 'ui' }}</span></a></div>"
   );
 
 
@@ -1381,7 +1402,7 @@ angular.module('kityminderEditor')
 					'theme': '皮肤',
 					'layout': '布局',
 					'style': '样式',
-					'font': '字体',
+					'font': '文字',
 					'color': '颜色',
 					'background': '背景',
 					'insert': '插入',
@@ -1391,7 +1412,8 @@ angular.module('kityminderEditor')
 					'progress': '进度',
 					'resource': '资源',
 					'note': '备注',
-					'attachment': '附件'
+					'attachment': '附件',
+					'word': '文字'
 				},
 				'error_message': {
 					'title': '哎呀，脑图出错了',
@@ -1787,6 +1809,37 @@ angular.module('kityminderEditor')
 
 		};
 	}]);
+angular.module('kityminderEditor')
+	.directive('colorPanel', function() {
+		return {
+			restrict: 'E',
+			templateUrl: 'ui/directive/colorPanel/colorPanel.html',
+			scope: {
+				minder: '='
+			},
+			link: function(scope) {
+
+				var minder = scope.minder;
+
+				scope.seriesColor = ['#e75d66', '#fac75b', '#99ca6a', '#00c5ad', '#3bbce0', '#425b71', '#ff00ff'];
+
+				scope.$on('colorpicker-selected', function(e, msg) {
+
+					// colorPicker 的 bug ： 初次选择 value 为 undefined
+					minder.execCommand('background', msg.value);
+
+					scope.customColor = msg.value;
+				});
+
+				minder.on('interactchange', function() {
+					var currentColor = minder.queryCommandValue('background') || '#000000';
+
+					scope.customColor =  scope.seriesColor.indexOf(currentColor) == -1 ? currentColor : null;
+				});
+
+			}
+		}
+	});
 angular.module('kityminderEditor').directive('controlPanel', function() {
     return {
         templateUrl: 'ui/directive/controlPanel/controlPanel.html',
@@ -1799,6 +1852,30 @@ angular.module('kityminderEditor').directive('controlPanel', function() {
         }
     }
 });
+angular.module('kityminderEditor')
+	.directive('fontOperator', function() {
+		return {
+			restrict: 'E',
+			templateUrl: 'ui/directive/fontOperator/fontOperator.html',
+			scope: {
+				minder: '='
+			},
+			link: function(scope) {
+				var minder = scope.minder;
+
+				scope.fontSizeList = [10, 12, 16, 18, 24, 32, 48];
+
+				scope.$on('colorpicker-selected', function(e, msg) {
+					minder.execCommand('forecolor', msg.value);
+					scope.customColor = msg.value;
+				});
+
+				minder.on('interactchange', function() {
+					scope.customColor = minder.queryCommandValue('forecolor') || '#000000';
+				});
+			}
+		}
+	});
 angular.module('kityminderEditor')
 	.directive('kityminderEditor', ['config', function(config) {
 		return {
@@ -1863,6 +1940,19 @@ angular.module('kityminderEditor')
 			}
 		}
 	}]);
+angular.module('kityminderEditor')
+	.directive('layout', function() {
+		return {
+			restrict: 'E',
+			templateUrl: 'ui/directive/layout/layout.html',
+			scope: {
+				minder: '='
+			},
+			link: function(scope) {
+
+			}
+		}
+	});
 angular.module('kityminderEditor')
 	.directive('minderDivider', ['config', function(config) {
 		return {
@@ -2187,6 +2277,16 @@ angular.module('kityminderEditor')
             }]
         };
     });
+angular.module('kityminderEditor')
+	.directive('styleOperator', function() {
+		return {
+			restrict: 'E',
+			templateUrl: 'ui/directive/styleOperator/styleOperator.html',
+			scope: {
+				minder: '='
+			}
+		}
+	});
 angular.module('kityminderEditor')
 	.directive('templateList', function() {
 		return {
