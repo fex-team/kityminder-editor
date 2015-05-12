@@ -18,13 +18,32 @@
     <tab heading="{{ 'appearence' | lang: 'ui/tabs'; }}">
 	    <accordion close-others="false">
 		    <accordion-group heading="{{ 'template' | lang: 'panels'; }}" is-open="true">
-			    <template-list minder="minder"></template-list>
+			    <template-list minder="minder" class="inline-directive"></template-list>
+			    <layout minder="minder" class="inline-directive"></layout>
 		    </accordion-group>
 	    </accordion>
 
 	    <accordion close-others="false">
 		    <accordion-group heading="{{ 'theme' | lang: 'panels'; }}" is-open="true">
 			    <theme-list minder="minder"></theme-list>
+		    </accordion-group>
+	    </accordion>
+
+	    <accordion close-others="false">
+		    <accordion-group heading="{{ 'style' | lang: 'panels'; }}" is-open="true">
+			    <style-operator minder="minder" class="inline-directive"></style-operator>
+		    </accordion-group>
+	    </accordion>
+
+	    <accordion close-others="false">
+		    <accordion-group heading="{{ 'font' | lang: 'panels'; }}" is-open="true">
+			    <font-operator minder="minder" class="inline-directive"></font-operator>
+		    </accordion-group>
+	    </accordion>
+
+	    <accordion close-others="false">
+		    <accordion-group heading="{{ 'background' | lang: 'panels'; }}" is-open="true">
+			    <color-panel minder="minder" class="inline-directive"></color-panel>
 		    </accordion-group>
 	    </accordion>
     </tab>

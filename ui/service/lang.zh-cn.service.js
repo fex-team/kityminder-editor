@@ -40,7 +40,7 @@ angular.module('kityminderEditor')
 					'theme': '皮肤',
 					'layout': '布局',
 					'style': '样式',
-					'font': '字体',
+					'font': '文字',
 					'color': '颜色',
 					'background': '背景',
 					'insert': '插入',
@@ -50,7 +50,8 @@ angular.module('kityminderEditor')
 					'progress': '进度',
 					'resource': '资源',
 					'note': '备注',
-					'attachment': '附件'
+					'attachment': '附件',
+					'word': '文字'
 				},
 				'error_message': {
 					'title': '哎呀，脑图出错了',
