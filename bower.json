@@ -40,8 +40,8 @@
     "marked": "~0.3.3",
     "kity": "~2.0.0",
     "hotbox": "~1.0.2",
-    "kityminder-core": "~1.4.3"
-
+    "kityminder-core": "~1.4.3",
+    "angular-bootstrap-colorpicker": "~3.0.17"
   },
   "overrides": {
     "codemirror": {

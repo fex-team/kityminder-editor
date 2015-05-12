@@ -1,6 +1,7 @@
 angular.module('kityminderEditor', [
     'ui.bootstrap',
-	'ui.codemirror'
+	'ui.codemirror',
+	'colorpicker.module'
 ])
 	.config(function($sceDelegateProvider) {
 		$sceDelegateProvider.resourceUrlWhitelist([

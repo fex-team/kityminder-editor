@@ -1,0 +1,19 @@
+<ul class="color-list">
+	<li ng-repeat="c in seriesColor"
+	    class="color-wrap"
+	    ng-class="{'color-wrap-selected': minder.queryCommandValue('background') == c}"
+		ng-disabled="minder.queryCommandState('background') === -1">
+
+		<span ng-click="minder.execCommand('background', c)"
+		      ng-style="{ 'background-color': c }"
+		      class="color-item"
+		      title="{{ c }}"></span>
+	</li>
+	<li class="color-wrap" ng-class="{'color-wrap-selected': minder.queryCommandValue('background') == customColor}">
+		<span colorpicker
+		      class="color-item"
+		      ng-model="hexPicker"
+		      ng-style="{ 'background-color': customColor }"
+		      title="{{ hexPicker }}"></span>
+	</li>
+</ul>
