@@ -8,6 +8,10 @@ angular.module('kityminderEditor')
 			},
 			link: function(scope) {
 				var minder = scope.minder;
+				var currentTheme = minder.getThemeItems();
+
+				scope.hexPicker = scope.hexPicker || currentTheme['main-color'] ;
+
 
 				scope.fontSizeList = [10, 12, 16, 18, 24, 32, 48];
 

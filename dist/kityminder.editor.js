@@ -1820,8 +1820,11 @@ angular.module('kityminderEditor')
 			link: function(scope) {
 
 				var minder = scope.minder;
+				var currentTheme = minder.getThemeItems();
 
-				scope.seriesColor = ['#e75d66', '#fac75b', '#99ca6a', '#00c5ad', '#3bbce0', '#425b71', '#ff00ff'];
+				scope.hexPicker = scope.hexPicker || currentTheme['background'] ;
+
+				scope.seriesColor = ['#e75d66', '#fac75b', '#99ca6a', '#00c5ad', '#3bbce0', '#425b71', '#ffffff'];
 
 				scope.$on('colorpicker-selected', function(e, msg) {
 
@@ -1862,6 +1865,10 @@ angular.module('kityminderEditor')
 			},
 			link: function(scope) {
 				var minder = scope.minder;
+				var currentTheme = minder.getThemeItems();
+
+				scope.hexPicker = scope.hexPicker || currentTheme['main-color'] ;
+
 
 				scope.fontSizeList = [10, 12, 16, 18, 24, 32, 48];
 
