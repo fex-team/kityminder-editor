@@ -35,6 +35,10 @@ angular.module('kityminderEditor')
 					scope.$apply();
 				});
 
+				element.on('mousedown mousewheel DOMMouseScroll', function(e) {
+					e.stopPropagation();
+				});
+
 				function preview(node, keyword) {
 					var icon = node.getRenderer('NoteIconRenderer').getRenderShape();
 					var b = icon.getRenderBox('screen');

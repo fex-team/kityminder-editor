@@ -40,6 +40,10 @@ angular.module('kityminderEditor')
 					if (content && enabled && !isInteracting) {
 						minder.execCommand('note', content);
 					}
+
+					setTimeout(function() {
+						cmEditor.refresh();
+					});
 				});
 
 				$scope.$on('notePanelActived', function() {
