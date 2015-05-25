@@ -1,7 +1,7 @@
-angular.module('kmEditorUI')
-	.directive('kityminderEditor', function() {
+angular.module('kityminderEditor')
+	.directive('kityminderEditor', ['config', function(config) {
 		return {
-			restrict: 'E',
+			restrict: 'EA',
 			templateUrl: 'ui/directive/kityminderEditor/kityminderEditor.html',
 			replace: true,
 			scope: {
@@ -9,7 +9,7 @@ angular.module('kmEditorUI')
 			},
 			link: function(scope, element, attributes) {
 
-				var $minderEditor = element.find('.minder-editor')[0];
+				var $minderEditor = element.children('.minder-editor')[0];
 
 				function onInit(editor, minder) {
 					scope.onInit({
@@ -57,6 +57,8 @@ angular.module('kmEditorUI')
 					onInit(editor, editor.minder);
 				}
 
+				scope.config = config.getConfig();
+
 			}
 		}
-	});
+	}]);

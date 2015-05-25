@@ -1,4 +1,4 @@
-angular.module('kmEditorUI')
+angular.module('kityminderEditor')
 
 	.directive('noteEditor', function() {
 		return {
@@ -40,6 +40,10 @@ angular.module('kmEditorUI')
 					if (content && enabled && !isInteracting) {
 						minder.execCommand('note', content);
 					}
+
+					setTimeout(function() {
+						cmEditor.refresh();
+					});
 				});
 
 				$scope.$on('notePanelActived', function() {

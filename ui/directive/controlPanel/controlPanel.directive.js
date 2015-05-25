@@ -1,4 +1,4 @@
-angular.module('kmEditorUI').directive('controlPanel', function() {
+angular.module('kityminderEditor').directive('controlPanel', function() {
     return {
         templateUrl: 'ui/directive/controlPanel/controlPanel.html',
         restrict: 'A',

@@ -1,4 +1,4 @@
-angular.module('kmEditorUI').service('commandBinder', function() {
+angular.module('kityminderEditor').service('commandBinder', function() {
 	return {
 		bind: function(minder, command, scope) {
 

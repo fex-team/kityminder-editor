@@ -1,6 +1,7 @@
-angular.module('kmEditorUI', [
+angular.module('kityminderEditor', [
     'ui.bootstrap',
-	'ui.codemirror'
+	'ui.codemirror',
+	'colorpicker.module'
 ])
 	.config(function($sceDelegateProvider) {
 		$sceDelegateProvider.resourceUrlWhitelist([
@@ -10,9 +11,4 @@ angular.module('kmEditorUI', [
 			'http://agroup.baidu.com:8910/**',
 			'http://agroup.baidu.com:8911/**'
 		]);
-	})
-.controller('uiController', function($scope, $element) {
-	$scope.initEditor = function(editor, minder) {
-		console.log(editor, minder);
-	};
-});
+	});

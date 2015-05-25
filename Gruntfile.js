@@ -43,7 +43,8 @@ module.exports = function(grunt) {
 	            'dist/*.js',
 	            'dist/*.css',
 	            'dist/*.css.map'
-            ]
+            ],
+	        clstmp: ['.tmp']
         },
 
         // resolve dependence
@@ -72,7 +73,7 @@ module.exports = function(grunt) {
                 files: {
 	                'dist/kityminder.editor.js': [
 		                '.tmp/scripts/kityminder.editor.js',
-		                '.tmp/scripts/ui.controller.annotated.js',
+		                '.tmp/scripts/kityminder.app.annotated.js',
 		                '.tmp/scripts/templates.annotated.js',
 		                '.tmp/scripts/service/*.js',
 		                '.tmp/scripts/filter/*.js',
@@ -117,7 +118,7 @@ module.exports = function(grunt) {
 	    },
 
 	    ngtemplates: {
-		    kmEditorUI: {
+		    kityminderEditor: {
 			    src: 'ui/directive/**/*.html',
 			    dest: 'ui/templates.js',
 			    options: {
@@ -174,7 +175,7 @@ module.exports = function(grunt) {
     });
 
     // Build task(s).
-	grunt.registerTask('build', ['clean', 'wiredep:dist', 'ngtemplates', 'dependence', 'ngAnnotate', 'concat', 'uglify', 'less', 'cssmin', 'copy']);
-	grunt.registerTask('serve', ['clean', 'wiredep:dev', 'ngtemplates', 'dependence', 'ngAnnotate', 'concat', 'uglify', 'less', 'cssmin', 'copy']);
+	grunt.registerTask('build', ['clean:last', 'wiredep:dist', 'ngtemplates', 'dependence', 'ngAnnotate', 'concat', 'uglify', 'less', 'cssmin', 'copy', 'clean:clstmp']);
+	grunt.registerTask('dev', ['clean:last', 'wiredep:dev', 'ngtemplates', 'dependence', 'ngAnnotate', 'concat', 'uglify', 'less', 'cssmin', 'copy', 'clean:clstmp']);
 
 };
