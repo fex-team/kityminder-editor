@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * km-editor - v0.0.1 - 2015-05-12
+ * km-editor - v0.0.1 - 2015-05-25
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -1283,13 +1283,20 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/noteEditor/noteEditor.html',
-    "<div class=\"km-note\" ng-show=\"noteEnabled\" ui-codemirror=\"{ onLoad: codemirrorLoaded }\" ng-model=\"noteContent\" ui-codemirror-opts=\"{\n" +
-    "\t\tgfm: true,\n" +
-    "\t\tbreaks: true,\n" +
-    "\t\tlineWrapping : true,\n" +
-    "\t\tmode: 'gfm',\n" +
-    "        dragDrop: false,\n" +
-    "        lineNumbers:true\n" +
+    "<div class=\"km-note\" ng-show=\"noteEnabled\" ui-codemirror=\"{ onLoad: codemirrorLoaded }\" ng-model=\"noteContent\" ui-codemirror-opts=\"{\r" +
+    "\n" +
+    "\t\tgfm: true,\r" +
+    "\n" +
+    "\t\tbreaks: true,\r" +
+    "\n" +
+    "\t\tlineWrapping : true,\r" +
+    "\n" +
+    "\t\tmode: 'gfm',\r" +
+    "\n" +
+    "        dragDrop: false,\r" +
+    "\n" +
+    "        lineNumbers:true\r" +
+    "\n" +
     "\t }\"></div><p ng-show=\"!noteEnabled\" class=\"km-note-tips\">请选择节点编辑备注</p>"
   );
 
