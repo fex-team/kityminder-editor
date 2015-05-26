@@ -2,9 +2,11 @@ angular.module('kityminderEditor')
 	.directive('minderDivider', ['config', function(config) {
 		return {
 			scope: {
-				config: '=minderDivider'
+				config: '=minderDivider',
+                minder: '='
 			},
 			link: function($scope, element) {
+                var minder = $scope.minder;
 				var ctrlPanelMin = config.getConfig('ctrlPanelMin');
 				var dividerWidth = config.getConfig('dividerWidth');
 
@@ -35,6 +37,7 @@ angular.module('kityminderEditor')
 						// 改变父 scope 的变量
 						$scope.config.ctrlPanelWidth = ctrlPanelWidth + deltaX;
 						$scope.$apply();
+                        minder.fire('resize');
 					}
 				});
 

@@ -1,6 +1,6 @@
 <div class="minder-editor-container">
 	<div class="minder-editor" ng-style="{'right': (config.dividerWidth + config.ctrlPanelWidth) + 'px' }"></div>
-	<div class="minder-divider" minder-divider="config" ng-if="minder" ng-style="{'width': config.dividerWidth + 'px', 'right': config.ctrlPanelWidth + 'px'}"></div>
+	<div class="minder-divider" minder-divider="config" minder="minder" ng-if="minder" ng-style="{'width': config.dividerWidth + 'px', 'right': config.ctrlPanelWidth + 'px'}"></div>
 	<div class="control-panel" control-panel ng-if="minder" ng-style="{'width': config.ctrlPanelWidth + 'px'}"></div>
 	<div class="note-previewer" note-previewer ng-if="minder"></div>
 </div>
