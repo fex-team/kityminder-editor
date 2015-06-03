@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * km-editor - v0.0.1 - 2015-05-26
+ * kityminder-editor - v1.0.19 - 2015-06-03
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -1279,7 +1279,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/kityminderEditor/kityminderEditor.html',
-    "<div class=\"minder-editor-container\"><div class=\"minder-editor\" ng-style=\"{'right': (config.dividerWidth + config.ctrlPanelWidth) + 'px' }\"></div><div class=\"minder-divider\" minder-divider=\"config\" ng-if=\"minder\" ng-style=\"{'width': config.dividerWidth + 'px', 'right': config.ctrlPanelWidth + 'px'}\"></div><div class=\"control-panel\" control-panel ng-if=\"minder\" ng-style=\"{'width': config.ctrlPanelWidth + 'px'}\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div></div>"
+    "<div class=\"minder-editor-container\"><div class=\"minder-editor\" ng-style=\"{'right': (config.dividerWidth + config.ctrlPanelWidth) + 'px' }\"></div><div class=\"minder-divider\" minder-divider=\"config\" minder=\"minder\" ng-if=\"minder\" ng-style=\"{'width': config.dividerWidth + 'px', 'right': config.ctrlPanelWidth + 'px'}\"></div><div class=\"control-panel\" control-panel ng-if=\"minder\" ng-style=\"{'width': config.ctrlPanelWidth + 'px'}\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div></div>"
   );
 
 
@@ -1289,20 +1289,13 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/noteEditor/noteEditor.html',
-    "<div class=\"km-note\" ng-show=\"noteEnabled\" ui-codemirror=\"{ onLoad: codemirrorLoaded }\" ng-model=\"noteContent\" ui-codemirror-opts=\"{\r" +
-    "\n" +
-    "\t\tgfm: true,\r" +
-    "\n" +
-    "\t\tbreaks: true,\r" +
-    "\n" +
-    "\t\tlineWrapping : true,\r" +
-    "\n" +
-    "\t\tmode: 'gfm',\r" +
-    "\n" +
-    "        dragDrop: false,\r" +
-    "\n" +
-    "        lineNumbers:true\r" +
-    "\n" +
+    "<div class=\"km-note\" ng-show=\"noteEnabled\" ui-codemirror=\"{ onLoad: codemirrorLoaded }\" ng-model=\"noteContent\" ui-codemirror-opts=\"{\n" +
+    "\t\tgfm: true,\n" +
+    "\t\tbreaks: true,\n" +
+    "\t\tlineWrapping : true,\n" +
+    "\t\tmode: 'gfm',\n" +
+    "        dragDrop: false,\n" +
+    "        lineNumbers:true\n" +
     "\t }\"></div><p ng-show=\"!noteEnabled\" class=\"km-note-tips\">请选择节点编辑备注</p>"
   );
 
@@ -1977,9 +1970,11 @@ angular.module('kityminderEditor')
 	.directive('minderDivider', ['config', function(config) {
 		return {
 			scope: {
-				config: '=minderDivider'
+				config: '=minderDivider',
+                minder: '='
 			},
 			link: function($scope, element) {
+                var minder = $scope.minder;
 				var ctrlPanelMin = config.getConfig('ctrlPanelMin');
 				var dividerWidth = config.getConfig('dividerWidth');
 
@@ -2010,6 +2005,7 @@ angular.module('kityminderEditor')
 						// 改变父 scope 的变量
 						$scope.config.ctrlPanelWidth = ctrlPanelWidth + deltaX;
 						$scope.$apply();
+                        minder.fire('resize');
 					}
 				});
 
