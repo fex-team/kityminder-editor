@@ -10,7 +10,10 @@ define(function(require, exports, module){
             position: 'top',
             label: '进度',
             key: 'G',
-            next: 'progress'
+            next: 'progress',
+            enable: function() {
+                return minder.queryCommandState('progress') != -1;
+            }
         });
 
         var progress = hotbox.state('progress');

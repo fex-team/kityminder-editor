@@ -10,7 +10,10 @@ define(function(require, exports, module){
             position: 'top',
             label: '优先级',
             key: 'P',
-            next: 'priority'
+            next: 'priority',
+            enable: function() {
+                return minder.queryCommandState('priority') != -1;
+            }
         });
 
         var priority = hotbox.state('priority');

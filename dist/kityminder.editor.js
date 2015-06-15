@@ -752,7 +752,10 @@ _p[13] = {
                 position: "top",
                 label: "优先级",
                 key: "P",
-                next: "priority"
+                next: "priority",
+                enable: function() {
+                    return minder.queryCommandState("priority") != -1;
+                }
             });
             var priority = hotbox.state("priority");
             "123456789".replace(/./g, function(p) {
@@ -795,7 +798,10 @@ _p[14] = {
                 position: "top",
                 label: "进度",
                 key: "G",
-                next: "progress"
+                next: "progress",
+                enable: function() {
+                    return minder.queryCommandState("progress") != -1;
+                }
             });
             var progress = hotbox.state("progress");
             "012345678".replace(/./g, function(p) {
@@ -1356,7 +1362,8 @@ angular.module('kityminderEditor')
 				ctrlPanelMin: 250,
 				ctrlPanelWidth: parseInt(window.localStorage.__dev_minder_ctrlPanelWidth) || 250,
 				dividerWidth: 3,
-				defaultLang: 'zh-cn'
+				defaultLang: 'zh-cn',
+                defaultMode: 'edit'
 			},
 			getConfig: function(key) {
 				return key == undefined ? this._default : (this._default[key] || null);
