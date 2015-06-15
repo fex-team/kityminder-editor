@@ -23,5 +23,6 @@
 		      class="font-color"
 		      ng-model="hexPicker"
 		      ng-style="{ 'background-color': customColor }"
+              ng-disabled="minder.queryCommandState('forecolor') === -1"
 		      title="{{ hexPicker }}"></span>
 </div>

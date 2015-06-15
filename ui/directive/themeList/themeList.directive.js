@@ -10,6 +10,9 @@ angular.module('kityminderEditor')
 
 				$scope.getThemeThumbStyle = function (theme) {
 					var themeObj = themeList[theme];
+                    if (!themeObj) {
+                        return;
+                    }
 					var style = {
 						'color': themeObj['root-color'],
 						'border-radius': themeObj['root-radius'] / 2

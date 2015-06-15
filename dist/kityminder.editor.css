@@ -453,6 +453,9 @@ li[disabled] {
 .current-temp-item {
   width: 74px;
 }
+.current-temp-item[disabled] {
+  opacity: 0.5;
+}
 .temp-item-selected {
   background-color: #87a9da;
 }
@@ -473,6 +476,9 @@ div a.theme-item {
 }
 .theme-item-selected {
   width: 100px;
+}
+.theme-item-selected[disabled] {
+  opacity: 0.5;
 }
 .theme-item-wrap {
   display: inline-block;
@@ -645,6 +651,9 @@ div a.theme-item {
   width: 16px;
   height: 16px;
   margin: 2px;
+}
+.font-color[disabled] {
+  opacity: 0.5;
 }
 .color-list {
   width: 100px;

@@ -1,5 +1,7 @@
 <span class="dropdown" dropdown on-toggle="toggled(open)">
-	<div class="dropdown-toggle current-temp-item" dropdown-toggle>
+	<div class="dropdown-toggle current-temp-item"
+         ng-disabled="minder.queryCommandState('template') === -1"
+         dropdown-toggle>
 		<a href class=" temp-item {{ minder.queryCommandValue('template') }}"  title="{{ minder.queryCommandValue('template') | lang: 'template' }}"></a>
 		<span class="caret"></span>
 	</div>

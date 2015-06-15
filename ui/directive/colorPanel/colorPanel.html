@@ -9,7 +9,9 @@
 		      class="color-item"
 		      title="{{ c }}"></span>
 	</li>
-	<li class="color-wrap" ng-class="{'color-wrap-selected': minder.queryCommandValue('background') == customColor}">
+	<li class="color-wrap"
+        ng-disabled="minder.queryCommandState('background') === -1"
+        ng-class="{'color-wrap-selected': minder.queryCommandValue('background') == customColor}">
 		<span colorpicker
 		      class="color-item"
 		      ng-model="hexPicker"

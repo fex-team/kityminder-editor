@@ -1,6 +1,12 @@
 <span class="dropdown" dropdown>
-	<div class="dropdown-toggle theme-item-selected" dropdown-toggle>
-		<a href class="theme-item" ng-style="getThemeThumbStyle(minder.queryCommandValue('theme'))" title="{{ minder.queryCommandValue('theme') | lang: 'theme'; }}" >{{ minder.queryCommandValue('theme') | lang: 'theme'; }}</a>
+	<div class="dropdown-toggle theme-item-selected"
+        dropdown-toggle
+        ng-disabled="minder.queryCommandState('theme') === -1">
+		<a href class="theme-item"
+           ng-style="getThemeThumbStyle(minder.queryCommandValue('theme'))"
+           title="{{ minder.queryCommandValue('theme') | lang: 'theme'; }}" >
+            {{ minder.queryCommandValue('theme') | lang: 'theme'; }}
+        </a>
 		<span class="caret"></span>
 	</div>
 	<ul class="dropdown-menu theme-list">
