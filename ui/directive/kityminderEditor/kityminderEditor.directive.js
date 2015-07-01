@@ -41,6 +41,9 @@ angular.module('kityminderEditor')
 
 						scope.editor = editor;
 						scope.minder = minder;
+                        scope.config = config.getConfig();
+
+                        //scope.minder.setDefaultOptions(scope.config);
 						scope.$apply();
 
 						onInit(editor, minder);
@@ -54,10 +57,12 @@ angular.module('kityminderEditor')
 					window.editor = scope.editor = editor;
 					window.minder = scope.minder = editor.minder;
 
-					onInit(editor, editor.minder);
-				}
+                    scope.config = config.getConfig();
 
-				scope.config = config.getConfig();
+                    //scope.minder.setDefaultOptions(config.getConfig());
+
+                    onInit(editor, editor.minder);
+                }
 
 			}
 		}
