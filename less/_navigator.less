@@ -19,9 +19,46 @@
         line-height: 24px;
         text-align: center;
 
-        &.active {
-            background: #5A6378;
+        .icon {
+            background: url(images/icons.png);
+            width: 20px;
+            height: 20px;
+            margin: 2px auto;
+            display: block;
         }
+
+        &.active {
+            background-color: #5A6378;
+        }
+    }
+
+    .zoom-in .icon {
+        background-position: 0 -730px;
+    }
+
+    .zoom-out .icon {
+        background-position: 0 -750px;
+    }
+
+    .hand .icon {
+        background-position: 0 -770px;
+        width: 25px;
+        height: 25px;
+        margin: 0 auto;
+    }
+
+    .camera .icon {
+        background-position: 0 -870px;
+        width: 25px;
+        height: 25px;
+        margin: 0 auto;
+    }
+
+    .nav-trigger .icon {
+        background-position: 0 -845px;
+        width: 25px;
+        height: 25px;
+        margin: 0 auto;
     }
 
     .zoom-pan {

@@ -711,8 +711,39 @@ div a.theme-item {
   line-height: 24px;
   text-align: center;
 }
+.nav-bar .nav-btn .icon {
+  background: url(images/icons.png);
+  width: 20px;
+  height: 20px;
+  margin: 2px auto;
+  display: block;
+}
 .nav-bar .nav-btn.active {
-  background: #5A6378;
+  background-color: #5A6378;
+}
+.nav-bar .zoom-in .icon {
+  background-position: 0 -730px;
+}
+.nav-bar .zoom-out .icon {
+  background-position: 0 -750px;
+}
+.nav-bar .hand .icon {
+  background-position: 0 -770px;
+  width: 25px;
+  height: 25px;
+  margin: 0 auto;
+}
+.nav-bar .camera .icon {
+  background-position: 0 -870px;
+  width: 25px;
+  height: 25px;
+  margin: 0 auto;
+}
+.nav-bar .nav-trigger .icon {
+  background-position: 0 -845px;
+  width: 25px;
+  height: 25px;
+  margin: 0 auto;
 }
 .nav-bar .zoom-pan {
   width: 2px;
