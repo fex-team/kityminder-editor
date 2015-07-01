@@ -690,4 +690,85 @@ div a.theme-item {
 .color-list .color-wrap-selected {
   background-color: #87a9da;
 }
+.nav-bar {
+  position: absolute;
+  width: 35px;
+  height: 240px;
+  padding: 5px 0;
+  left: 10px;
+  bottom: 10px;
+  background: #fc8383;
+  color: #fff;
+  border-radius: 4px;
+  z-index: 10;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+  transition: -webkit-transform 0.7s 0.1s ease;
+  transition: transform .7s 0.1s ease;
+}
+.nav-bar .nav-btn {
+  width: 35px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+}
+.nav-bar .nav-btn.active {
+  background: #5A6378;
+}
+.nav-bar .zoom-pan {
+  width: 2px;
+  height: 70px;
+  box-shadow: 0 1px #E50000;
+  position: relative;
+  background: white;
+  margin: 3px auto;
+  overflow: visible;
+}
+.nav-bar .zoom-pan .origin {
+  position: absolute;
+  width: 20px;
+  height: 8px;
+  left: -9px;
+  margin-top: -4px;
+  background: transparent;
+}
+.nav-bar .zoom-pan .origin:after {
+  content: ' ';
+  display: block;
+  width: 6px;
+  height: 2px;
+  background: white;
+  left: 7px;
+  top: 3px;
+  position: absolute;
+}
+.nav-bar .zoom-pan .indicator {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  left: -3px;
+  background: white;
+  border-radius: 100%;
+  margin-top: -4px;
+}
+.nav-previewer {
+  background: #fff;
+  width: 140px;
+  height: 120px;
+  position: absolute;
+  left: 45px;
+  bottom: 30px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  border-radius: 0 2px 2px 0;
+  padding: 1px;
+  z-index: 9;
+  cursor: crosshair;
+  transition: -webkit-transform 0.7s 0.1s ease;
+  transition: transform .7s 0.1s ease;
+}
+.nav-previewer.grab {
+  cursor: move;
+  cursor: -webkit-grabbing;
+  cursor: -moz-grabbing;
+  cursor: grabbing;
+}
 /*# sourceMappingURL=kityminder.editor.css.map */

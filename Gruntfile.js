@@ -58,7 +58,7 @@ module.exports = function(grunt) {
                     src: [
                         'src/**/*.js'
                     ],
-                    dest: '.tmp/scripts/kityminder.editor.js'
+                    dest: '.tmp/scripts/kityminder.editor.logic.js'
                 }]
             }
         },
@@ -72,7 +72,7 @@ module.exports = function(grunt) {
                 },
                 files: {
 	                'dist/kityminder.editor.js': [
-		                '.tmp/scripts/kityminder.editor.js',
+		                '.tmp/scripts/kityminder.editor.logic.js',
 		                '.tmp/scripts/kityminder.app.annotated.js',
 		                '.tmp/scripts/templates.annotated.js',
 		                '.tmp/scripts/service/*.js',
@@ -177,5 +177,4 @@ module.exports = function(grunt) {
     // Build task(s).
 	grunt.registerTask('build', ['clean:last', 'wiredep:dist', 'ngtemplates', 'dependence', 'ngAnnotate', 'concat', 'uglify', 'less', 'cssmin', 'copy', 'clean:clstmp']);
 	grunt.registerTask('dev', ['clean:last', 'wiredep:dev', 'ngtemplates', 'dependence', 'ngAnnotate', 'concat', 'uglify', 'less', 'cssmin', 'copy', 'clean:clstmp']);
-
 };

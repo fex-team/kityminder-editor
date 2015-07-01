@@ -17,12 +17,20 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/kityminderEditor/kityminderEditor.html',
-    "<div class=\"minder-editor-container\"><div class=\"minder-editor\" ng-style=\"{'right': (config.dividerWidth + config.ctrlPanelWidth) + 'px' }\"></div><div class=\"minder-divider\" minder-divider=\"config\" minder=\"minder\" ng-if=\"minder\" ng-style=\"{'width': config.dividerWidth + 'px', 'right': config.ctrlPanelWidth + 'px'}\"></div><div class=\"control-panel\" control-panel ng-if=\"minder\" ng-style=\"{'width': config.ctrlPanelWidth + 'px'}\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div></div>"
+    "<div class=\"minder-editor-container\"><div class=\"minder-editor\" ng-style=\"{'right': (config.dividerWidth + config.ctrlPanelWidth) + 'px' }\"></div><div class=\"minder-divider\" minder-divider=\"config\" minder=\"minder\" ng-if=\"minder\" ng-style=\"{'width': config.dividerWidth + 'px', 'right': config.ctrlPanelWidth + 'px'}\"></div><div class=\"control-panel\" control-panel ng-if=\"minder\" ng-style=\"{'width': config.ctrlPanelWidth + 'px'}\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div><div class=\"navigator\" navigator minder=\"minder\" ng-if=\"minder\"></div></div>"
   );
 
 
   $templateCache.put('ui/directive/layout/layout.html',
     "<a ng-click=\"minder.execCommand('resetlayout')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('resetlayout') === -1\"><span class=\"btn-icon reset-layout-icon\"></span> <span class=\"btn-label\">{{ 'resetlayout' | lang: 'ui/command' }}</span></a>"
+  );
+
+
+  $templateCache.put('ui/directive/navigator/navigator.html',
+    "<div class=\"nav-bar\"><div class=\"nav-btn zoom-in glyphicon glyphicon-zoom-in\" ng-click=\"minder.execCommand('zoomIn')\" title=\"{{ 'zoom-in' | lang : 'ui' }}\" ng-class=\"{ 'active' : getZoomRadio(zoom) == 0 }\"></div><div class=\"zoom-pan\"><div class=\"origin\" ng-style=\"{'transform': 'translate(0, ' + getHeight(100) + 'px)'}\" ng-click=\"minder.execCommand('zoom', 100);\"></div><div class=\"indicator\" ng-style=\"{\n" +
+    "             'transform': 'translate(0, ' + getHeight(zoom) + 'px)',\n" +
+    "             'transition': 'transform 200ms'\n" +
+    "             }\"></div></div><div class=\"nav-btn zoom-out glyphicon glyphicon-zoom-out\" ng-click=\"minder.execCommand('zoomOut')\" title=\"{{ 'zoom-out' | lang : 'ui' }}\" ng-class=\"{ 'active' : getZoomRadio(zoom) == 1 }\"></div><div class=\"nav-btn hand glyphicon glyphicon-move\" ng-click=\"minder.execCommand('hand')\" title=\"{{ 'hand' | lang : 'ui' }}\" ng-class=\"{ 'active' : minder.queryCommandState('hand') == 1 }\"></div><div class=\"nav-btn camera glyphicon glyphicon-screenshot\" ng-click=\"minder.execCommand('camera', minder.getRoot(), 600);\" title=\"{{ 'camera' | lang : 'ui' }}\"></div><div class=\"nav-btn nav-trigger glyphicon glyphicon-eye-open\" ng-class=\"{'active' : isNavOpen}\" ng-click=\"toggleNavOpen()\" title=\"{{ 'navigator' | lang : 'ui' }}\"></div></div><div class=\"nav-previewer\" ng-show=\"isNavOpen\"></div>"
   );
 
 
