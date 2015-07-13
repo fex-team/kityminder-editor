@@ -62,9 +62,9 @@ div.minder-editor-container {
 }
 .minder-editor {
   position: absolute;
-  top: 0;
+  top: 92px;
   left: 0;
-  right: 250px;
+  right: 0;
   bottom: 0;
 }
 .control-panel {
@@ -86,6 +86,135 @@ div.minder-editor-container {
 }
 .panel-body {
   padding: 10px;
+}
+.top-tab .nav-tabs {
+  background-color: #e1e1e1;
+  border: 0;
+  height: 32px;
+}
+.top-tab .nav-tabs li {
+  margin: 0;
+}
+.top-tab .nav-tabs li a {
+  margin: 0;
+  border: 0;
+  padding: 6px 15px;
+  border-radius: 0;
+  vertical-align: middle;
+}
+.top-tab .nav-tabs li a:hover,
+.top-tab .nav-tabs li a:focus {
+  background: inherit;
+  border: 0;
+}
+.top-tab .nav-tabs li.active a {
+  border: 0;
+  background-color: #fff;
+}
+.top-tab .nav-tabs li.active a:hover,
+.top-tab .nav-tabs li.active a:focus {
+  border: 0;
+}
+.top-tab .tab-content {
+  height: 60px;
+  border-bottom: 1px solid #dbdbdb;
+}
+.tab-pane {
+  font-size: 0;
+}
+.km-btn-group {
+  display: inline-block;
+  margin: 5px 0;
+  padding: 0 5px;
+  border-right: 1px dashed #eee;
+}
+.km-btn-item {
+  font-size: 0;
+  cursor: default;
+}
+.km-btn-item[disabled] {
+  opacity: 0.5;
+}
+.km-btn-item[disabled]:hover,
+.km-btn-item[disabled]:active {
+  background-color: #fff;
+}
+.km-btn-item .km-btn-icon {
+  display: inline-block;
+  background: url(images/icons.png) no-repeat;
+  background-position: 0 20px;
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  margin: 1px;
+  vertical-align: middle;
+}
+.km-btn-item .km-btn-caption {
+  display: inline-block;
+  font-size: 12px;
+  vertical-align: middle;
+}
+.km-btn-item:hover {
+  background-color: #eff3fa;
+}
+.km-btn-item:active {
+  background-color: #c4d0ee;
+}
+.append-child-node .km-btn-icon {
+  background-position: 0 0;
+}
+.append-sibling-node .km-btn-icon {
+  background-position: 0 -20px;
+}
+.arrange-up .km-btn-icon {
+  background-position: 0 -280px;
+}
+.arrange-down .km-btn-icon {
+  background-position: 0 -300px;
+}
+.edit-node .km-btn-icon {
+  background-position: 0 -60px;
+}
+.remove-node .km-btn-icon {
+  background-position: 0 -80px;
+}
+.btn-group-vertical {
+  vertical-align: top;
+  margin: 5px;
+}
+.btn-group-vertical .hyperlink,
+.btn-group-vertical .hyperlink-caption {
+  width: 40px;
+  margin: 0;
+  padding: 0;
+  border: none!important;
+  border-radius: 0!important;
+}
+.btn-group-vertical .hyperlink:hover,
+.btn-group-vertical .hyperlink-caption:hover {
+  background-color: #eff3fa;
+}
+.btn-group-vertical .hyperlink:active,
+.btn-group-vertical .hyperlink-caption:active {
+  background-color: #c4d0ee;
+}
+.btn-group-vertical .hyperlink.active,
+.btn-group-vertical .hyperlink-caption.active {
+  box-shadow: none;
+  background-color: #eff3fa;
+}
+.btn-group-vertical .hyperlink {
+  height: 25px;
+  background: url(images/icons.png) no-repeat center -100px;
+}
+.btn-group-vertical .hyperlink-caption {
+  height: 20px;
+}
+.btn-group-vertical .hyperlink-caption .caption {
+  font-size: 12px;
+}
+.open > .dropdown-toggle.btn-default {
+  background-color: #eff3fa;
 }
 .tool-group {
   padding: 0;
@@ -277,22 +406,6 @@ li[disabled] {
 .gfm-render .highlight {
   background: yellow;
   color: red;
-}
-.tab-content {
-  position: absolute;
-  top: 42px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-.tab-pane,
-.km-note .CodeMirror,
-.km-note {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
 }
 .km-note {
   padding: 5px 10px;

@@ -1,0 +1,16 @@
+<div class="km-btn-group">
+    <div class="km-btn-item append-child-node"
+         ng-disabled="minder.queryCommandState('AppendChildNode') === -1"
+         ng-click="execCommand('AppendChildNode')"
+         title="{{ 'appendchildnode' | lang:'ui/command' }}">
+        <i class="km-btn-icon"></i>
+        <span class="km-btn-caption">{{ 'appendchildnode' | lang:'ui/command' }}</span>
+    </div>
+    <div class="km-btn-item append-sibling-node"
+         ng-disabled="minder.queryCommandState('AppendSiblingNode') === -1"
+         ng-click="execCommand('AppendSiblingNode')"
+         title="{{ 'appendsiblingnode' | lang:'ui/command' }}">
+        <i class="km-btn-icon"></i>
+        <span class="km-btn-caption">{{ 'appendsiblingnode' | lang:'ui/command' }}</span>
+    </div>
+</div>

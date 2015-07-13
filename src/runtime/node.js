@@ -28,7 +28,7 @@ define(function(require, exports, module) {
                 key: key,
                 action: function() {
                     if (command.indexOf('Append') === 0) {
-                        minder.execCommand(command, '新主题');
+                        minder.execCommand(command, '分支主题');
 
                         // provide in input runtime
                         runtime.editText();
