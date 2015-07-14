@@ -126,6 +126,7 @@ div.minder-editor-container {
   display: inline-block;
   margin: 5px 0;
   padding: 0 5px;
+  vertical-align: middle;
   border-right: 1px dashed #eee;
 }
 .km-btn-item {
@@ -179,7 +180,7 @@ div.minder-editor-container {
   background-position: 0 -80px;
 }
 .btn-group-vertical {
-  vertical-align: top;
+  vertical-align: middle;
   margin: 5px;
 }
 .btn-group-vertical .hyperlink,
@@ -362,107 +363,6 @@ div.minder-editor-container {
 }
 .open > .dropdown-toggle.btn-default {
   background-color: #eff3fa;
-}
-.tool-group {
-  padding: 0;
-}
-.tool-group[disabled] {
-  opacity: 0.5;
-}
-.tool-group .tool-group-item {
-  display: inline-block;
-  border-radius: 4px;
-}
-.tool-group .tool-group-item .tool-group-icon {
-  width: 20px;
-  height: 20px;
-  padding: 2px;
-  margin: 1px;
-}
-.tool-group .tool-group-item:hover {
-  background-color: #eff3fa;
-}
-.tool-group .tool-group-item:active {
-  background-color: #c4d0ee;
-}
-.tool-group .tool-group-item.active {
-  background-color: #c4d0ee;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon {
-  background: url(images/iconpriority.png) repeat-y;
-  background-color: transparent;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon.priority-0 {
-  background-position: 0 20px;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon.priority-1 {
-  background-position: 0 0px;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon.priority-2 {
-  background-position: 0 -20px;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon.priority-3 {
-  background-position: 0 -40px;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon.priority-4 {
-  background-position: 0 -60px;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon.priority-5 {
-  background-position: 0 -80px;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon.priority-6 {
-  background-position: 0 -100px;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon.priority-7 {
-  background-position: 0 -120px;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon.priority-8 {
-  background-position: 0 -140px;
-}
-.control-panel .km-priority .km-priority-item .km-priority-icon.priority-9 {
-  background-position: 0 -160px;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon {
-  background: url(images/iconprogress.png) repeat-y;
-  background-color: transparent;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon.progress-0 {
-  background-position: 0 20px;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon.progress-1 {
-  background-position: 0 0px;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon.progress-2 {
-  background-position: 0 -20px;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon.progress-3 {
-  background-position: 0 -40px;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon.progress-4 {
-  background-position: 0 -60px;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon.progress-5 {
-  background-position: 0 -80px;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon.progress-6 {
-  background-position: 0 -100px;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon.progress-7 {
-  background-position: 0 -120px;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon.progress-8 {
-  background-position: 0 -140px;
-}
-.control-panel .km-progress .km-progress-item .km-progress-icon.progress-9 {
-  background-position: 0 -160px;
-}
-.km-resource {
-  padding: 0;
-  margin-top: 10px;
-  list-style-type: none;
-}
-li[disabled] {
-  opacity: 0.5;
 }
 .gfm-render {
   font-size: 12px;
@@ -704,6 +604,119 @@ li[disabled] {
 }
 .panel-body {
   padding: 10px;
+}
+.tab-content .km-priority {
+  vertical-align: middle;
+  font-size: inherit;
+  display: inline-block;
+  width: 140px;
+  margin: 5px;
+  border-right: 1px dashed #eee;
+}
+.tab-content .km-priority .km-priority-item {
+  margin: 0 1px;
+  padding: 1px;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon {
+  background: url(images/iconpriority.png) repeat-y;
+  background-color: transparent;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon.priority-0 {
+  background-position: 0 20px;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon.priority-1 {
+  background-position: 0 0px;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon.priority-2 {
+  background-position: 0 -20px;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon.priority-3 {
+  background-position: 0 -40px;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon.priority-4 {
+  background-position: 0 -60px;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon.priority-5 {
+  background-position: 0 -80px;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon.priority-6 {
+  background-position: 0 -100px;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon.priority-7 {
+  background-position: 0 -120px;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon.priority-8 {
+  background-position: 0 -140px;
+}
+.tab-content .km-priority .km-priority-item .km-priority-icon.priority-9 {
+  background-position: 0 -160px;
+}
+.tool-group {
+  padding: 0;
+}
+.tool-group[disabled] {
+  opacity: 0.5;
+}
+.tool-group .tool-group-item {
+  display: inline-block;
+  border-radius: 4px;
+}
+.tool-group .tool-group-item .tool-group-icon {
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  margin: 1px;
+}
+.tool-group .tool-group-item:hover {
+  background-color: #eff3fa;
+}
+.tool-group .tool-group-item:active {
+  background-color: #c4d0ee;
+}
+.tool-group .tool-group-item.active {
+  background-color: #c4d0ee;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon {
+  background: url(images/iconprogress.png) repeat-y;
+  background-color: transparent;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon.progress-0 {
+  background-position: 0 20px;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon.progress-1 {
+  background-position: 0 0px;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon.progress-2 {
+  background-position: 0 -20px;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon.progress-3 {
+  background-position: 0 -40px;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon.progress-4 {
+  background-position: 0 -60px;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon.progress-5 {
+  background-position: 0 -80px;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon.progress-6 {
+  background-position: 0 -100px;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon.progress-7 {
+  background-position: 0 -120px;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon.progress-8 {
+  background-position: 0 -140px;
+}
+.control-panel .km-progress .km-progress-item .km-progress-icon.progress-9 {
+  background-position: 0 -160px;
+}
+.km-resource {
+  padding: 0;
+  margin-top: 10px;
+  list-style-type: none;
+}
+li[disabled] {
+  opacity: 0.5;
 }
 .temp-list {
   min-width: 124px;
