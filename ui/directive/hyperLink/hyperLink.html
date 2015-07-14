@@ -3,7 +3,7 @@
             class="btn btn-default hyperlink"
             title="{{ 'link' | lang:'ui' }}"
             ng-class="{'active': isopen}"
-            ng-click="minder.execCommand('HyperLink', 'http://www.baidu.com', '百度一下，你就知道。')"
+            ng-click="addHyperlink()"
             ng-disabled="minder.queryCommandState('HyperLink') === -1"></button>
     <button type="button"
             class="btn btn-default hyperlink-caption dropdown-toggle"
@@ -17,7 +17,7 @@
     <ul class="dropdown-menu" role="menu">
         <li>
             <a href
-               ng-click="minder.execCommand('HyperLink', 'http://www.baidu.com', '百度一下，你就知道。')">{{ 'insertlink' | lang:'ui' }}</a>
+               ng-click="addHyperlink()">{{ 'insertlink' | lang:'ui' }}</a>
         </li>
         <li>
             <a href
