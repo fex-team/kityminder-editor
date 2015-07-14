@@ -9,7 +9,7 @@ angular.module('kityminderEditor')
            link: function(scope) {
                 scope.select = function($event) {
                     console.log($event);
-                }
+                };
            }
        }
     });

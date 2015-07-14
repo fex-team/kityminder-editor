@@ -91,24 +91,48 @@
     }
 }
 
-//.tab-content {
-//    position: absolute;
-//    top: 42px;
-//    bottom: 0;
-//    left: 0;
-//    right: 0;
-//}
-//.tab-pane, .km-note .CodeMirror, .km-note {
-//    position: absolute;
-//    top: 0;
-//    bottom: 0;
-//    left: 0;
-//    right: 0;
-//}
 .km-note {
+    width: 300px;
+    border-left: 1px solid #babfcd;
     padding: 5px 10px;
+    background: white;
+    position: absolute;
+    top: 92px;
+    right: 0;
+    bottom: 0;
+    left: auto;
+
+    &.panel {
+        margin: 0;
+        padding: 0;
+
+        .panel-heading {
+
+            h3 {
+                display: inline-block;
+            }
+
+            .close-note-editor {
+                width: 15px;
+                height: 15px;
+                display: inline-block;
+                float: right;
+
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+        }
+
+        .panel-body {
+            padding: 0;
+        }
+    }
 
     .CodeMirror {
+        position: absolute;
+        top: 41px;
+        bottom: 0;
         height: auto;
         cursor: text;
         font-size: 14px;

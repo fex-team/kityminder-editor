@@ -1,15 +1,15 @@
 angular.module('kityminderEditor')
 
-	.directive('noteEditor', function() {
+	.directive('noteEditor', ['valueTransfer', function(valueTransfer) {
 		return {
-			restrict: 'E',
+			restrict: 'A',
 			templateUrl: 'ui/directive/noteEditor/noteEditor.html',
 			scope: {
 				minder: '='
 			},
+            replace: true,
 			controller: function($scope) {
 				var minder = $scope.minder;
-
 				var isInteracting = false;
 				var cmEditor;
 
@@ -46,15 +46,30 @@ angular.module('kityminderEditor')
 					});
 				});
 
-				$scope.$on('notePanelActived', function() {
-					setTimeout(function() {
-						cmEditor.refresh();
-						cmEditor.focus();
-					});
-				});
+
+                var noteEditorOpen = function() {
+                    return valueTransfer.noteEditorOpen;
+                };
+
+                // 监听面板状态变量的改变
+                $scope.$watch(noteEditorOpen, function(newVal, oldVal) {
+                    if (newVal) {
+                        setTimeout(function() {
+                            cmEditor.refresh();
+                            cmEditor.focus();
+                        });
+                    }
+                    $scope.noteEditorOpen = valueTransfer.noteEditorOpen;
+                }, true);
+
+
+                $scope.closeNoteEditor = function() {
+                    valueTransfer.noteEditorOpen = false;
+                };
+
 
 
 				minder.on('interactchange', updateNote);
 			}
 		}
-	});
+	}]);

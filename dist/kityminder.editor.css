@@ -321,6 +321,48 @@ div.minder-editor-container {
   -ms-transform: translate(0, 0);
   transform: translate(0, 0);
 }
+.btn-group-vertical {
+  vertical-align: top;
+  margin: 5px;
+}
+.btn-group-vertical.note-btn-group {
+  border-right: 1px dashed #eee;
+  padding-right: 5px;
+}
+.btn-group-vertical .note-btn,
+.btn-group-vertical .note-btn-caption {
+  width: 40px;
+  margin: 0;
+  padding: 0;
+  border: none!important;
+  border-radius: 0!important;
+}
+.btn-group-vertical .note-btn:hover,
+.btn-group-vertical .note-btn-caption:hover {
+  background-color: #eff3fa;
+}
+.btn-group-vertical .note-btn:active,
+.btn-group-vertical .note-btn-caption:active {
+  background-color: #c4d0ee;
+}
+.btn-group-vertical .note-btn.active,
+.btn-group-vertical .note-btn-caption.active {
+  box-shadow: none;
+  background-color: #eff3fa;
+}
+.btn-group-vertical .note-btn {
+  height: 25px;
+  background: url(images/icons.png) no-repeat center -1150px;
+}
+.btn-group-vertical .note-btn-caption {
+  height: 20px;
+}
+.btn-group-vertical .note-btn-caption .caption {
+  font-size: 12px;
+}
+.open > .dropdown-toggle.btn-default {
+  background-color: #eff3fa;
+}
 .tool-group {
   padding: 0;
 }
@@ -513,9 +555,39 @@ li[disabled] {
   color: red;
 }
 .km-note {
+  width: 300px;
+  border-left: 1px solid #babfcd;
   padding: 5px 10px;
+  background: white;
+  position: absolute;
+  top: 92px;
+  right: 0;
+  bottom: 0;
+  left: auto;
+}
+.km-note.panel {
+  margin: 0;
+  padding: 0;
+}
+.km-note.panel .panel-heading h3 {
+  display: inline-block;
+}
+.km-note.panel .panel-heading .close-note-editor {
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  float: right;
+}
+.km-note.panel .panel-heading .close-note-editor:hover {
+  cursor: pointer;
+}
+.km-note.panel .panel-body {
+  padding: 0;
 }
 .km-note .CodeMirror {
+  position: absolute;
+  top: 41px;
+  bottom: 0;
   height: auto;
   cursor: text;
   font-size: 14px;
