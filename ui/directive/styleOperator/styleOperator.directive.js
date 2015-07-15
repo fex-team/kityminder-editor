@@ -5,6 +5,7 @@ angular.module('kityminderEditor')
 			templateUrl: 'ui/directive/styleOperator/styleOperator.html',
 			scope: {
 				minder: '='
-			}
+			},
+            replace: true
 		}
 	});

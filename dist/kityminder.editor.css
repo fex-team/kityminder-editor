@@ -924,30 +924,14 @@ div a.theme-item {
   background: url(images/icons.png) no-repeat;
   background-position: 0 -150px;
 }
-.tool-group {
-  padding: 0;
-}
-.tool-group[disabled] {
-  opacity: 0.5;
-}
-.tool-group .tool-group-item {
+.style-operator {
   display: inline-block;
-  border-radius: 4px;
+  vertical-align: middle;
+  padding: 0 5px;
+  border-right: 1px dashed #eee;
 }
-.tool-group .tool-group-item .tool-group-icon {
-  width: 20px;
-  height: 20px;
-  padding: 2px;
-  margin: 1px;
-}
-.tool-group .tool-group-item:hover {
-  background-color: #eff3fa;
-}
-.tool-group .tool-group-item:active {
-  background-color: #c4d0ee;
-}
-.tool-group .tool-group-item.active {
-  background-color: #c4d0ee;
+.style-operator .clear-style {
+  vertical-align: middle;
 }
 .clear-style-icon {
   background: url(images/icons.png) no-repeat;
@@ -955,6 +939,7 @@ div a.theme-item {
 }
 .s-btn-group-vertical {
   display: inline-block;
+  vertical-align: middle;
 }
 .s-btn-icon {
   width: 20px;
@@ -969,8 +954,7 @@ div a.theme-item {
   display: inline-block;
 }
 .s-btn-wrap {
-  margin-bottom: 2px;
-  padding: 2px 5px 2px 3px;
+  padding: 0 5px 0 3px;
   display: inline-block;
   text-decoration: none;
   font-size: 0;
@@ -1004,6 +988,31 @@ div a.theme-item {
 .paste-style-icon {
   background: url(images/icons.png) no-repeat;
   background-position: 0 -220px;
+}
+.tool-group {
+  padding: 0;
+}
+.tool-group[disabled] {
+  opacity: 0.5;
+}
+.tool-group .tool-group-item {
+  display: inline-block;
+  border-radius: 4px;
+}
+.tool-group .tool-group-item .tool-group-icon {
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  margin: 1px;
+}
+.tool-group .tool-group-item:hover {
+  background-color: #eff3fa;
+}
+.tool-group .tool-group-item:active {
+  background-color: #c4d0ee;
+}
+.tool-group .tool-group-item.active {
+  background-color: #c4d0ee;
 }
 .font-size-list {
   display: inline-block;
