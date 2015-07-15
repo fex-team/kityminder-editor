@@ -1,5 +1,4 @@
 angular.module('kityminderEditor')
-
     .directive('resourceEditor', function () {
         return {
             restrict: 'E',
@@ -7,6 +6,7 @@ angular.module('kityminderEditor')
             scope: {
                 minder: '='
             },
+            replace: true,
             controller: function ($scope) {
                 var minder = $scope.minder;
 
@@ -60,7 +60,32 @@ angular.module('kityminderEditor')
 	                }
 
                     $scope.newResourceName = null;
-                }
+                };
+
             }
         };
-    });
+    })
+
+    .directive('clickAnywhereButHere', ['$document', function ($document) {
+        return {
+            link: function(scope, element, attrs) {
+                var onClick = function (event) {
+                    var isChild = $('#resource-dropdown').has(event.target).length > 0;
+                    var isSelf = $('#resource-dropdown') == event.target;
+                    var isInside = isChild || isSelf;
+                    if (!isInside) {
+                        scope.$apply(attrs.clickAnywhereButHere)
+                    }
+                };
+
+                scope.$watch(attrs.isActive, function(newValue, oldValue) {
+                    if (newValue !== oldValue && newValue == true) {
+                        $document.bind('click', onClick);
+                    }
+                    else if (newValue !== oldValue && newValue == false) {
+                        $document.unbind('click', onClick);
+                    }
+                });
+            }
+        };
+    }]);
