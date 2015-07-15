@@ -1096,6 +1096,41 @@ div a.theme-item {
 .color-wrap-selected {
   background-color: #87a9da;
 }
+.btn-group-vertical {
+  vertical-align: middle;
+  margin: 5px;
+}
+.btn-group-vertical .expand,
+.btn-group-vertical .expand-caption {
+  width: 40px;
+  margin: 0;
+  padding: 0;
+  border: none!important;
+  border-radius: 0!important;
+}
+.btn-group-vertical .expand:hover,
+.btn-group-vertical .expand-caption:hover {
+  background-color: #eff3fa;
+}
+.btn-group-vertical .expand:active,
+.btn-group-vertical .expand-caption:active {
+  background-color: #c4d0ee;
+}
+.btn-group-vertical .expand.active,
+.btn-group-vertical .expand-caption.active {
+  box-shadow: none;
+  background-color: #eff3fa;
+}
+.btn-group-vertical .expand {
+  height: 25px;
+  background: url(images/icons.png) no-repeat center -100px;
+}
+.btn-group-vertical .expand-caption {
+  height: 20px;
+}
+.btn-group-vertical .expand-caption .caption {
+  font-size: 12px;
+}
 .tool-group {
   padding: 0;
 }
