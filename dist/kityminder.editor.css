@@ -873,40 +873,16 @@ div a.theme-item {
 .theme-item-wrap:hover {
   background-color: #eff3fa;
 }
-.tool-group {
-  padding: 0;
-}
-.tool-group[disabled] {
-  opacity: 0.5;
-}
-.tool-group .tool-group-item {
+.readjust-layout {
   display: inline-block;
-  border-radius: 4px;
-}
-.tool-group .tool-group-item .tool-group-icon {
-  width: 20px;
-  height: 20px;
-  padding: 2px;
-  margin: 1px;
-}
-.tool-group .tool-group-item:hover {
-  background-color: #eff3fa;
-}
-.tool-group .tool-group-item:active {
-  background-color: #c4d0ee;
-}
-.tool-group .tool-group-item.active {
-  background-color: #c4d0ee;
-}
-.inline-directive {
-  display: inline-block;
+  vertical-align: middle;
+  padding: 0 10px 0 5px;
+  border-right: 1px dashed #eee;
 }
 .btn-icon {
   width: 25px;
   height: 25px;
   margin-left: 12px;
-  margin-bottom: 3px;
-  margin-top: 4px;
   display: block;
 }
 .btn-label {
@@ -914,7 +890,7 @@ div a.theme-item {
 }
 .btn-wrap {
   width: 50px;
-  height: 50px;
+  height: 42px;
   cursor: pointer;
   display: inline-block;
   text-decoration: none;
@@ -947,6 +923,31 @@ div a.theme-item {
 .reset-layout-icon {
   background: url(images/icons.png) no-repeat;
   background-position: 0 -150px;
+}
+.tool-group {
+  padding: 0;
+}
+.tool-group[disabled] {
+  opacity: 0.5;
+}
+.tool-group .tool-group-item {
+  display: inline-block;
+  border-radius: 4px;
+}
+.tool-group .tool-group-item .tool-group-icon {
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  margin: 1px;
+}
+.tool-group .tool-group-item:hover {
+  background-color: #eff3fa;
+}
+.tool-group .tool-group-item:active {
+  background-color: #c4d0ee;
+}
+.tool-group .tool-group-item.active {
+  background-color: #c4d0ee;
 }
 .clear-style-icon {
   background: url(images/icons.png) no-repeat;
