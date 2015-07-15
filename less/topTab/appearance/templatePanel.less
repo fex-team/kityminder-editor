@@ -2,6 +2,7 @@
     margin: 5px 5px 5px 10px;
     border-right: 1px dashed #eee;
     display: inline-block;
+    vertical-align: middle;
 }
 
 .temp-list {
@@ -50,6 +51,12 @@
 
 .current-temp-item {
     width: 74px;
+    padding: 0 0 0 5px;
+    border: 1px solid #fff;
+
+    &:hover {
+        border-color: #c9ced1;
+    }
 
     &[disabled] {
         opacity: 0.5;

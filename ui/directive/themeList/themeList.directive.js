@@ -3,6 +3,7 @@ angular.module('kityminderEditor')
 		return {
 			restrict: 'E',
 			templateUrl: 'ui/directive/themeList/themeList.html',
+            replace: true,
 			link: function($scope) {
 				var themeList = kityminder.Minder.getThemeList();
 

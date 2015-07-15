@@ -773,6 +773,7 @@ div.minder-editor-container {
   margin: 5px 5px 5px 10px;
   border-right: 1px dashed #eee;
   display: inline-block;
+  vertical-align: middle;
 }
 .temp-list {
   min-width: 124px;
@@ -811,6 +812,11 @@ div.minder-editor-container {
 }
 .current-temp-item {
   width: 74px;
+  padding: 0 0 0 5px;
+  border: 1px solid #fff;
+}
+.current-temp-item:hover {
+  border-color: #c9ced1;
 }
 .current-temp-item[disabled] {
   opacity: 0.5;
@@ -820,6 +826,14 @@ div.minder-editor-container {
 }
 .temp-item-selected {
   background-color: #87a9da;
+}
+.theme-panel {
+  height: 42px;
+  margin: 5px;
+  padding: 0 5px 0 0;
+  border-right: 1px dashed #eee;
+  display: inline-block;
+  vertical-align: middle;
 }
 .theme-list {
   min-width: 162px;
@@ -838,6 +852,14 @@ div a.theme-item {
 }
 .theme-item-selected {
   width: 100px;
+  padding: 6px 7px;
+  border: 1px solid #fff;
+}
+.theme-item-selected:hover {
+  border-color: #c9ced1;
+}
+.theme-item-selected .caret {
+  margin-left: 5px;
 }
 .theme-item-selected[disabled] {
   opacity: 0.5;

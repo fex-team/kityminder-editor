@@ -1,3 +1,12 @@
+.theme-panel {
+    height: 42px;
+    margin: 5px;
+    padding: 0 5px 0 0;
+    border-right: 1px dashed #eee;
+    display: inline-block;
+    vertical-align: middle;
+}
+
 .theme-list {
     min-width: 162px;
 }
@@ -17,6 +26,16 @@ div a.theme-item {
 
 .theme-item-selected {
     width: 100px;
+    padding: 6px 7px;
+    border: 1px solid #fff;
+
+    &:hover {
+        border-color: #c9ced1;
+    }
+
+    .caret {
+        margin-left: 5px;
+    }
 
     &[disabled] {
         opacity: 0.5;
