@@ -38,13 +38,6 @@
               ng-disabled="minder.queryCommandState('forecolor') === -1"
               title="{{ hexPicker }}"></span>
     </div>
-    <div class="background-color-wrap" >
-		<span colorpicker
-              class="background-color"
-              ng-model="hexPicker"
-              ng-style="{ 'background-color': customColor }"
-              ng-disabled="minder.queryCommandState('forecolor') === -1"
-              title="{{ hexPicker }}"></span>
-    </div>
+    <color-panel minder="minder" class="inline-directive"></color-panel>
 
 </div>

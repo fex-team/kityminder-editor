@@ -6,6 +6,7 @@ angular.module('kityminderEditor')
 			scope: {
 				minder: '='
 			},
+            replace: true,
 			link: function(scope) {
 
 				var minder = scope.minder;
@@ -16,6 +17,7 @@ angular.module('kityminderEditor')
 				scope.seriesColor = ['#e75d66', '#fac75b', '#99ca6a', '#00c5ad', '#3bbce0', '#425b71', '#ffffff'];
 
 				scope.$on('colorpicker-selected', function(e, msg) {
+                    e.stopPropagation();
 
 					// colorPicker 的 bug ： 初次选择 value 为 undefined
 					minder.execCommand('background', msg.value);
