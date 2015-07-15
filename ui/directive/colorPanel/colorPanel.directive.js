@@ -14,7 +14,6 @@ angular.module('kityminderEditor')
 
 				scope.hexPicker = scope.hexPicker || currentTheme['background'] ;
 
-				scope.seriesColor = ['#e75d66', '#fac75b', '#99ca6a', '#00c5ad', '#3bbce0', '#425b71', '#ffffff'];
 
 				scope.$on('colorpicker-selected', function(e, msg) {
                     e.stopPropagation();
@@ -26,9 +25,8 @@ angular.module('kityminderEditor')
 				});
 
 				minder.on('interactchange', function() {
-					var currentColor = minder.queryCommandValue('background') || '#000000';
-
-					scope.customColor =  scope.seriesColor.indexOf(currentColor) == -1 ? currentColor : null;
+                    scope.customColor = minder.queryCommandValue('background') || '#000000';
+                    scope.$apply();
 				});
 
 			}

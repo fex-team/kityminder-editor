@@ -59,6 +59,7 @@ angular.module('kityminderEditor')
 
 				minder.on('interactchange', function() {
 					scope.customColor = minder.queryCommandValue('forecolor') || '#000000';
+                    scope.$apply();
 				});
 
                 scope.getFontfamilyName = function(val) {

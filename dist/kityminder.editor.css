@@ -816,7 +816,7 @@ div.minder-editor-container {
   border: 1px solid #fff;
 }
 .current-temp-item:hover {
-  border-color: #c9ced1;
+  background-color: #eff3fa;
 }
 .current-temp-item[disabled] {
   opacity: 0.5;
@@ -856,7 +856,7 @@ div a.theme-item {
   border: 1px solid #fff;
 }
 .theme-item-selected:hover {
-  border-color: #c9ced1;
+  background-color: #eff3fa;
 }
 .theme-item-selected .caret {
   margin-left: 5px;
