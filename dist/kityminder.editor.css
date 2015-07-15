@@ -989,36 +989,27 @@ div a.theme-item {
   background: url(images/icons.png) no-repeat;
   background-position: 0 -220px;
 }
-.tool-group {
-  padding: 0;
-}
-.tool-group[disabled] {
-  opacity: 0.5;
-}
-.tool-group .tool-group-item {
+.font-operator {
+  width: 126px;
   display: inline-block;
-  border-radius: 4px;
+  vertical-align: middle;
+  font-size: 12px;
+  padding: 0 5px;
 }
-.tool-group .tool-group-item .tool-group-icon {
-  width: 20px;
-  height: 20px;
-  padding: 2px;
-  margin: 1px;
-}
-.tool-group .tool-group-item:hover {
-  background-color: #eff3fa;
-}
-.tool-group .tool-group-item:active {
-  background-color: #c4d0ee;
-}
-.tool-group .tool-group-item.active {
-  background-color: #c4d0ee;
-}
-.font-size-list {
+.font-operator .font-size-list {
   display: inline-block;
+  border: 1px solid #eee;
+  padding: 2px 4px;
+}
+.font-operator .font-family-list {
+  display: inline-block;
+  border: 1px solid #eee;
+  padding: 2px 4px;
 }
 .current-font-item a {
   text-decoration: none;
+  width: 32px;
+  display: inline-block;
 }
 .current-font-item[disabled] {
   opacity: 0.5;
@@ -1032,8 +1023,10 @@ div a.theme-item {
 }
 .font-bold,
 .font-italics {
+  display: inline-block;
   background: url(images/icons.png) no-repeat;
   cursor: pointer;
+  margin: 0 3px;
 }
 .font-bold:hover,
 .font-italics:hover {
@@ -1073,6 +1066,31 @@ div a.theme-item {
 }
 .font-color[disabled] {
   opacity: 0.5;
+}
+.tool-group {
+  padding: 0;
+}
+.tool-group[disabled] {
+  opacity: 0.5;
+}
+.tool-group .tool-group-item {
+  display: inline-block;
+  border-radius: 4px;
+}
+.tool-group .tool-group-item .tool-group-icon {
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  margin: 1px;
+}
+.tool-group .tool-group-item:hover {
+  background-color: #eff3fa;
+}
+.tool-group .tool-group-item:active {
+  background-color: #c4d0ee;
+}
+.tool-group .tool-group-item.active {
+  background-color: #c4d0ee;
 }
 .color-list {
   width: 100px;

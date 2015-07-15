@@ -1,10 +1,28 @@
-.font-size-list {
+.font-operator {
+    width: 126px;
     display: inline-block;
-//    border: 1px #ccc solid;
-//    padding: 1px 4px 1px 8px;
+    vertical-align: middle;
+    font-size: 12px;
+    padding: 0 5px;
+
+    .font-size-list {
+        display: inline-block;
+        border: 1px solid #eee;
+        padding: 2px 4px;
+    }
+
+    .font-family-list {
+        display: inline-block;
+        border: 1px solid #eee;
+        padding: 2px 4px;
+    }
+
 }
+
 .current-font-item a {
     text-decoration: none;
+    width: 32px;
+    display: inline-block;
 }
 
 .current-font-item[disabled] {
@@ -21,8 +39,10 @@
 }
 
 .font-bold, .font-italics {
+    display: inline-block;
     background: url(images/icons.png) no-repeat;
     cursor: pointer;
+    margin: 0 3px;
 
 
     &:hover {
