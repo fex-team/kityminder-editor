@@ -6,6 +6,7 @@ angular.module('kityminderEditor')
 			scope: {
 				minder: '='
 			},
+            replace: true,
 			link: function($scope) {
 				$scope.templateList = kityminder.Minder.getTemplateList();
 
