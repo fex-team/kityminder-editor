@@ -130,6 +130,8 @@ div.minder-editor-container {
   border-right: 1px dashed #eee;
 }
 .km-btn-item {
+  display: inline-block;
+  margin: 0 3px;
   font-size: 0;
   cursor: default;
 }
@@ -161,17 +163,29 @@ div.minder-editor-container {
 .km-btn-item:active {
   background-color: #c4d0ee;
 }
+.append-group {
+  width: 212px;
+}
 .append-child-node .km-btn-icon {
   background-position: 0 0;
 }
 .append-sibling-node .km-btn-icon {
   background-position: 0 -20px;
 }
+.append-parent-node .km-btn-icon {
+  background-position: 0 -40px;
+}
+.arrange-group {
+  width: 64px;
+}
 .arrange-up .km-btn-icon {
   background-position: 0 -280px;
 }
 .arrange-down .km-btn-icon {
   background-position: 0 -300px;
+}
+.operation-group {
+  width: 64px;
 }
 .edit-node .km-btn-icon {
   background-position: 0 -60px;
