@@ -1,5 +1,6 @@
 .km-editor {
   overflow: hidden;
+  z-index: 2;
 }
 .km-editor > .mask {
   display: block;
@@ -121,8 +122,6 @@ div.minder-editor-container {
 }
 .top-tab .tab-pane {
   font-size: 0;
-  height: 54px;
-  overflow: hidden;
 }
 .km-btn-group {
   display: inline-block;

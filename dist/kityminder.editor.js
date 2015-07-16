@@ -2804,6 +2804,7 @@ angular.module('kityminderEditor')
 			scope: {
 				minder: '='
 			},
+            replace: true,
 			link: function($scope) {
 				var minder = $scope.minder;
 				var progresses = [];
