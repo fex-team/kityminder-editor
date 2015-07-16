@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.21 - 2015-07-01
+ * kityminder-editor - v1.0.21 - 2015-07-16
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -667,7 +667,7 @@ _p[11] = {
             // 不使用 kityminder 的按键处理，由 ReceiverRuntime 统一处理
             var minder = new Minder({
                 enableKeyReceiver: false,
-                enableAnimation: false
+                enableAnimation: true
             });
             // 渲染，初始化
             minder.renderTo(this.selector);
@@ -690,7 +690,7 @@ _p[12] = {
             var hotbox = this.hotbox;
             var fsm = this.fsm;
             var main = hotbox.state("main");
-            var buttons = [ "前移:Alt+Up:ArrangeUp", "下级:Tab:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "归纳:Shift+Tab|Shift+Insert:AppendParentNode" ];
+            var buttons = [ "前移:Alt+Up:ArrangeUp", "下级:Tab:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "上级:Shift+Tab|Shift+Insert:AppendParentNode" ];
             buttons.forEach(function(button) {
                 var parts = button.split(":");
                 var label = parts.shift();
@@ -702,7 +702,7 @@ _p[12] = {
                     key: key,
                     action: function() {
                         if (command.indexOf("Append") === 0) {
-                            minder.execCommand(command, "新主题");
+                            minder.execCommand(command, "分支主题");
                             // provide in input runtime
                             runtime.editText();
                         } else {
@@ -714,27 +714,6 @@ _p[12] = {
                         return minder.queryCommandState(command) != -1;
                     }
                 });
-            });
-            main.button({
-                position: "ring",
-                key: "/",
-                action: function() {
-                    if (!minder.queryCommandState("expand")) {
-                        minder.execCommand("expand");
-                    } else if (!minder.queryCommandState("collapse")) {
-                        minder.execCommand("collapse");
-                    }
-                },
-                enable: function() {
-                    return minder.queryCommandState("expand") != -1 || minder.queryCommandState("collapse") != -1;
-                },
-                beforeShow: function() {
-                    if (!minder.queryCommandState("expand")) {
-                        this.$button.children[0].innerHTML = "展开";
-                    } else {
-                        this.$button.children[0].innerHTML = "收起";
-                    }
-                }
             });
         }
         return module.exports = NodeRuntime;
@@ -1269,28 +1248,48 @@ angular.module('kityminderEditor', [
 angular.module('kityminderEditor').run(['$templateCache', function($templateCache) {
   'use strict';
 
-  $templateCache.put('ui/directive/colorPanel/colorPanel.html',
-    "<ul class=\"color-list\"><li ng-repeat=\"c in seriesColor\" class=\"color-wrap\" ng-class=\"{'color-wrap-selected': minder.queryCommandValue('background') == c}\" ng-disabled=\"minder.queryCommandState('background') === -1\"><span ng-click=\"minder.execCommand('background', c)\" ng-style=\"{ 'background-color': c }\" class=\"color-item\" title=\"{{ c }}\"></span></li><li class=\"color-wrap\" ng-disabled=\"minder.queryCommandState('background') === -1\" ng-class=\"{'color-wrap-selected': minder.queryCommandValue('background') == customColor}\"><span colorpicker class=\"color-item\" ng-model=\"hexPicker\" ng-style=\"{ 'background-color': customColor }\" title=\"{{ hexPicker }}\"></span></li></ul>"
+  $templateCache.put('ui/directive/appendNode/appendNode.html',
+    "<div class=\"km-btn-group append-group\"><div class=\"km-btn-item append-child-node\" ng-disabled=\"minder.queryCommandState('AppendChildNode') === -1\" ng-click=\"execCommand('AppendChildNode')\" title=\"{{ 'appendchildnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendchildnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-parent-node\" ng-disabled=\"minder.queryCommandState('AppendParentNode') === -1\" ng-click=\"execCommand('AppendParentNode')\" title=\"{{ 'appendparentnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendparentnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-sibling-node\" ng-disabled=\"minder.queryCommandState('AppendSiblingNode') === -1\" ng-click=\"execCommand('AppendSiblingNode')\" title=\"{{ 'appendsiblingnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendsiblingnode' | lang:'ui/command' }}</span></div></div>"
   );
 
 
-  $templateCache.put('ui/directive/controlPanel/controlPanel.html',
-    "<div class=\"divider\"></div><tabset><tab heading=\"{{ 'idea' | lang: 'ui/tabs'; }}\"><accordion close-others=\"false\"><accordion-group heading=\"{{ 'priority' | lang: 'panels'; }}\" is-open=\"true\"><priority-editor minder=\"minder\"></priority-editor></accordion-group><accordion-group heading=\"{{ 'progress' | lang: 'panels'; }}\" is-open=\"true\"><progress-editor minder=\"minder\"></progress-editor></accordion-group><accordion-group heading=\"{{ 'resource' | lang: 'panels'; }}\" is-open=\"true\"><resource-editor minder=\"minder\"></resource-editor></accordion-group></accordion></tab><tab heading=\"{{ 'appearence' | lang: 'ui/tabs'; }}\"><accordion close-others=\"false\"><accordion-group heading=\"{{ 'template' | lang: 'panels'; }}\" is-open=\"true\"><template-list minder=\"minder\" class=\"inline-directive\"></template-list><layout minder=\"minder\" class=\"inline-directive\"></layout></accordion-group></accordion><accordion close-others=\"false\"><accordion-group heading=\"{{ 'theme' | lang: 'panels'; }}\" is-open=\"true\"><theme-list minder=\"minder\"></theme-list></accordion-group></accordion><accordion close-others=\"false\"><accordion-group heading=\"{{ 'style' | lang: 'panels'; }}\" is-open=\"true\"><style-operator minder=\"minder\" class=\"inline-directive\"></style-operator></accordion-group></accordion><accordion close-others=\"false\"><accordion-group heading=\"{{ 'font' | lang: 'panels'; }}\" is-open=\"true\"><font-operator minder=\"minder\" class=\"inline-directive\"></font-operator></accordion-group></accordion><accordion close-others=\"false\"><accordion-group heading=\"{{ 'background' | lang: 'panels'; }}\" is-open=\"true\"><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></accordion-group></accordion></tab><tab heading=\"{{ 'note' | lang: 'panels'; }}\" select=\"refreshNotePanel()\"><note-editor minder=\"minder\" class=\"km-note\"></note-editor></tab></tabset>"
+  $templateCache.put('ui/directive/arrange/arrange.html',
+    "<div class=\"km-btn-group arrange-group\"><div class=\"km-btn-item arrange-up\" ng-disabled=\"minder.queryCommandState('ArrangeUp') === -1\" ng-click=\"minder.execCommand('ArrangeUp')\" title=\"{{ 'arrangeup' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangeup' | lang:'ui/command' }}</span></div><div class=\"km-btn-item arrange-down\" ng-disabled=\"minder.queryCommandState('ArrangeDown') === -1\" ng-click=\"minder.execCommand('ArrangeDown');\" title=\"{{ 'arrangedown' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangedown' | lang:'ui/command' }}</span></div></div>"
+  );
+
+
+  $templateCache.put('ui/directive/colorPanel/colorPanel.html',
+    "<div class=\"color-wrap\" ng-disabled=\"minder.queryCommandState('background') === -1\"><span colorpicker class=\"color-item\" ng-model=\"hexPicker\" ng-style=\"{ 'background-color': customColor }\" title=\"{{ hexPicker }}\"></span></div>"
+  );
+
+
+  $templateCache.put('ui/directive/expandLevel/expandLevel.html',
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default expand\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"minder.execCommand('expand')\"></button> <button type=\"button\" class=\"btn btn-default expand-caption dropdown-toggle\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'expandtoleaf' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'expandtoleaf' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"level in levels\"><a href ng-click=\"minder.execCommand('ExpandToLevel', level)\">{{ 'expandtolevel' + level | lang:'ui/command' }}</a></li></ul></div>"
   );
 
 
   $templateCache.put('ui/directive/fontOperator/fontOperator.html',
-    "<span class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-item\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || '默认字号' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></span> <span class=\"s-btn-icon font-bold\" ng-click=\"minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\"></span> <span class=\"s-btn-icon font-italics\" ng-click=\"minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"></span><div class=\"font-color-wrap\"><span colorpicker class=\"font-color\" ng-model=\"hexPicker\" ng-style=\"{ 'background-color': customColor }\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\" title=\"{{ hexPicker }}\"></span></div>"
+    "<div class=\"font-operator\"><div class=\"dropdown font-family-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontfamily') === -1\"><a href class=\"current-font-item\" title=\"{{ 'fontfamily' | lang: 'ui' }}\">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontFamilyList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontfamily', f.val)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontfamily') }\" ng-style=\"{'font-family': f.val }\">{{ f.name }}</a></li></ul></div><div class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-item\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || '字号' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></div><span class=\"s-btn-icon font-bold\" ng-click=\"minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\"></span> <span class=\"s-btn-icon font-italics\" ng-click=\"minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"></span><div class=\"font-color-wrap\"><span colorpicker class=\"font-color\" ng-model=\"hexPicker\" ng-style=\"{ 'background-color': customColor }\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\" title=\"{{ hexPicker }}\"></span></div><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></div>"
+  );
+
+
+  $templateCache.put('ui/directive/hyperLink/hyperLink.html',
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default hyperlink\" title=\"{{ 'link' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"addHyperlink()\" ng-disabled=\"minder.queryCommandState('HyperLink') === -1\"></button> <button type=\"button\" class=\"btn btn-default hyperlink-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('HyperLink') === -1\" title=\"{{ 'link' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'link' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'link' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addHyperlink()\">{{ 'insertlink' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('HyperLink', null)\">{{ 'removelink' | lang:'ui' }}</a></li></ul></div>"
+  );
+
+
+  $templateCache.put('ui/directive/imageBtn/imageBtn.html',
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default image-btn\" title=\"{{ 'image' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"addImage()\" ng-disabled=\"minder.queryCommandState('Image') === -1\"></button> <button type=\"button\" class=\"btn btn-default image-btn-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('Image') === -1\" title=\"{{ 'image' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'image' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'image' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addImage()\">{{ 'insertimage' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('Image', null)\">{{ 'removeimage' | lang:'ui' }}</a></li></ul></div>"
   );
 
 
   $templateCache.put('ui/directive/kityminderEditor/kityminderEditor.html',
-    "<div class=\"minder-editor-container\"><div class=\"minder-editor\" ng-style=\"{'right': (config.dividerWidth + config.ctrlPanelWidth) + 'px' }\"></div><div class=\"minder-divider\" minder-divider=\"config\" minder=\"minder\" ng-if=\"minder\" ng-style=\"{'width': config.dividerWidth + 'px', 'right': config.ctrlPanelWidth + 'px'}\"></div><div class=\"control-panel\" control-panel ng-if=\"minder\" ng-style=\"{'width': config.ctrlPanelWidth + 'px'}\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div><div class=\"navigator\" navigator minder=\"minder\" ng-if=\"minder\"></div></div>"
+    "<div class=\"minder-editor-container\"><div class=\"top-tab\" top-tab=\"minder\" ng-if=\"minder\"></div><div class=\"minder-editor\"></div><div class=\"km-note\" note-editor minder=\"minder\" ng-if=\"minder\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div><div class=\"navigator\" navigator minder=\"minder\" ng-if=\"minder\"></div></div>"
   );
 
 
   $templateCache.put('ui/directive/layout/layout.html',
-    "<a ng-click=\"minder.execCommand('resetlayout')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('resetlayout') === -1\"><span class=\"btn-icon reset-layout-icon\"></span> <span class=\"btn-label\">{{ 'resetlayout' | lang: 'ui/command' }}</span></a>"
+    "<div class=\"readjust-layout\"><a ng-click=\"minder.execCommand('resetlayout')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('resetlayout') === -1\"><span class=\"btn-icon reset-layout-icon\"></span> <span class=\"btn-label\">{{ 'resetlayout' | lang: 'ui/command' }}</span></a></div>"
   );
 
 
@@ -1302,20 +1301,30 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
   );
 
 
+  $templateCache.put('ui/directive/noteBtn/noteBtn.html',
+    "<div class=\"btn-group-vertical note-btn-group\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default note-btn\" title=\"{{ 'note' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"addNote()\" ng-disabled=\"minder.queryCommandState('note') === -1\"></button> <button type=\"button\" class=\"btn btn-default note-btn-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('note') === -1\" title=\"{{ 'note' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'note' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'note' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addNote()\">{{ 'insertnote' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('note', null)\">{{ 'removenote' | lang:'ui' }}</a></li></ul></div>"
+  );
+
+
   $templateCache.put('ui/directive/noteEditor/noteEditor.html',
-    "<div class=\"km-note\" ng-show=\"noteEnabled\" ui-codemirror=\"{ onLoad: codemirrorLoaded }\" ng-model=\"noteContent\" ui-codemirror-opts=\"{\n" +
-    "\t\tgfm: true,\n" +
-    "\t\tbreaks: true,\n" +
-    "\t\tlineWrapping : true,\n" +
-    "\t\tmode: 'gfm',\n" +
-    "        dragDrop: false,\n" +
-    "        lineNumbers:true\n" +
-    "\t }\"></div><p ng-show=\"!noteEnabled\" class=\"km-note-tips\">请选择节点编辑备注</p>"
+    "<div class=\"panel panel-default\" ng-init=\"noteEditorOpen = false\" ng-show=\"noteEditorOpen\"><div class=\"panel-heading\"><h3 class=\"panel-title\">备注</h3><span>（<a class=\"help\" href=\"https://www.zybuluo.com/techird/note/46064\" target=\"_blank\">支持 GFM 语法书写</a>）</span> <i class=\"close-note-editor glyphicon glyphicon-remove\" ng-click=\"closeNoteEditor()\"></i></div><div class=\"panel-body\"><div ng-show=\"noteEnabled\" ui-codemirror=\"{ onLoad: codemirrorLoaded }\" ng-model=\"noteContent\" ui-codemirror-opts=\"{\n" +
+    "                gfm: true,\n" +
+    "                breaks: true,\n" +
+    "                lineWrapping : true,\n" +
+    "                mode: 'gfm',\n" +
+    "                dragDrop: false,\n" +
+    "                lineNumbers:true\n" +
+    "             }\"></div><p ng-show=\"!noteEnabled\" class=\"km-note-tips\">请选择节点编辑备注</p></div></div>"
   );
 
 
   $templateCache.put('ui/directive/notePreviewer/notePreviewer.html',
     "<div id=\"previewer-content\" ng-show=\"showNotePreviewer\" ng-style=\"previewerStyle\" ng-bind-html=\"noteContent\"></div>"
+  );
+
+
+  $templateCache.put('ui/directive/operation/operation.html',
+    "<div class=\"km-btn-group operation-group\"><div class=\"km-btn-item edit-node\" ng-disabled=\"minder.queryCommandState('text') === -1\" ng-click=\"editNode()\" title=\"{{ 'editnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'editnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item remove-node\" ng-disabled=\"minder.queryCommandState('RemoveNode') === -1\" ng-click=\"minder.execCommand('RemoveNode');\" title=\"{{ 'removenode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'removenode' | lang:'ui/command' }}</span></div></div>"
   );
 
 
@@ -1330,22 +1339,32 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/resourceEditor/resourceEditor.html',
-    "<div><div class=\"input-group\"><input class=\"form-control\" type=\"text\" ng-model=\"newResourceName\" ng-required ng-keypress=\"$event.keyCode == 13 && addResource(newResourceName)\" ng-disabled=\"!enabled\"> <span class=\"input-group-btn\"><button class=\"btn btn-default\" ng-click=\"addResource(newResourceName)\" ng-disabled=\"!enabled\">添加</button></span></div><ul class=\"km-resource\"><li ng-repeat=\"resource in used\" ng-disabled=\"!enabled\"><label style=\"background: {{resourceColor(resource.name)}}\"><input type=\"checkbox\" ng-model=\"resource.selected\" ng-disabled=\"!enabled\"> <span>{{resource.name}}</span></label></li></ul></div>"
+    "<form class=\"form form-inline resource-editor\"><div class=\"input-group\"><input class=\"form-control\" type=\"text\" ng-model=\"newResourceName\" ng-required ng-keypress=\"$event.keyCode == 13 && addResource(newResourceName)\" ng-disabled=\"!enabled\"> <span class=\"input-group-btn\"><button class=\"btn btn-default\" ng-click=\"addResource(newResourceName)\" ng-disabled=\"!enabled\">添加</button></span></div><div class=\"resource-dropdown clearfix\" id=\"resource-dropdown\"><ul class=\"km-resource\" ng-init=\"resourceListOpen = false\" ng-class=\"{'open': resourceListOpen}\"><li ng-repeat=\"resource in used\" ng-disabled=\"!enabled\" ng-blur=\"blurCB()\"><label style=\"background: {{resourceColor(resource.name)}}\"><input type=\"checkbox\" ng-model=\"resource.selected\" ng-disabled=\"!enabled\"> <span>{{resource.name}}</span></label></li></ul><div class=\"resource-caret\" click-anywhere-but-here=\"resourceListOpen = false\" is-active=\"resourceListOpen\" ng-click=\"resourceListOpen = !resourceListOpen\"><span class=\"caret\"></span></div></div></form>"
+  );
+
+
+  $templateCache.put('ui/directive/selectAll/selectAll.html',
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default select\" title=\"{{ 'selectall' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"select['all']()\"></button> <button type=\"button\" class=\"btn btn-default select-caption dropdown-toggle\" title=\"{{ 'selectall' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'selectall' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'selectall' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"item in items\"><a href ng-click=\"select[item]()\">{{ 'select' + item | lang:'ui' }}</a></li></ul></div>"
   );
 
 
   $templateCache.put('ui/directive/styleOperator/styleOperator.html',
-    "<a ng-click=\"minder.execCommand('clearstyle')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('clearstyle') === -1;\"><span class=\"btn-icon clear-style-icon\"></span> <span class=\"btn-label\">{{ 'clearstyle' | lang: 'ui' }}</span></a><div class=\"s-btn-group-vertical\"><a class=\"s-btn-wrap\" href ng-click=\"minder.execCommand('copystyle')\" ng-disabled=\"minder.queryCommandState('copystyle') === -1;\"><span class=\"s-btn-icon copy-style-icon\"></span> <span class=\"s-btn-label\">{{ 'copystyle' | lang: 'ui' }}</span></a> <a class=\"s-btn-wrap paste-style-wrap\" href ng-click=\"minder.execCommand('pastestyle')\" ng-disabled=\"minder.queryCommandState('pastestyle') === -1;\"><span class=\"s-btn-icon paste-style-icon\"></span> <span class=\"s-btn-label\">{{ 'pastestyle' | lang: 'ui' }}</span></a></div>"
+    "<div class=\"style-operator\"><a ng-click=\"minder.execCommand('clearstyle')\" class=\"btn-wrap clear-style\" ng-disabled=\"minder.queryCommandState('clearstyle') === -1;\"><span class=\"btn-icon clear-style-icon\"></span> <span class=\"btn-label\">{{ 'clearstyle' | lang: 'ui' }}</span></a><div class=\"s-btn-group-vertical\"><a class=\"s-btn-wrap\" href ng-click=\"minder.execCommand('copystyle')\" ng-disabled=\"minder.queryCommandState('copystyle') === -1;\"><span class=\"s-btn-icon copy-style-icon\"></span> <span class=\"s-btn-label\">{{ 'copystyle' | lang: 'ui' }}</span></a> <a class=\"s-btn-wrap paste-style-wrap\" href ng-click=\"minder.execCommand('pastestyle')\" ng-disabled=\"minder.queryCommandState('pastestyle') === -1;\"><span class=\"s-btn-icon paste-style-icon\"></span> <span class=\"s-btn-label\">{{ 'pastestyle' | lang: 'ui' }}</span></a></div></div>"
   );
 
 
   $templateCache.put('ui/directive/templateList/templateList.html',
-    "<span class=\"dropdown\" dropdown on-toggle=\"toggled(open)\"><div class=\"dropdown-toggle current-temp-item\" ng-disabled=\"minder.queryCommandState('template') === -1\" dropdown-toggle><a href class=\"temp-item {{ minder.queryCommandValue('template') }}\" title=\"{{ minder.queryCommandValue('template') | lang: 'template' }}\"></a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu temp-list\"><li ng-repeat=\"(key, templateObj) in templateList\" class=\"temp-item-wrap\"><a ng-click=\"minder.execCommand('template', key);\" class=\"temp-item {{key}}\" ng-class=\"{ 'temp-item-selected' : key == minder.queryCommandValue('template') }\" title=\"{{ key | lang: 'template' }}\"></a></li></ul></span>"
+    "<div class=\"dropdown temp-panel\" dropdown on-toggle=\"toggled(open)\"><div class=\"dropdown-toggle current-temp-item\" ng-disabled=\"minder.queryCommandState('template') === -1\" dropdown-toggle><a href class=\"temp-item {{ minder.queryCommandValue('template') }}\" title=\"{{ minder.queryCommandValue('template') | lang: 'template' }}\"></a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu temp-list\"><li ng-repeat=\"(key, templateObj) in templateList\" class=\"temp-item-wrap\"><a ng-click=\"minder.execCommand('template', key);\" class=\"temp-item {{key}}\" ng-class=\"{ 'temp-item-selected' : key == minder.queryCommandValue('template') }\" title=\"{{ key | lang: 'template' }}\"></a></li></ul></div>"
   );
 
 
   $templateCache.put('ui/directive/themeList/themeList.html',
-    "<span class=\"dropdown\" dropdown><div class=\"dropdown-toggle theme-item-selected\" dropdown-toggle ng-disabled=\"minder.queryCommandState('theme') === -1\"><a href class=\"theme-item\" ng-style=\"getThemeThumbStyle(minder.queryCommandValue('theme'))\" title=\"{{ minder.queryCommandValue('theme') | lang: 'theme'; }}\">{{ minder.queryCommandValue('theme') | lang: 'theme'; }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu theme-list\"><li ng-repeat=\"key in themeKeyList\" class=\"theme-item-wrap\"><a ng-click=\"minder.execCommand('theme', key);\" class=\"theme-item\" ng-style=\"getThemeThumbStyle(key)\" title=\"{{ key | lang: 'theme'; }}\">{{ key | lang: 'theme'; }}</a></li></ul></span>"
+    "<div class=\"dropdown theme-panel\" dropdown><div class=\"dropdown-toggle theme-item-selected\" dropdown-toggle ng-disabled=\"minder.queryCommandState('theme') === -1\"><a href class=\"theme-item\" ng-style=\"getThemeThumbStyle(minder.queryCommandValue('theme'))\" title=\"{{ minder.queryCommandValue('theme') | lang: 'theme'; }}\">{{ minder.queryCommandValue('theme') | lang: 'theme'; }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu theme-list\"><li ng-repeat=\"key in themeKeyList\" class=\"theme-item-wrap\"><a ng-click=\"minder.execCommand('theme', key);\" class=\"theme-item\" ng-style=\"getThemeThumbStyle(key)\" title=\"{{ key | lang: 'theme'; }}\">{{ key | lang: 'theme'; }}</a></li></ul></div>"
+  );
+
+
+  $templateCache.put('ui/directive/topTab/topTab.html',
+    "<tabset><tab heading=\"{{ 'idea' | lang: 'ui/tabs'; }}\"><append-node minder=\"minder\"></append-node><arrange minder=\"minder\"></arrange><operation minder=\"minder\"></operation><hyper-link minder=\"minder\"></hyper-link><image-btn minder=\"minder\"></image-btn><note-btn minder=\"minder\"></note-btn><priority-editor minder=\"minder\"></priority-editor><progress-editor minder=\"minder\"></progress-editor><resource-editor minder=\"minder\"></resource-editor></tab><tab heading=\"{{ 'appearence' | lang: 'ui/tabs'; }}\"><template-list minder=\"minder\" class=\"inline-directive\"></template-list><theme-list minder=\"minder\"></theme-list><layout minder=\"minder\" class=\"inline-directive\"></layout><style-operator minder=\"minder\" class=\"inline-directive\"></style-operator><font-operator minder=\"minder\" class=\"inline-directive\"></font-operator></tab><tab heading=\"{{ 'view' | lang: 'ui/tabs'; }}\"><expand-level minder=\"minder\"></expand-level><select-all minder=\"minder\"></select-all></tab></tabset>"
   );
 
 }]);
@@ -1552,6 +1571,7 @@ angular.module('kityminderEditor')
 
 					'command': {
 						'appendsiblingnode': '插入同级主题',
+                        'appendparentnode': '插入上级主题',
 						'appendchildnode': '插入下级主题',
 						'removenode': '删除',
 						'editnode': '编辑',
@@ -1719,6 +1739,9 @@ angular.module('kityminderEditor')
 					'link': '链接',
 					'image': '图片',
 					'note': '备注',
+                    'insertlink': '插入链接',
+                    'insertimage': '插入图片',
+                    'insertnote': '插入备注',
 					'removelink': '移除已有连接',
 					'removeimage': '移除已有图片',
 					'removenote': '移除已有备注',
@@ -1836,6 +1859,61 @@ angular.module('kityminderEditor')
     }
 });
 angular.module('kityminderEditor')
+    .service('resourceService', ['$document', function($document) {
+    var openScope = null;
+
+    this.open = function( dropdownScope ) {
+        console.log('Enter open function');
+        if ( !openScope ) {
+            $document.bind('click', closeDropdown);
+            $document.bind('keydown', escapeKeyBind);
+        }
+
+        if ( openScope && openScope !== dropdownScope ) {
+            openScope.resourceListOpen = false;
+        }
+
+        openScope = dropdownScope;
+    };
+
+    this.close = function( dropdownScope ) {
+        console.log('Enter close function');
+        if ( openScope === dropdownScope ) {
+            openScope = null;
+            $document.unbind('click', closeDropdown);
+            $document.unbind('keydown', escapeKeyBind);
+        }
+    };
+
+    var closeDropdown = function( evt ) {
+        // This method may still be called during the same mouse event that
+        // unbound this event handler. So check openScope before proceeding.
+        console.log(evt, openScope);
+        if (!openScope) { return; }
+
+        var toggleElement = openScope.getToggleElement();
+        if ( evt && toggleElement && toggleElement[0].contains(evt.target) ) {
+            return;
+        }
+
+        openScope.$apply(function() {
+            console.log('to close the resourcelist');
+            openScope.resourceListOpen = false;
+        });
+    };
+
+    var escapeKeyBind = function( evt ) {
+        if ( evt.which === 27 ) {
+            openScope.focusToggleElement();
+            closeDropdown();
+        }
+    };
+}])
+angular.module('kityminderEditor')
+    .service('valueTransfer', function() {
+        return {};
+    });
+angular.module('kityminderEditor')
     .filter('commandState', function() {
         return function(minder, command) {
             return minder.queryCommandState(command);
@@ -1868,6 +1946,53 @@ angular.module('kityminderEditor')
 		};
 	}]);
 angular.module('kityminderEditor')
+    .directive('appendNode', ['commandBinder', function(commandBinder) {
+        return {
+            restrict: 'E',
+            templateUrl: 'ui/directive/appendNode/appendNode.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            link: function($scope) {
+                var minder = $scope.minder;
+
+                commandBinder.bind(minder, 'appendchildnode', $scope)
+
+                $scope.execCommand = function(command) {
+                    minder.execCommand(command, '分支主题');
+                    editText();
+                };
+
+                function editText() {
+                    var receiverElement = editor.receiver.element;
+                    var fsm = editor.fsm;
+                    var receiver = editor.receiver;
+
+                    receiverElement.innerText = minder.queryCommandValue('text');
+                    fsm.jump('input', 'input-request');
+                    receiver.selectAll();
+                }
+            }
+        }
+    }]);
+angular.module('kityminderEditor')
+    .directive('arrange', ['commandBinder', function(commandBinder) {
+        return {
+            restrict: 'E',
+            templateUrl: 'ui/directive/arrange/arrange.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            link: function($scope) {
+                var minder = $scope.minder;
+
+                //commandBinder.bind(minder, 'priority', $scope);
+            }
+        }
+    }]);
+angular.module('kityminderEditor')
 	.directive('colorPanel', function() {
 		return {
 			restrict: 'E',
@@ -1875,6 +2000,7 @@ angular.module('kityminderEditor')
 			scope: {
 				minder: '='
 			},
+            replace: true,
 			link: function(scope) {
 
 				var minder = scope.minder;
@@ -1882,9 +2008,9 @@ angular.module('kityminderEditor')
 
 				scope.hexPicker = scope.hexPicker || currentTheme['background'] ;
 
-				scope.seriesColor = ['#e75d66', '#fac75b', '#99ca6a', '#00c5ad', '#3bbce0', '#425b71', '#ffffff'];
 
 				scope.$on('colorpicker-selected', function(e, msg) {
+                    e.stopPropagation();
 
 					// colorPicker 的 bug ： 初次选择 value 为 undefined
 					minder.execCommand('background', msg.value);
@@ -1893,26 +2019,29 @@ angular.module('kityminderEditor')
 				});
 
 				minder.on('interactchange', function() {
-					var currentColor = minder.queryCommandValue('background') || '#000000';
-
-					scope.customColor =  scope.seriesColor.indexOf(currentColor) == -1 ? currentColor : null;
+                    scope.customColor = minder.queryCommandValue('background') || '#000000';
+                    scope.$apply();
 				});
 
 			}
 		}
 	});
-angular.module('kityminderEditor').directive('controlPanel', function() {
-    return {
-        templateUrl: 'ui/directive/controlPanel/controlPanel.html',
-        restrict: 'A',
-        link: function(scope) {
+angular.module('kityminderEditor')
+    .directive('expandLevel', ['$modal', function($modal) {
+        return {
+            restrict: 'E',
+            templateUrl: 'ui/directive/expandLevel/expandLevel.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            link: function($scope) {
+                var minder = $scope.minder;
 
-	        scope.refreshNotePanel = function() {
-				scope.$broadcast('notePanelActived');
-	        }
+                $scope.levels = [1, 2, 3, 4, 5, 6];
+            }
         }
-    }
-});
+    }]);
 angular.module('kityminderEditor')
 	.directive('fontOperator', function() {
 		return {
@@ -1921,14 +2050,51 @@ angular.module('kityminderEditor')
 			scope: {
 				minder: '='
 			},
+            replace: true,
 			link: function(scope) {
 				var minder = scope.minder;
 				var currentTheme = minder.getThemeItems();
 
 				scope.hexPicker = scope.hexPicker || currentTheme['main-color'] ;
 
-
 				scope.fontSizeList = [10, 12, 16, 18, 24, 32, 48];
+                scope.fontFamilyList = [{
+                    name: '宋体',
+                    val: '宋体,SimSun'
+                }, {
+                    name: '微软雅黑',
+                    val: '微软雅黑,Microsoft YaHei'
+                }, {
+                    name: '楷体',
+                    val: '楷体,楷体_GB2312,SimKai'
+                }, {
+                    name: '黑体',
+                    val: '黑体, SimHei'
+                }, {
+                    name: '隶书',
+                    val: '隶书, SimLi'
+                }, {
+                    name: 'Andale Mono',
+                    val: 'andale mono'
+                }, {
+                    name: 'Arial',
+                    val: 'arial,helvetica,sans-serif'
+                }, {
+                    name: 'arialBlack',
+                    val: 'arial black,avant garde'
+                }, {
+                    name: 'Comic Sans Ms',
+                    val: 'comic sans ms'
+                }, {
+                    name: 'Impact',
+                    val: 'impact,chicago'
+                }, {
+                    name: 'Times New Roman',
+                    val: 'times new roman'
+                }, {
+                    name: 'Sans-Serif',
+                    val: 'sans-serif'
+                }];
 
 				scope.$on('colorpicker-selected', function(e, msg) {
 					minder.execCommand('forecolor', msg.value);
@@ -1937,10 +2103,91 @@ angular.module('kityminderEditor')
 
 				minder.on('interactchange', function() {
 					scope.customColor = minder.queryCommandValue('forecolor') || '#000000';
+                    scope.$apply();
 				});
+
+                scope.getFontfamilyName = function(val) {
+                    scope.fontFamilyList.forEach(function(ele, idx, arr) {
+                        if (ele.val === val) {
+                            return ele.name;
+                        }
+                    });
+
+                    return '';
+                }
 			}
 		}
 	});
+angular.module('kityminderEditor')
+    .directive('hyperLink', ['$modal', function($modal) {
+        return {
+            restrict: 'E',
+            templateUrl: 'ui/directive/hyperLink/hyperLink.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            link: function($scope) {
+                var minder = $scope.minder;
+
+                $scope.addHyperlink = function() {
+
+                    var link = minder.queryCommandValue('HyperLink');
+
+                    var hyperlinkModal = $modal.open({
+                        animation: true,
+                        templateUrl: 'ui/dialog/hyperlink/hyperlink.tpl.html',
+                        controller: 'hyperlink.ctrl',
+                        size: 'md',
+                        resolve: {
+                            link: function() {
+                                return link;
+                            }
+                        }
+                    });
+
+                    hyperlinkModal.result.then(function(result) {
+                        minder.execCommand('HyperLink', result.url, result.title || '');
+                    });
+                }
+            }
+        }
+    }]);
+angular.module('kityminderEditor')
+    .directive('imageBtn', ['$modal', function($modal) {
+        return {
+            restrict: 'E',
+            templateUrl: 'ui/directive/imageBtn/imageBtn.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            link: function($scope) {
+                var minder = $scope.minder;
+
+                $scope.addImage = function() {
+
+                    var image = minder.queryCommandValue('image');
+
+                    var imageModal = $modal.open({
+                        animation: true,
+                        templateUrl: 'ui/dialog/image/image.tpl.html',
+                        controller: 'image.ctrl',
+                        size: 'md',
+                        resolve: {
+                            image: function() {
+                                return image;
+                            }
+                        }
+                    });
+
+                    imageModal.result.then(function(result) {
+                        minder.execCommand('image', result.url, result.title || '');
+                    });
+                }
+            }
+        }
+    }]);
 angular.module('kityminderEditor')
 	.directive('kityminderEditor', ['config', function(config) {
 		return {
@@ -2018,63 +2265,12 @@ angular.module('kityminderEditor')
 			scope: {
 				minder: '='
 			},
+            replace: true,
 			link: function(scope) {
 
 			}
 		}
 	});
-angular.module('kityminderEditor')
-	.directive('minderDivider', ['config', function(config) {
-		return {
-			scope: {
-				config: '=minderDivider',
-                minder: '='
-			},
-			link: function($scope, element) {
-                var minder = $scope.minder;
-				var ctrlPanelMin = config.getConfig('ctrlPanelMin');
-				var dividerWidth = config.getConfig('dividerWidth');
-
-				var originalX, currentX;
-				var isOnResizing = false;
-				var bodyWidth = document.body.clientWidth;
-				var ctrlPanelWidth = $scope.config.ctrlPanelWidth;
-
-
-				element.on('mousedown', function(e) {
-					originalX = e.pageX;
-					isOnResizing = true;
-				});
-
-				$('body').on('mousemove', function(e) {
-					if (isOnResizing) {
-						currentX = e.clientX;
-						var deltaX = (originalX - currentX);
-
-						// 计算安全范围
-						var deltaMax = bodyWidth - ctrlPanelWidth;
-						var deltaMin = (ctrlPanelMin + dividerWidth) - ctrlPanelWidth;
-
-						// 判断是否越界
-						deltaX = deltaX > deltaMax ? deltaMax : deltaX;
-						deltaX = deltaX < deltaMin ? deltaMin : deltaX;
-
-						// 改变父 scope 的变量
-						$scope.config.ctrlPanelWidth = ctrlPanelWidth + deltaX;
-						$scope.$apply();
-                        minder.fire('resize');
-					}
-				});
-
-				window.addEventListener('mouseup', function(e) {
-					ctrlPanelWidth = $scope.config.ctrlPanelWidth;
-					window.localStorage.__dev_minder_ctrlPanelWidth = ctrlPanelWidth;
-					isOnResizing = false;
-					$scope.$apply();
-				});
-			}
-		}
-	}]);
 /**
  * @fileOverview
  *
@@ -2268,17 +2464,35 @@ angular.module('kityminderEditor')
         }
     }]);
 angular.module('kityminderEditor')
+    .directive('noteBtn', ['valueTransfer', function(valueTransfer) {
+        return {
+            restrict: 'E',
+            templateUrl: 'ui/directive/noteBtn/noteBtn.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            link: function($scope) {
+                var minder = $scope.minder;
 
-	.directive('noteEditor', function() {
+                $scope.addNote =function() {
+                    valueTransfer.noteEditorOpen = true;
+                };
+            }
+        }
+    }]);
+angular.module('kityminderEditor')
+
+	.directive('noteEditor', ['valueTransfer', function(valueTransfer) {
 		return {
-			restrict: 'E',
+			restrict: 'A',
 			templateUrl: 'ui/directive/noteEditor/noteEditor.html',
 			scope: {
 				minder: '='
 			},
+            replace: true,
 			controller: ["$scope", function($scope) {
 				var minder = $scope.minder;
-
 				var isInteracting = false;
 				var cmEditor;
 
@@ -2315,18 +2529,33 @@ angular.module('kityminderEditor')
 					});
 				});
 
-				$scope.$on('notePanelActived', function() {
-					setTimeout(function() {
-						cmEditor.refresh();
-						cmEditor.focus();
-					});
-				});
+
+                var noteEditorOpen = function() {
+                    return valueTransfer.noteEditorOpen;
+                };
+
+                // 监听面板状态变量的改变
+                $scope.$watch(noteEditorOpen, function(newVal, oldVal) {
+                    if (newVal) {
+                        setTimeout(function() {
+                            cmEditor.refresh();
+                            cmEditor.focus();
+                        });
+                    }
+                    $scope.noteEditorOpen = valueTransfer.noteEditorOpen;
+                }, true);
+
+
+                $scope.closeNoteEditor = function() {
+                    valueTransfer.noteEditorOpen = false;
+                };
+
 
 
 				minder.on('interactchange', updateNote);
 			}]
 		}
-	});
+	}]);
 // TODO: 使用一个 div 容器作为 previewer，而不是两个
 angular.module('kityminderEditor')
 
@@ -2414,6 +2643,31 @@ angular.module('kityminderEditor')
 		}
 }]);
 angular.module('kityminderEditor')
+    .directive('operation', function() {
+        return {
+            restrict: 'E',
+            templateUrl: 'ui/directive/operation/operation.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            link: function($scope) {
+                $scope.editNode = function() {
+
+                    var receiverElement = editor.receiver.element;
+                    var fsm = editor.fsm;
+                    var receiver = editor.receiver;
+
+                    receiverElement.innerText = minder.queryCommandValue('text');
+                    fsm.jump('input', 'input-request');
+                    receiver.selectAll();
+
+                }
+
+            }
+        }
+    });
+angular.module('kityminderEditor')
 
     .directive('priorityEditor', ['commandBinder', function(commandBinder) {
         return {
@@ -2422,6 +2676,7 @@ angular.module('kityminderEditor')
             scope: {
                 minder: '='
             },
+            replace: true,
             link: function($scope) {
                 var minder = $scope.minder;
                 var priorities = [];
@@ -2477,7 +2732,6 @@ angular.module('kityminderEditor')
 		}
 	}])
 angular.module('kityminderEditor')
-
     .directive('resourceEditor', function () {
         return {
             restrict: 'E',
@@ -2485,6 +2739,7 @@ angular.module('kityminderEditor')
             scope: {
                 minder: '='
             },
+            replace: true,
             controller: ["$scope", function ($scope) {
                 var minder = $scope.minder;
 
@@ -2538,9 +2793,114 @@ angular.module('kityminderEditor')
 	                }
 
                     $scope.newResourceName = null;
-                }
+                };
+
             }]
         };
+    })
+
+    .directive('clickAnywhereButHere', ['$document', function ($document) {
+        return {
+            link: function(scope, element, attrs) {
+                var onClick = function (event) {
+                    var isChild = $('#resource-dropdown').has(event.target).length > 0;
+                    var isSelf = $('#resource-dropdown') == event.target;
+                    var isInside = isChild || isSelf;
+                    if (!isInside) {
+                        scope.$apply(attrs.clickAnywhereButHere)
+                    }
+                };
+
+                scope.$watch(attrs.isActive, function(newValue, oldValue) {
+                    if (newValue !== oldValue && newValue == true) {
+                        $document.bind('click', onClick);
+                    }
+                    else if (newValue !== oldValue && newValue == false) {
+                        $document.unbind('click', onClick);
+                    }
+                });
+            }
+        };
+    }]);
+angular.module('kityminderEditor')
+    .directive('selectAll', function() {
+        return {
+            restrict: 'E',
+            templateUrl: 'ui/directive/selectAll/selectAll.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            link: function($scope) {
+                var minder = $scope.minder;
+
+                $scope.items = ['revert', 'siblings', 'level', 'path', 'tree'];
+
+                $scope.select = {
+                    all: function() {
+                        var selection = [];
+                        minder.getRoot().traverse(function(node) {
+                            selection.push(node);
+                        });
+                        minder.select(selection, true);
+                    },
+                    revert: function() {
+                        var selected = minder.getSelectedNodes();
+                        var selection = [];
+                        minder.getRoot().traverse(function(node) {
+                            if (selected.indexOf(node) == -1) {
+                                selection.push(node);
+                            }
+                        });
+                        minder.select(selection, true);
+                    },
+                    siblings: function() {
+                        var selected = minder.getSelectedNodes();
+                        var selection = [];
+                        selected.forEach(function(node) {
+                            if (!node.parent) return;
+                            node.parent.children.forEach(function(sibling) {
+                                if (selection.indexOf(sibling) == -1) selection.push(sibling);
+                            });
+                        });
+                        minder.select(selection, true);
+                    },
+                    level: function() {
+                        var selectedLevel = minder.getSelectedNodes().map(function(node) {
+                            return node.getLevel();
+                        });
+                        var selection = [];
+                        minder.getRoot().traverse(function(node) {
+                            if (selectedLevel.indexOf(node.getLevel()) != -1) {
+                                selection.push(node);
+                            }
+                        });
+                        minder.select(selection, true);
+                    },
+                    path: function() {
+                        var selected = minder.getSelectedNodes();
+                        var selection = [];
+                        selected.forEach(function(node) {
+                            while(node && selection.indexOf(node) == -1) {
+                                selection.push(node);
+                                node = node.parent;
+                            }
+                        });
+                        minder.select(selection, true);
+                    },
+                    tree: function() {
+                        var selected = minder.getSelectedNodes();
+                        var selection = [];
+                        selected.forEach(function(parent) {
+                            parent.traverse(function(node) {
+                                if (selection.indexOf(node) == -1) selection.push(node);
+                            });
+                        });
+                        minder.select(selection, true);
+                    }
+                };
+            }
+        }
     });
 angular.module('kityminderEditor')
 	.directive('styleOperator', function() {
@@ -2549,7 +2909,8 @@ angular.module('kityminderEditor')
 			templateUrl: 'ui/directive/styleOperator/styleOperator.html',
 			scope: {
 				minder: '='
-			}
+			},
+            replace: true
 		}
 	});
 angular.module('kityminderEditor')
@@ -2560,6 +2921,7 @@ angular.module('kityminderEditor')
 			scope: {
 				minder: '='
 			},
+            replace: true,
 			link: function($scope) {
 				$scope.templateList = kityminder.Minder.getTemplateList();
 
@@ -2571,6 +2933,7 @@ angular.module('kityminderEditor')
 		return {
 			restrict: 'E',
 			templateUrl: 'ui/directive/themeList/themeList.html',
+            replace: true,
 			link: function($scope) {
 				var themeList = kityminder.Minder.getThemeList();
 
@@ -2617,5 +2980,20 @@ angular.module('kityminderEditor')
 			}
 		}
 	});
+angular.module('kityminderEditor')
+    .directive('topTab', function() {
+       return {
+           restrict: 'A',
+           templateUrl: 'ui/directive/topTab/topTab.html',
+           scope: {
+               minder: '=topTab'
+           },
+           link: function(scope) {
+                scope.select = function($event) {
+                    console.log($event);
+                };
+           }
+       }
+    });
 use('expose-editor');
 })();

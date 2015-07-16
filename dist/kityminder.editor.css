@@ -43,6 +43,7 @@
 }
 .km-editor > .receiver.input {
   pointer-events: all;
+  opacity: 1;
   z-index: 999;
   background: white;
   outline: none;
@@ -120,6 +121,8 @@ div.minder-editor-container {
 }
 .tab-pane {
   font-size: 0;
+  height: 54px;
+  overflow: hidden;
 }
 .km-btn-group {
   display: inline-block;
