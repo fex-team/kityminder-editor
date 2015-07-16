@@ -2204,13 +2204,15 @@ angular.module('kityminderEditor')
 				});
 
                 scope.getFontfamilyName = function(val) {
+                    var fontName = '';
                     scope.fontFamilyList.forEach(function(ele, idx, arr) {
                         if (ele.val === val) {
-                            return ele.name;
+                            fontName = ele.name;
+                            return '';
                         }
                     });
 
-                    return '';
+                    return fontName;
                 }
 			}
 		}
