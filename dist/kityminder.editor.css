@@ -1123,12 +1123,47 @@ div a.theme-item {
 }
 .btn-group-vertical .expand {
   height: 25px;
-  background: url(images/icons.png) no-repeat center -100px;
+  background: url(images/icons.png) no-repeat 0 -995px;
 }
 .btn-group-vertical .expand-caption {
   height: 20px;
 }
 .btn-group-vertical .expand-caption .caption {
+  font-size: 12px;
+}
+.btn-group-vertical {
+  vertical-align: middle;
+  margin: 5px;
+}
+.btn-group-vertical .select,
+.btn-group-vertical .select-caption {
+  width: 40px;
+  margin: 0;
+  padding: 0;
+  border: none!important;
+  border-radius: 0!important;
+}
+.btn-group-vertical .select:hover,
+.btn-group-vertical .select-caption:hover {
+  background-color: #eff3fa;
+}
+.btn-group-vertical .select:active,
+.btn-group-vertical .select-caption:active {
+  background-color: #c4d0ee;
+}
+.btn-group-vertical .select.active,
+.btn-group-vertical .select-caption.active {
+  box-shadow: none;
+  background-color: #eff3fa;
+}
+.btn-group-vertical .select {
+  height: 25px;
+  background: url(images/icons.png) no-repeat 7px -1175px;
+}
+.btn-group-vertical .select-caption {
+  height: 20px;
+}
+.btn-group-vertical .select-caption .caption {
   font-size: 12px;
 }
 .tool-group {
