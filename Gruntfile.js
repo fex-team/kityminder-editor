@@ -77,6 +77,7 @@ module.exports = function(grunt) {
 		                '.tmp/scripts/templates.annotated.js',
 		                '.tmp/scripts/service/*.js',
 		                '.tmp/scripts/filter/*.js',
+                        '.tmp/scripts/dialog/**/*.js',
 		                '.tmp/scripts/directive/**/*.js'
 	                ]
                 }
@@ -119,7 +120,7 @@ module.exports = function(grunt) {
 
 	    ngtemplates: {
 		    kityminderEditor: {
-			    src: 'ui/directive/**/*.html',
+			    src: ['ui/directive/**/*.html', 'ui/dialog/**/*.html'],
 			    dest: 'ui/templates.js',
 			    options: {
 				    htmlmin: {

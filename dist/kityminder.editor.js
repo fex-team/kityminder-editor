@@ -1367,6 +1367,16 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
     "<tabset><tab heading=\"{{ 'idea' | lang: 'ui/tabs'; }}\"><append-node minder=\"minder\"></append-node><arrange minder=\"minder\"></arrange><operation minder=\"minder\"></operation><hyper-link minder=\"minder\"></hyper-link><image-btn minder=\"minder\"></image-btn><note-btn minder=\"minder\"></note-btn><priority-editor minder=\"minder\"></priority-editor><progress-editor minder=\"minder\"></progress-editor><resource-editor minder=\"minder\"></resource-editor></tab><tab heading=\"{{ 'appearence' | lang: 'ui/tabs'; }}\"><template-list minder=\"minder\" class=\"inline-directive\"></template-list><theme-list minder=\"minder\"></theme-list><layout minder=\"minder\" class=\"inline-directive\"></layout><style-operator minder=\"minder\" class=\"inline-directive\"></style-operator><font-operator minder=\"minder\" class=\"inline-directive\"></font-operator></tab><tab heading=\"{{ 'view' | lang: 'ui/tabs'; }}\"><expand-level minder=\"minder\"></expand-level><select-all minder=\"minder\"></select-all></tab></tabset>"
   );
 
+
+  $templateCache.put('ui/dialog/hyperlink/hyperlink.tpl.html',
+    "<div class=\"modal-header\"><h3 class=\"modal-title\">链接</h3></div><div class=\"modal-body\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"link-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"url\" ng-blur=\"urlPassed = R_URL.test(url)\" ng-focus=\"this.value = url\" id=\"link-url\" placeholder=\"以 http(s):// 或 ftp:// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"link-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"title\" ng-blur=\"titlePassed = true\" id=\"link-title\" placeholder=\"鼠标在链接上悬停时提示的文本\"></div></form></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\" ng-disabled=\"urlPassed === false\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
+  );
+
+
+  $templateCache.put('ui/dialog/image/image.tpl.html',
+    "<div class=\"modal-header\"><h3 class=\"modal-title\">图片</h3></div><div class=\"modal-body\"><tabset><tab heading=\"图片搜索\"><form class=\"form-inline\"><div class=\"form-group\"><label for=\"search-keyword\">关键词：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.searchKeyword2\" id=\"search-keyword\" placeholder=\"请输入搜索的关键词\"></div><button class=\"btn btn-primary\" ng-click=\"searchImage()\">百度一下</button></form><div class=\"search-result\" id=\"search-result\"><ul><li ng-repeat=\"image in list\" id=\"{{ 'img-item' + $index }}\" ng-class=\"{'selected' : isSelected}\" ng-click=\"selectImage($event)\"><img id=\"{{ 'img-' + $index }}\" ng-src=\"{{ image.src || '' }}\" alt=\"{{ image.title }}\" onerror=\"this.parentNode.remove()\"> <span>{{ image.title }}</span></li></ul></div></tab><tab heading=\"插入图片\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"image-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.url\" ng-blur=\"urlPassed = data.R_URL.test(url)\" ng-focus=\"this.value = url\" id=\"image-url\" placeholder=\"以 http(s):// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" alt=\"{{ data.title }}\"></div></form></tab></tabset></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\" ng-disabled=\"urlPassed === false\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
+  );
+
 }]);
 
 angular.module('kityminderEditor').service('commandBinder', function() {
@@ -1945,6 +1955,92 @@ angular.module('kityminderEditor')
 
 		};
 	}]);
+angular.module('kityminderEditor')
+    .controller('hyperlink.ctrl', ["$scope", "$modalInstance", "link", function ($scope, $modalInstance, link) {
+
+        $scope.R_URL = /(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/;
+
+        $scope.url = link.url || '';
+        $scope.title = link.title || '';
+
+        $scope.ok = function () {
+            $modalInstance.close({
+                url: $scope.url,
+                title: $scope.title
+            });
+        };
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('cancel');
+        };
+
+    }]);
+angular.module('kityminderEditor')
+    .controller('image.ctrl', ['$http', '$scope', '$modalInstance', 'image', function($http, $scope, $modalInstance, image) {
+
+
+        $scope.data = {
+            list: [],
+            url: image.url || '',
+            title: image.title || '',
+            R_URL: /^https?\:\/\/(\w+\.)+\w+/
+        };
+
+
+        // 搜索图片按钮点击事件
+        $scope.searchImage = function() {
+            $scope.list = [];
+
+            getImageData()
+                .success(function(json) {
+                    if(json && json.data) {
+                        for(var i = 0; i < json.data.length; i++) {
+                            if(json.data[i].objURL) {
+                                $scope.list.push({
+                                    title: json.data[i].fromPageTitleEnc,
+                                    src: json.data[i].objURL,
+                                    url: json.data[i].fromURL
+                                });
+                            }
+                        }
+                    }
+                })
+                .error(function() {
+
+                });
+        };
+
+        // 选择图片的鼠标点击事件
+        $scope.selectImage = function($event) {
+            var targetItem = $('#img-item'+ (this.$index));
+            var targetImg = $('#img-'+ (this.$index));
+
+            targetItem.siblings('.selected').removeClass('selected')
+            targetItem.addClass('selected');
+
+            $scope.data.url = targetImg.attr('src');
+            $scope.data.title = targetImg.attr('alt');
+        };
+
+        $scope.ok = function () {
+            $modalInstance.close({
+                url: $scope.data.url,
+                title: $scope.data.title
+            });
+        };
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('cancel');
+        };
+
+        function getImageData(){
+            var key = $scope.data.searchKeyword2;
+            var keepOriginName = '1';
+            var url = "http://image.baidu.com/i?ct=201326592&cl=2&lm=-1&st=-1&tn=baiduimagejson&istype=2&rn=3200&fm=index&pv=&word=" + key + "&ie=utf-8&oe=utf-8&keeporiginname=" + keepOriginName + "&" + +new Date + "&callback=JSON_CALLBACK";
+
+            return $http.jsonp(url);
+        }
+    }]);
 angular.module('kityminderEditor')
     .directive('appendNode', ['commandBinder', function(commandBinder) {
         return {

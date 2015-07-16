@@ -119,7 +119,7 @@ div.minder-editor-container {
   height: 60px;
   border-bottom: 1px solid #dbdbdb;
 }
-.tab-pane {
+.top-tab .tab-pane {
   font-size: 0;
   height: 54px;
   overflow: hidden;
@@ -337,6 +337,11 @@ div.minder-editor-container {
   -webkit-transform: translate(0, 0);
   -ms-transform: translate(0, 0);
   transform: translate(0, 0);
+}
+@media (min-width: 768px) {
+  .form-inline .form-control {
+    width: 422px;
+  }
 }
 .btn-group-vertical {
   vertical-align: top;
