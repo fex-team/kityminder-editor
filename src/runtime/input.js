@@ -110,10 +110,16 @@ define(function(require, exports, module) {
                 var fontSize = node.getData('font-size') || node.getStyle('font-size');
                 receiverElement.style.fontSize = fontSize + 'px';
                 receiverElement.style.minWidth = 0;
+                receiverElement.style.opacity = 0;
                 receiverElement.style.minWidth = receiverElement.clientWidth + 'px';
                 receiverElement.classList.add('input');
                 receiverElement.focus();
             }
+
+
+            setTimeout(function() {
+                receiverElement.style.opacity = 1;
+            }, 400);
         }
 
         function commitInputResult() {

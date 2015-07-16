@@ -14,7 +14,7 @@ define(function(require, exports, module) {
         // 不使用 kityminder 的按键处理，由 ReceiverRuntime 统一处理
         var minder = new Minder({
             enableKeyReceiver: false,
-            enableAnimation: false
+            enableAnimation: true
         });
 
         // 渲染，初始化

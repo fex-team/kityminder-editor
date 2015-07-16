@@ -14,7 +14,8 @@ define(function(require, exports, module) {
             '同级:Enter:AppendSiblingNode',
             '后移:Alt+Down:ArrangeDown',
             '删除:Delete|Backspace:RemoveNode',
-            '归纳:Shift+Tab|Shift+Insert:AppendParentNode'
+            '上级:Shift+Tab|Shift+Insert:AppendParentNode'
+            //'全选:Ctrl+A:SelectAll'
         ];
 
         buttons.forEach(function(button) {
@@ -43,27 +44,27 @@ define(function(require, exports, module) {
             });
         });
 
-        main.button({
-            position: 'ring',
-            key: '/',
-            action: function(){
-                if (!minder.queryCommandState('expand')) {
-                    minder.execCommand('expand');
-                } else if (!minder.queryCommandState('collapse')) {
-                    minder.execCommand('collapse');
-                }
-            },
-            enable: function() {
-                return minder.queryCommandState('expand') != -1 || minder.queryCommandState('collapse') != -1;
-            },
-            beforeShow: function() {
-                if (!minder.queryCommandState('expand')) {
-                    this.$button.children[0].innerHTML = '展开';
-                } else {
-                    this.$button.children[0].innerHTML = '收起';
-                }
-            }
-        })
+        //main.button({
+        //    position: 'ring',
+        //    key: '/',
+        //    action: function(){
+        //        if (!minder.queryCommandState('expand')) {
+        //            minder.execCommand('expand');
+        //        } else if (!minder.queryCommandState('collapse')) {
+        //            minder.execCommand('collapse');
+        //        }
+        //    },
+        //    enable: function() {
+        //        return minder.queryCommandState('expand') != -1 || minder.queryCommandState('collapse') != -1;
+        //    },
+        //    beforeShow: function() {
+        //        if (!minder.queryCommandState('expand')) {
+        //            this.$button.children[0].innerHTML = '展开';
+        //        } else {
+        //            this.$button.children[0].innerHTML = '收起';
+        //        }
+        //    }
+        //})
     }
 
     return module.exports = NodeRuntime;
