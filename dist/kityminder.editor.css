@@ -164,6 +164,15 @@ div.minder-editor-container {
 .km-btn-item:active {
   background-color: #c4d0ee;
 }
+.do-group {
+  width: 38px;
+}
+.undo .km-btn-icon {
+  background-position: 0 -1240px;
+}
+.redo .km-btn-icon {
+  background-position: 0 -1220px;
+}
 .append-group {
   width: 212px;
 }

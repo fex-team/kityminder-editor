@@ -60,7 +60,7 @@ define(function(require, exports, module) {
         function redo() {
             patchLock = true;
             var redoDiff = redoDiffs.pop();
-            if (redoDiffs) {
+            if (redoDiff) {
                 minder.applyPatches(redoDiff);
                 makeUndoDiff();
             }

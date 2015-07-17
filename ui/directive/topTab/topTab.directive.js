@@ -4,7 +4,8 @@ angular.module('kityminderEditor')
            restrict: 'A',
            templateUrl: 'ui/directive/topTab/topTab.html',
            scope: {
-               minder: '=topTab'
+               minder: '=topTab',
+               editor: '='
            },
            link: function(scope) {
                 scope.select = function($event) {
