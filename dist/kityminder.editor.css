@@ -755,7 +755,7 @@ div.minder-editor-container {
   list-style-type: none;
 }
 .resource-editor .resource-dropdown .km-resource.open {
-  z-index: 1;
+  z-index: 3;
   background-color: #fff;
 }
 .resource-editor .resource-dropdown .km-resource li {
