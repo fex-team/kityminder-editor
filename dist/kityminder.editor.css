@@ -493,6 +493,7 @@ div.minder-editor-container {
   right: 0;
   bottom: 0;
   left: auto;
+  z-index: 3;
 }
 .km-note.panel {
   margin: 0;
@@ -525,6 +526,7 @@ div.minder-editor-container {
 }
 .km-note-tips {
   color: #ccc;
+  padding: 3px 8px;
 }
 #previewer-content {
   position: absolute;
