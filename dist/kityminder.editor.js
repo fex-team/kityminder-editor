@@ -1875,7 +1875,7 @@ angular.module('kityminderEditor')
     }
 });
 angular.module('kityminderEditor')
-    .service('minder',  function() {
+    .service('minder.service',  function() {
 
         var callbackQueue = [];
 
@@ -2312,7 +2312,7 @@ angular.module('kityminderEditor')
         }
     }]);
 angular.module('kityminderEditor')
-	.directive('kityminderEditor', ['config', 'minder', function(config, minderService) {
+	.directive('kityminderEditor', ['config', 'minder.service', function(config, minderService) {
 		return {
 			restrict: 'EA',
 			templateUrl: 'ui/directive/kityminderEditor/kityminderEditor.html',
