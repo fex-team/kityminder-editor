@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.21 - 2015-07-21
+ * kityminder-editor - v1.0.21 - 2015-08-04
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -1875,6 +1875,26 @@ angular.module('kityminderEditor')
     }
 });
 angular.module('kityminderEditor')
+    .service('minder',  function() {
+
+        var callbackQueue = [];
+
+        function registerEvent(callback) {
+            callbackQueue.push(callback);
+        }
+
+        function executeCallback() {
+            callbackQueue.forEach(function(ele) {
+                ele.apply(this, arguments);
+            })
+        }
+
+        return {
+            registerEvent: registerEvent,
+            executeCallback: executeCallback
+        }
+    });
+angular.module('kityminderEditor')
     .service('resourceService', ['$document', function($document) {
     var openScope = null;
 
@@ -2129,7 +2149,7 @@ angular.module('kityminderEditor')
 		}
 	});
 angular.module('kityminderEditor')
-    .directive('expandLevel', ['$modal', function($modal) {
+    .directive('expandLevel', function() {
         return {
             restrict: 'E',
             templateUrl: 'ui/directive/expandLevel/expandLevel.html',
@@ -2138,12 +2158,11 @@ angular.module('kityminderEditor')
             },
             replace: true,
             link: function($scope) {
-                var minder = $scope.minder;
 
                 $scope.levels = [1, 2, 3, 4, 5, 6];
             }
         }
-    }]);
+    });
 angular.module('kityminderEditor')
 	.directive('fontOperator', function() {
 		return {
@@ -2293,7 +2312,7 @@ angular.module('kityminderEditor')
         }
     }]);
 angular.module('kityminderEditor')
-	.directive('kityminderEditor', ['config', function(config) {
+	.directive('kityminderEditor', ['config', 'minder', function(config, minderService) {
 		return {
 			restrict: 'EA',
 			templateUrl: 'ui/directive/kityminderEditor/kityminderEditor.html',
@@ -2310,6 +2329,8 @@ angular.module('kityminderEditor')
 						editor: editor,
 						minder: minder
 					});
+
+					minderService.executeCallback();
 				}
 
 				if (typeof(seajs) != 'undefined') {

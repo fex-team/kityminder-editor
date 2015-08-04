@@ -1,5 +1,5 @@
 angular.module('kityminderEditor')
-    .directive('expandLevel', ['$modal', function($modal) {
+    .directive('expandLevel', function() {
         return {
             restrict: 'E',
             templateUrl: 'ui/directive/expandLevel/expandLevel.html',
@@ -8,9 +8,8 @@ angular.module('kityminderEditor')
             },
             replace: true,
             link: function($scope) {
-                var minder = $scope.minder;
 
                 $scope.levels = [1, 2, 3, 4, 5, 6];
             }
         }
-    }]);
+    });

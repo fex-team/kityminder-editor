@@ -1,5 +1,5 @@
 angular.module('kityminderEditor')
-	.directive('kityminderEditor', ['config', function(config) {
+	.directive('kityminderEditor', ['config', 'minder', function(config, minderService) {
 		return {
 			restrict: 'EA',
 			templateUrl: 'ui/directive/kityminderEditor/kityminderEditor.html',
@@ -16,6 +16,8 @@ angular.module('kityminderEditor')
 						editor: editor,
 						minder: minder
 					});
+
+					minderService.executeCallback();
 				}
 
 				if (typeof(seajs) != 'undefined') {
