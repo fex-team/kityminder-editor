@@ -1,5 +1,5 @@
 angular.module('kityminderEditor')
-    .service('minder',  function() {
+    .service('minder.service',  function() {
 
         var callbackQueue = [];
 
