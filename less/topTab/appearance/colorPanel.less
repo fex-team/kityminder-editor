@@ -1,0 +1,44 @@
+//.color-list {
+//    width: 100px;
+//    display: inline-block;
+//    margin: 0;
+//    padding: 0;
+//    font-size: 0;
+
+    .color-wrap {
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        margin: 3px 3px 0 0;
+        border: 1px #efefef solid;
+        background-color: transparent;
+        list-style-type: none;
+        cursor: pointer;
+        vertical-align: middle;
+
+        .color-item {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin: 2px;
+        }
+
+        &:hover {
+            background-color: @tool-hover;
+        }
+
+        &:active {
+            background-color: @tool-active;
+        }
+
+        &[disabled] {
+            opacity: 0.5;
+        }
+    }
+
+
+
+    .color-wrap-selected {
+        background-color: @tool-selected;
+    }
+//}

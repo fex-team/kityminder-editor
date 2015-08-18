@@ -1,8 +1,6 @@
-@import (less) "../lib/km-core/src/kityminder.css";
-@import (less) "../lib/hotbox/less/hotbox.less";
-
 .km-editor {
     overflow: hidden;
+    z-index: 2;
 }
 
 .km-editor > .mask {
@@ -55,3 +53,72 @@
         outline: none;
     }
 }
+
+div.minder-editor-container {
+    position: absolute;
+    top: 40px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+}
+
+
+.minder-editor {
+    position: absolute;
+    top: 92px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.control-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 250px;
+    bottom: 0;
+    border-left: 1px solid #CCC;
+}
+.minder-divider {
+    position: absolute;
+    top: 0;
+    right: 250px;
+    bottom: 0;
+    width: 2px;
+    background-color: rgb(251, 251, 251);
+    cursor: ew-resize;
+}
+
+// @override bootstrap
+.panel-body {
+    padding: 10px;
+}
+
+@import (less) "_vars.less";
+@import (less) "topTab/topTab.less";
+@import (less) "topTab/idea/undoRedo.less";
+@import (less) "topTab/idea/appendNode.less";
+@import (less) "topTab/idea/arrange.less";
+@import (less) "topTab/idea/operation.less";
+@import (less) "topTab/idea/hyperlink.less";
+@import (less) "topTab/idea/image.less";
+@import (less) "topTab/idea/note.less";
+@import (less) "topTab/idea/noteEditor.less";
+@import (less) "topTab/idea/priority.less";
+@import (less) "topTab/idea/progress.less";
+@import (less) "topTab/idea/resource.less";
+@import (less) "topTab/appearance/templatePanel.less";
+@import (less) "topTab/appearance/themePanel.less";
+@import (less) "topTab/appearance/layout.less";
+@import (less) "topTab/appearance/styleOperator.less";
+@import (less) "topTab/appearance/fontOperator.less";
+@import (less) "topTab/appearance/colorPanel.less";
+@import (less) "topTab/view/expand.less";
+@import (less) "topTab/view/select.less";
+@import (less) "_tool_group.less";
+@import (less) "_navigator.less";

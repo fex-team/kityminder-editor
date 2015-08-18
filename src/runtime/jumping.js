@@ -58,7 +58,7 @@ define(function(require, exports, module) {
         receiver.listen('hotbox', function(e) {
             e.preventDefault();
             var handleResult = hotbox.dispatch(e);
-            if (handleResult == 'back' && hotbox.state() == Hotbox.STATE_IDLE) {
+            if (hotbox.state() == Hotbox.STATE_IDLE && fsm.state() == 'hotbox') {
                 return fsm.jump('normal', 'hotbox-idle');
             }
         });
@@ -89,6 +89,9 @@ define(function(require, exports, module) {
         var MOUSE_RB = 2; // 右键
 
         container.addEventListener('mousedown', function(e) {
+            if (e.button == MOUSE_RB) {
+                e.preventDefault();
+            }
             if (fsm.state() == 'hotbox') {
                 hotbox.active(Hotbox.STATE_IDLE);
                 fsm.jump('normal', 'blur');
@@ -97,6 +100,10 @@ define(function(require, exports, module) {
                 downY = e.clientY;
             }
         }, false);
+
+        container.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
 
         container.addEventListener('mouseup', function(e) {
             if (fsm.state() != 'normal') {
