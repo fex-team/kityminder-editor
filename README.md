@@ -3,9 +3,17 @@ KityMinder Editor
 
 ## 简介
 
-KityMinder Editor 是一款强大、简介、体验优秀的脑图编辑工具，适合用于编辑树/图/网等结构的数据。
+KityMinder Editor 是一款强大、简洁、体验优秀的脑图编辑工具，适合用于编辑树/图/网等结构的数据。
 
 编辑器由百度 [FEX](https://github.com/fex-team) 基于 [kityminder-core](https://github.com/fex-team/kityminder-core) 搭建，并且在[百度脑图](http://naotu.baidu.com)中使用。
+
+他们的区别与联系如下：
+
+![KityMinder 联系](relations.png "KityMinder 联系")
+
+- kityminder-core 是 kityminder 的核心部分，基于百度 [FEX](https://github.com/fex-team) 开发的矢量图形库 [kity](https://github.com/fex-team/kity)。包含了脑图数据的可视化展现，简单编辑功能等所有底层支持。
+- kityminder-editor 基于 kityminder-core 搭建，包含了 UI 和热盒 hotbox等方便用户输入的功能，简单来说，就是一款编辑器。
+- [百度脑图](http://naotu.baidu.com) 基于 kityminder-editor，加入了第三方格式导入导出 (FreeMind, XMind, MindManager) 、文件储存、用户认证、文件分享、历史版本等业务逻辑。
 
 ## 功能
 
@@ -23,46 +31,24 @@ KityMinder Editor 是一款强大、简介、体验优秀的脑图编辑工具�
 - 缩略图：支持缩略图查看/导航
 
 ## 使用
+根目录下的 `index.html` 为开发环境，`dist` 目录下的 `index.html` 使用打包好的代码，适用于线上环境。
 
-可参照 `demo` 目录下的两种使用方式，`dev.html` 使用 [CMD](https://github.com/seajs/seajs/issues/242) 的方式来加载，适用于开发环境；而 `editor.html` 使用打包压缩好的代码，适用于线上环境。
+1. 安装 [nodejs](http://nodejs.org) 和 [npm](https://docs.npmjs.com/getting-started/installing-node)
+2. 初始化：切到 kityminder-editor 根目录下运行 `npm run init`
+3. 安装 [bower](http://bower.io) 依赖：运行 `bower install`
+4. 你可以基于根目录的 `index.html` 开发，或者查看 `dist` 目录下用于生产环境的 `index.html`，Enjoy it!
 
-### dev.html
+另外，kityminder-editor 还提供了 bower 包，方便开发者直接使用。你可以在需要用到 kityminder-editor 的工程目录下
+运行 `bower install kityminder-editor`，接着手动引入 kityminder-editor 所依赖的 css 和 js 文件，具体文件见
+`dist` 目录下的 `index.html`，推荐使用 npm 包 [wireDep](https://www.npmjs.com/package/wiredep) 自动进行，
+可参考根目录下 `Gruntfile.js`。
 
-```html
-<script src="../lib/kity/dist/kity.js"></script>
-<script src="../bower_components/seajs/dist/sea-debug.js"></script>
-<script>
-/* global seajs */
-
-seajs.config({
-    base: '../src'
-});
-
-define('demo', function(require) {
-    var Editor = require('editor');
-
-    window.editor = new Editor('#minder-editor');
-});
-
-seajs.use('demo');
-
-</script>
-```
-
-### editor.html
-
-```html
-<script src="../lib/kity/dist/kity.js"></script>
-<script src="../kityminder.editor.js"></script>
-<script>
-/* global kityminder */
-window.editor = new kityminder.Editor('#minder-editor');
-</script>
-```
+## 构建
+运行 `grunt build`，完成后 `dist` 目录里就是可用运行的 kityminder-editor
 
 ## 数据导入导出
-
-创建编辑器实例之后，可以使用四个接口进行数据的导入导出。
+由于 kityminder-editor 是基于 kityminder-core 搭建的，而 kityminder-core 内置了五种常见
+格式的导入或导出，在创建编辑器实例之后，可以使用四个接口进行数据的导入导出。
 
 * `editor.minder.exportJson()` - 导出脑图数据为 JSON 对象
 * `editor.minder.importJson(json)` - 导入 JSON 对象为当前脑图数据
@@ -77,4 +63,15 @@ window.editor = new kityminder.Editor('#minder-editor');
 * `svg` - SVG 矢量格式，仅支持导出
 * `png` - PNG 位图格式，仅支持导出
 
+更多格式的支持，可以加载 [kityminder-protocol](https://github.com/fex-team/kityminder-protocol) 来扩展第三方格式支持。
+
 数据格式的具体信息，可参考 [kityminder-core-wiki 的中的说明](https://github.com/fex-team/kityminder-core/wiki)。
+
+## 联系我们
+问题和建议反馈：
+
+[Github issues](https://github.com/fex-team/kityminder-editor/issues)
+
+邮件组：kity@baidu.com
+
+QQ 讨论群：475962105
