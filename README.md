@@ -12,7 +12,7 @@ KityMinder Editor 是一款强大、简洁、体验优秀的脑图编辑工具�
 ![KityMinder 联系](relations.png "KityMinder 联系")
 
 - kityminder-core 是 kityminder 的核心部分，基于百度 [FEX](https://github.com/fex-team) 开发的矢量图形库 [kity](https://github.com/fex-team/kity)。包含了脑图数据的可视化展现，简单编辑功能等所有底层支持。
-- kityminder-editor 基于 kityminder-core 搭建，包含了 UI 和热盒 hotbox等方便用户输入的功能，简单来说，就是一款编辑器。
+- kityminder-editor 基于 kityminder-core 搭建，依赖于 AngularJS，包含 UI 和热盒 [hotbox](https://github.com/fex-team/hotbox) 等方便用户输入的功能，简单来说，就是一款编辑器。
 - [百度脑图](http://naotu.baidu.com) 基于 kityminder-editor，加入了第三方格式导入导出 (FreeMind, XMind, MindManager) 、文件储存、用户认证、文件分享、历史版本等业务逻辑。
 
 ## 功能
