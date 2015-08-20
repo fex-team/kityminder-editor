@@ -11,8 +11,8 @@ KityMinder Editor 是一款强大、简洁、体验优秀的脑图编辑工具�
 
 ![KityMinder 联系](relations.png "KityMinder 联系")
 
-- kityminder-core 是 kityminder 的核心部分，基于百度 [FEX](https://github.com/fex-team) 开发的矢量图形库 [kity](https://github.com/fex-team/kity)。包含了脑图数据的可视化展现，简单编辑功能等所有底层支持。
-- kityminder-editor 基于 kityminder-core 搭建，依赖于 AngularJS，包含 UI 和热盒 [hotbox](https://github.com/fex-team/hotbox) 等方便用户输入的功能，简单来说，就是一款编辑器。
+- [kityminder-core](https://github.com/fex-team/kityminder-core) 是 kityminder 的核心部分，基于百度 [FEX](https://github.com/fex-team) 开发的矢量图形库 [kity](https://github.com/fex-team/kity)。包含了脑图数据的可视化展现，简单编辑功能等所有底层支持。
+- [kityminder-editor](https://github.com/fex-team/kityminder-editor) 基于 kityminder-core 搭建，依赖于 AngularJS，包含 UI 和热盒 [hotbox](https://github.com/fex-team/hotbox) 等方便用户输入的功能，简单来说，就是一款编辑器。
 - [百度脑图](http://naotu.baidu.com) 基于 kityminder-editor，加入了第三方格式导入导出 (FreeMind, XMind, MindManager) 、文件储存、用户认证、文件分享、历史版本等业务逻辑。
 
 ## 功能
@@ -35,8 +35,7 @@ KityMinder Editor 是一款强大、简洁、体验优秀的脑图编辑工具�
 
 1. 安装 [nodejs](http://nodejs.org) 和 [npm](https://docs.npmjs.com/getting-started/installing-node)
 2. 初始化：切到 kityminder-editor 根目录下运行 `npm run init`
-3. 安装 [bower](http://bower.io) 依赖：运行 `bower install`
-4. 你可以基于根目录的 `index.html` 开发，或者查看 `dist` 目录下用于生产环境的 `index.html`，Enjoy it!
+3. 你可以基于根目录的 `index.html` 开发，或者查看 `dist` 目录下用于生产环境的 `index.html`，Enjoy it!
 
 另外，kityminder-editor 还提供了 bower 包，方便开发者直接使用。你可以在需要用到 kityminder-editor 的工程目录下
 运行 `bower install kityminder-editor`，接着手动引入 kityminder-editor 所依赖的 css 和 js 文件，具体文件见
