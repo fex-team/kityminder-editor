@@ -118,7 +118,16 @@ define(function(require, exports, module) {
         }
 
         function commitInputResult() {
-            var text = receiverElement.innerText;
+            var text = '';
+            var textNodes = [].slice.call(receiverElement.childNodes);
+
+            textNodes.forEach(function(str, i) {
+                if (str.toString() === '[object HTMLBRElement]') {
+                    text += '\n'
+                } else {
+                    text += str.data;
+                }
+            });
             minder.execCommand('text', text.replace(/^\n*|\n*$/g, ''));
             exitInputMode();
         }
