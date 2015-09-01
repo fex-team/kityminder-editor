@@ -38,6 +38,7 @@ define(function(require, exports, module) {
         receiver.selectAll();
 
         minder.on('beforemousedown', receiver.selectAll);
+        minder.on('receiverfocus', receiver.selectAll);
 
         // 侦听器，接收到的事件会派发给所有侦听器
         var listeners = [];

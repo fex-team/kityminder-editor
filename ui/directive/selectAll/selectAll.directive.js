@@ -19,7 +19,7 @@ angular.module('kityminderEditor')
                             selection.push(node);
                         });
                         minder.select(selection, true);
-                        editor.receiver.selectAll();
+                        minder.fire('receiverfocus');
                     },
                     revert: function() {
                         var selected = minder.getSelectedNodes();
@@ -30,7 +30,7 @@ angular.module('kityminderEditor')
                             }
                         });
                         minder.select(selection, true);
-                        editor.receiver.selectAll();
+                        minder.fire('receiverfocus');
                     },
                     siblings: function() {
                         var selected = minder.getSelectedNodes();
@@ -42,7 +42,7 @@ angular.module('kityminderEditor')
                             });
                         });
                         minder.select(selection, true);
-                        editor.receiver.selectAll();
+                        minder.fire('receiverfocus');
                     },
                     level: function() {
                         var selectedLevel = minder.getSelectedNodes().map(function(node) {
@@ -55,7 +55,7 @@ angular.module('kityminderEditor')
                             }
                         });
                         minder.select(selection, true);
-                        editor.receiver.selectAll();
+                        minder.fire('receiverfocus');
                     },
                     path: function() {
                         var selected = minder.getSelectedNodes();
@@ -67,7 +67,7 @@ angular.module('kityminderEditor')
                             }
                         });
                         minder.select(selection, true);
-                        editor.receiver.selectAll();
+                        minder.fire('receiverfocus');
                     },
                     tree: function() {
                         var selected = minder.getSelectedNodes();
@@ -78,7 +78,7 @@ angular.module('kityminderEditor')
                             });
                         });
                         minder.select(selection, true);
-                        editor.receiver.selectAll();
+                        minder.fire('receiverfocus');
                     }
                 };
             }
