@@ -101,6 +101,13 @@ define(function(require, exports, module) {
             }
         }, false);
 
+        container.addEventListener('mousewheel', function(e) {
+            if (fsm.state() == 'hotbox') {
+                hotbox.active(Hotbox.STATE_IDLE);
+                fsm.jump('normal', 'mousemove-blur');
+            }
+        }, false);
+
         container.addEventListener('contextmenu', function(e) {
             e.preventDefault();
         });

@@ -8,6 +8,7 @@
  */
 define(function(require, exports, module) {
 
+    var Hotbox = require('../hotbox');
     var Debug = require('../tool/debug');
     var debug = new Debug('drag');
 
@@ -36,13 +37,36 @@ define(function(require, exports, module) {
             });
         }
 
+        var downX, downY;
+        var MOUSE_HAS_DOWN = 0;
+        var MOUSE_HAS_UP = 1;
+        var flag = MOUSE_HAS_UP;
+
         minder.on('mousedown', function(e) {
-            if (minder.getSelectedNode()) {
+            flag = MOUSE_HAS_DOWN;
+            downX = e.clientX;
+            downY = e.clientY;
+        });
+
+        minder.on('mousemove', function(e) {
+
+            if (fsm.state() != 'drag'
+                && flag == MOUSE_HAS_DOWN
+                && minder.getSelectedNode()
+                || (Math.abs(downX - e.clientX) > 10
+                || Math.abs(downY - e.clientY) > 10)) {
+
+                if (fsm.state() == 'hotbox') {
+                    hotbox.active(Hotbox.STATE_IDLE);
+                }
+
                 return fsm.jump('drag', 'user-drag');
             }
+
         });
 
         document.body.onmouseup = function(e) {
+            flag = MOUSE_HAS_UP;
             if (fsm.state() == 'drag') {
                 return fsm.jump('normal', 'drag-finish');
             }
