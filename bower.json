@@ -60,5 +60,8 @@
                 "mode/gfm/gfm.js"
             ]
         }
+    },
+    "resolutions": {
+        "angular": "~1.3.8"
     }
 }
