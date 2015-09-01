@@ -19,6 +19,7 @@ angular.module('kityminderEditor')
                             selection.push(node);
                         });
                         minder.select(selection, true);
+                        editor.receiver.selectAll();
                     },
                     revert: function() {
                         var selected = minder.getSelectedNodes();
@@ -29,6 +30,7 @@ angular.module('kityminderEditor')
                             }
                         });
                         minder.select(selection, true);
+                        editor.receiver.selectAll();
                     },
                     siblings: function() {
                         var selected = minder.getSelectedNodes();
@@ -40,6 +42,7 @@ angular.module('kityminderEditor')
                             });
                         });
                         minder.select(selection, true);
+                        editor.receiver.selectAll();
                     },
                     level: function() {
                         var selectedLevel = minder.getSelectedNodes().map(function(node) {
@@ -52,6 +55,7 @@ angular.module('kityminderEditor')
                             }
                         });
                         minder.select(selection, true);
+                        editor.receiver.selectAll();
                     },
                     path: function() {
                         var selected = minder.getSelectedNodes();
@@ -63,6 +67,7 @@ angular.module('kityminderEditor')
                             }
                         });
                         minder.select(selection, true);
+                        editor.receiver.selectAll();
                     },
                     tree: function() {
                         var selected = minder.getSelectedNodes();
@@ -73,6 +78,7 @@ angular.module('kityminderEditor')
                             });
                         });
                         minder.select(selection, true);
+                        editor.receiver.selectAll();
                     }
                 };
             }
