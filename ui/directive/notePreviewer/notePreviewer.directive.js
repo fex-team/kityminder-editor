@@ -12,9 +12,14 @@ angular.module('kityminderEditor')
 				scope.showNotePreviewer = false;
 
 				marked.setOptions({
-					gfm: true,
-					breaks: true
-				});
+                    gfm: true,
+                    tables: true,
+                    breaks: true,
+                    pedantic: false,
+                    sanitize: true,
+                    smartLists: true,
+                    smartypants: false
+                });
 
 
 				var previewTimer;
@@ -50,7 +55,7 @@ angular.module('kityminderEditor')
 					if (keyword) {
 						html = html.replace(new RegExp('(' + keyword + ')', 'ig'), '<span class="highlight">$1</span>');
 					}
-					scope.noteContent = $sce.trustAsHtml(sanitizeHtml(html));
+					scope.noteContent = $sce.trustAsHtml(html);
 					scope.$apply(); // 让浏览器重新渲染以获取 previewer 提示框的尺寸
 
 					var cw = $($container[0]).width();
@@ -81,47 +86,6 @@ angular.module('kityminderEditor')
 
 					scope.$apply();
 				}
-
-
-                // 对字符做转义等处理。
-                function sanitizeHtml(s) {
-                    var div = document.createElement('div');
-                    div.innerHTML = s;
-                    var scripts = div.getElementsByTagName('script');
-                    var i = scripts.length;
-                    while (i--) {
-                        scripts[i].parentNode.removeChild(scripts[i]);
-                    }
-
-
-
-
-                    return div.innerHTML;
-                }
-
-                function sanitizeAttr(domStr) {
-                    var div = document.createElement('div');
-                    div.innerHTML = domStr;
-
-                    for (var j = 0; div.childNodes && (j < div.childNodes.length); j++) {
-                        var node = div.childNodes[j];
-                        for(var k = 0; node.attributes && (k < node.attributes.length); k++) {
-                            var attrObj = node.attributes[k];
-                            var attrName = attrObj.nodeName;
-
-                            var pattern = /^on.*/g;
-                            if (pattern.test(attrName.toLowerCase())) {
-                                attrObj.removeAttribute(attrName);
-                            }
-                        }
-
-                        if (node.childNodes.length) {
-                            var temp = document.createElement('div');
-                            temp.appendChild(node);
-                            sanitizeAttr(temp.innerHTML);
-                        }
-                    }
-                }
 			}
 		}
 }]);
