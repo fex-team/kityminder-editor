@@ -81,6 +81,9 @@ define(function(require, exports, module) {
                 if (e.is('Tab') || e.is('Shift + Tab')) {
                     e.preventDefault();
                 }
+            } else if (e.type == 'keyup' && e.is('Esc')) {
+                e.preventDefault();
+                return fsm.jump('normal', 'input-cancel');
             }
         });
 
