@@ -1,7 +1,7 @@
 <div class="font-operator">
     <div class="dropdown font-family-list" dropdown>
         <div class="dropdown-toggle current-font-item" dropdown-toggle ng-disabled="minder.queryCommandState('fontfamily') === -1">
-            <a href class="current-font-item"  title="{{ 'fontfamily' | lang: 'ui' }}">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a>
+            <a href class="current-font-family"  title="{{ 'fontfamily' | lang: 'ui' }}">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a>
             <span class="caret"></span>
         </div>
         <ul class="dropdown-menu font-list">
@@ -12,7 +12,7 @@
     </div>
     <div class="dropdown font-size-list" dropdown>
         <div class="dropdown-toggle current-font-item" dropdown-toggle ng-disabled="minder.queryCommandState('fontsize') === -1">
-            <a href class="current-font-item"  title="{{ 'fontsize' | lang: 'ui' }}">{{ minder.queryCommandValue('fontsize') || '字号' }}</a>
+            <a href class="current-font-size"  title="{{ 'fontsize' | lang: 'ui' }}">{{ minder.queryCommandValue('fontsize') || '字号' }}</a>
             <span class="caret"></span>
         </div>
         <ul class="dropdown-menu font-list">
