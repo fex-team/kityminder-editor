@@ -36,10 +36,14 @@ define(function(require, exports, module) {
         // normal -> *
         receiver.listen('normal', function(e) {
             // normal -> hotbox
-            if (e.type == 'keydown' && e.is('Space')) {
+            if ((e.type == 'keydown' && e.is('Space')) || (e.type == 'keyup' && e.is('Space'))) {
                 e.preventDefault();
                 return fsm.jump('hotbox', 'space-trigger');
             }
+            if (e.type == 'keydown' && e.keyCode == 229) {
+                return;
+            }
+
             // normal -> input
             if (e.type == 'keydown' && isIntendToInput(e)) {
                 if (minder.getSelectedNode()) {

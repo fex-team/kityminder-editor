@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.21 - 2015-08-05
+ * kityminder-editor - v1.0.21 - 2015-09-06
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -57,16 +57,17 @@ _p[0] = {
         }
         KMEditor.assemble = assemble;
         assemble(_p.r(5));
-        assemble(_p.r(6));
-        assemble(_p.r(11));
-        assemble(_p.r(15));
-        assemble(_p.r(8));
-        assemble(_p.r(9));
-        assemble(_p.r(12));
         assemble(_p.r(7));
+        assemble(_p.r(12));
+        assemble(_p.r(16));
+        assemble(_p.r(9));
         assemble(_p.r(10));
+        assemble(_p.r(6));
         assemble(_p.r(13));
+        assemble(_p.r(8));
+        assemble(_p.r(11));
         assemble(_p.r(14));
+        assemble(_p.r(15));
         return module.exports = KMEditor;
     }
 };
@@ -136,6 +137,64 @@ _p[5] = {
     }
 };
 
+//src/runtime/drag.js
+/**
+ * @fileOverview
+ *
+ * 用于拖拽节点是屏蔽键盘事件
+ *
+ * @author: techird
+ * @copyright: Baidu FEX, 2014
+ */
+_p[6] = {
+    value: function(require, exports, module) {
+        var Hotbox = _p.r(2);
+        var Debug = _p.r(17);
+        var debug = new Debug("drag");
+        function DragRuntime() {
+            var fsm = this.fsm;
+            var minder = this.minder;
+            var hotbox = this.hotbox;
+            var receiver = this.receiver;
+            var receiverElement = receiver.element;
+            // setup everything to go
+            setupFsm();
+            // listen the fsm changes, make action.
+            function setupFsm() {
+                // when jumped to drag mode, enter
+                fsm.when("* -> drag", function() {});
+                fsm.when("drag -> *", function(exit, enter, reason) {
+                    if (reason == "drag-finish") {}
+                });
+            }
+            var downX, downY;
+            var MOUSE_HAS_DOWN = 0;
+            var MOUSE_HAS_UP = 1;
+            var flag = MOUSE_HAS_UP;
+            minder.on("mousedown", function(e) {
+                flag = MOUSE_HAS_DOWN;
+                downX = e.clientX;
+                downY = e.clientY;
+            });
+            minder.on("mousemove", function(e) {
+                if (fsm.state() != "drag" && flag == MOUSE_HAS_DOWN && minder.getSelectedNode() || (Math.abs(downX - e.clientX) > 10 || Math.abs(downY - e.clientY) > 10)) {
+                    if (fsm.state() == "hotbox") {
+                        hotbox.active(Hotbox.STATE_IDLE);
+                    }
+                    return fsm.jump("drag", "user-drag");
+                }
+            });
+            document.body.onmouseup = function(e) {
+                flag = MOUSE_HAS_UP;
+                if (fsm.state() == "drag") {
+                    return fsm.jump("normal", "drag-finish");
+                }
+            };
+        }
+        return module.exports = DragRuntime;
+    }
+};
+
 //src/runtime/fsm.js
 /**
  * @fileOverview
@@ -145,9 +204,9 @@ _p[5] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[6] = {
+_p[7] = {
     value: function(require, exports, module) {
-        var Debug = _p.r(16);
+        var Debug = _p.r(17);
         var debug = new Debug("fsm");
         function handlerConditionMatch(condition, when, exit, enter) {
             if (condition.when != when) return false;
@@ -253,9 +312,9 @@ _p[6] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[7] = {
+_p[8] = {
     value: function(require, exports, module) {
-        var jsonDiff = _p.r(19);
+        var jsonDiff = _p.r(20);
         function HistoryRuntime() {
             var minder = this.minder;
             var hotbox = this.hotbox;
@@ -373,7 +432,7 @@ _p[7] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[8] = {
+_p[9] = {
     value: function(require, exports, module) {
         var Hotbox = _p.r(2);
         function HotboxRuntime() {
@@ -419,10 +478,10 @@ _p[8] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[9] = {
+_p[10] = {
     value: function(require, exports, module) {
-        _p.r(18);
-        var Debug = _p.r(16);
+        _p.r(19);
+        var Debug = _p.r(17);
         var debug = new Debug("input");
         function InputRuntime() {
             var fsm = this.fsm;
@@ -508,7 +567,15 @@ _p[9] = {
                 }
             }
             function commitInputResult() {
-                var text = receiverElement.innerText;
+                var text = "";
+                var textNodes = [].slice.call(receiverElement.childNodes);
+                textNodes.forEach(function(str, i) {
+                    if (str.toString() === "[object HTMLBRElement]") {
+                        text += "\n";
+                    } else {
+                        text += str.data;
+                    }
+                });
                 minder.execCommand("text", text.replace(/^\n*|\n*$/g, ""));
                 exitInputMode();
             }
@@ -544,7 +611,7 @@ _p[9] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[10] = {
+_p[11] = {
     value: function(require, exports, module) {
         var Hotbox = _p.r(2);
         // Nice: http://unixpapa.com/js/key.html
@@ -567,9 +634,12 @@ _p[10] = {
             // normal -> *
             receiver.listen("normal", function(e) {
                 // normal -> hotbox
-                if (e.type == "keydown" && e.is("Space")) {
+                if (e.type == "keydown" && e.is("Space") || e.type == "keyup" && e.is("Space")) {
                     e.preventDefault();
                     return fsm.jump("hotbox", "space-trigger");
+                }
+                if (e.type == "keydown" && e.keyCode == 229) {
+                    return;
                 }
                 // normal -> input
                 if (e.type == "keydown" && isIntendToInput(e)) {
@@ -627,6 +697,12 @@ _p[10] = {
                     downY = e.clientY;
                 }
             }, false);
+            container.addEventListener("mousewheel", function(e) {
+                if (fsm.state() == "hotbox") {
+                    hotbox.active(Hotbox.STATE_IDLE);
+                    fsm.jump("normal", "mousemove-blur");
+                }
+            }, false);
             container.addEventListener("contextmenu", function(e) {
                 e.preventDefault();
             });
@@ -660,7 +736,7 @@ _p[10] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[11] = {
+_p[12] = {
     value: function(require, exports, module) {
         var Minder = _p.r(4);
         function MinderRuntime() {
@@ -682,7 +758,7 @@ _p[11] = {
 };
 
 //src/runtime/node.js
-_p[12] = {
+_p[13] = {
     value: function(require, exports, module) {
         function NodeRuntime() {
             var runtime = this;
@@ -721,7 +797,7 @@ _p[12] = {
 };
 
 //src/runtime/priority.js
-_p[13] = {
+_p[14] = {
     value: function(require, exports, module) {
         function PriorityRuntime() {
             var minder = this.minder;
@@ -767,7 +843,7 @@ _p[13] = {
 };
 
 //src/runtime/progress.js
-_p[14] = {
+_p[15] = {
     value: function(require, exports, module) {
         function ProgressRuntime() {
             var minder = this.minder;
@@ -821,9 +897,9 @@ _p[14] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[15] = {
+_p[16] = {
     value: function(require, exports, module) {
-        var key = _p.r(20);
+        var key = _p.r(21);
         function ReceiverRuntime() {
             var fsm = this.fsm;
             var minder = this.minder;
@@ -849,6 +925,7 @@ _p[15] = {
             };
             receiver.selectAll();
             minder.on("beforemousedown", receiver.selectAll);
+            minder.on("receiverfocus", receiver.selectAll);
             // 侦听器，接收到的事件会派发给所有侦听器
             var listeners = [];
             // 侦听指定状态下的事件，如果不传 state，侦听所有状态
@@ -911,9 +988,9 @@ _p[15] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[16] = {
+_p[17] = {
     value: function(require, exports, module) {
-        var format = _p.r(17);
+        var format = _p.r(18);
         function noop() {}
         function stringHash(str) {
             var hash = 0;
@@ -942,7 +1019,7 @@ _p[16] = {
 };
 
 //src/tool/format.js
-_p[17] = {
+_p[18] = {
     value: function(require, exports, module) {
         function format(template, args) {
             if (typeof args != "object") {
@@ -965,7 +1042,7 @@ _p[17] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[18] = {
+_p[19] = {
     value: function(require, exports, module) {
         if (!("innerText" in document.createElement("a")) && "getSelection" in window) {
             HTMLElement.prototype.__defineGetter__("innerText", function() {
@@ -1007,7 +1084,7 @@ _p[18] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[19] = {
+_p[20] = {
     value: function(require, exports, module) {
         /*!
     * https://github.com/Starcounter-Jack/Fast-JSON-Patch
@@ -1093,9 +1170,9 @@ _p[19] = {
 };
 
 //src/tool/key.js
-_p[20] = {
+_p[21] = {
     value: function(require, exports, module) {
-        var keymap = _p.r(21);
+        var keymap = _p.r(22);
         var CTRL_MASK = 4096;
         var ALT_MASK = 8192;
         var SHIFT_MASK = 16384;
@@ -1154,7 +1231,7 @@ _p[20] = {
 };
 
 //src/tool/keymap.js
-_p[21] = {
+_p[22] = {
     value: function(require, exports, module) {
         var keymap = {
             Shift: 16,
@@ -2730,9 +2807,14 @@ angular.module('kityminderEditor')
 				scope.showNotePreviewer = false;
 
 				marked.setOptions({
-					gfm: true,
-					breaks: true
-				});
+                    gfm: true,
+                    tables: true,
+                    breaks: true,
+                    pedantic: false,
+                    sanitize: true,
+                    smartLists: true,
+                    smartypants: false
+                });
 
 
 				var previewTimer;
@@ -3004,6 +3086,7 @@ angular.module('kityminderEditor')
                             selection.push(node);
                         });
                         minder.select(selection, true);
+                        minder.fire('receiverfocus');
                     },
                     revert: function() {
                         var selected = minder.getSelectedNodes();
@@ -3014,6 +3097,7 @@ angular.module('kityminderEditor')
                             }
                         });
                         minder.select(selection, true);
+                        minder.fire('receiverfocus');
                     },
                     siblings: function() {
                         var selected = minder.getSelectedNodes();
@@ -3025,6 +3109,7 @@ angular.module('kityminderEditor')
                             });
                         });
                         minder.select(selection, true);
+                        minder.fire('receiverfocus');
                     },
                     level: function() {
                         var selectedLevel = minder.getSelectedNodes().map(function(node) {
@@ -3037,6 +3122,7 @@ angular.module('kityminderEditor')
                             }
                         });
                         minder.select(selection, true);
+                        minder.fire('receiverfocus');
                     },
                     path: function() {
                         var selected = minder.getSelectedNodes();
@@ -3048,6 +3134,7 @@ angular.module('kityminderEditor')
                             }
                         });
                         minder.select(selection, true);
+                        minder.fire('receiverfocus');
                     },
                     tree: function() {
                         var selected = minder.getSelectedNodes();
@@ -3058,6 +3145,7 @@ angular.module('kityminderEditor')
                             });
                         });
                         minder.select(selection, true);
+                        minder.fire('receiverfocus');
                     }
                 };
             }
