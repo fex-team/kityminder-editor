@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.21 - 2015-09-08
+ * kityminder-editor - v1.0.37 - 2015-09-09
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -910,7 +910,6 @@ _p[16] = {
             var element = document.createElement("div");
             element.contentEditable = true;
             element.classList.add("receiver");
-            element.tabindex = -1;
             element.onkeydown = element.onkeypress = element.onkeyup = dispatchKeyEvent;
             this.container.appendChild(element);
             // receiver 对象
