@@ -55,6 +55,7 @@ div.minder-editor-container {
   bottom: 0;
   left: 0;
   right: 0;
+  font-family: Arial, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -266,10 +267,10 @@ div.minder-editor-container {
   height: 25px;
   background: url(images/icons.png) no-repeat center -125px;
 }
-.btn-group-vertical .image-caption {
+.btn-group-vertical .image-btn-caption {
   height: 20px;
 }
-.btn-group-vertical .image-caption .caption {
+.btn-group-vertical .image-btn-caption .caption {
   font-size: 12px;
 }
 .image-preview {
