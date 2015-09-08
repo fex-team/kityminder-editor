@@ -56,11 +56,6 @@ div.minder-editor-container {
   left: 0;
   right: 0;
   font-family: Arial, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  -khtml-user-select: none;
-  user-select: none;
 }
 .minder-editor {
   position: absolute;
