@@ -9,10 +9,12 @@
 
 define(function(require, exports, module) {
     var key = require('../tool/key');
+    var hotbox = require('hotbox');
 
     function ReceiverRuntime() {
         var fsm = this.fsm;
         var minder = this.minder;
+        var me = this;
 
         // 接收事件的 div
         var element = document.createElement('div');
@@ -39,6 +41,11 @@ define(function(require, exports, module) {
 
         minder.on('beforemousedown', receiver.selectAll);
         minder.on('receiverfocus', receiver.selectAll);
+        minder.on('readonly', function() {
+            element.contentEditable = false;
+            element.style.opacity = '0';
+            editor.hotbox.$container.removeChild(editor.hotbox.$element);
+        });
 
         // 侦听器，接收到的事件会派发给所有侦听器
         var listeners = [];
