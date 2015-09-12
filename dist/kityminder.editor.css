@@ -114,6 +114,7 @@ div.minder-editor-container {
 }
 .top-tab .tab-content {
   height: 60px;
+  background-color: #fff;
   border-bottom: 1px solid #dbdbdb;
 }
 .top-tab .tab-pane {
