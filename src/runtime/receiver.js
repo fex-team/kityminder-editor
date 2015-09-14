@@ -59,8 +59,7 @@ define(function(require, exports, module) {
         minder.on('beforemousedown', receiver.selectAll);
         minder.on('receiverfocus', receiver.selectAll);
         minder.on('readonly', function() {
-            element.contentEditable = false;
-            element.style.opacity = '0';
+            receiver.disable();
             editor.hotbox.$container.removeChild(editor.hotbox.$element);
         });
 
