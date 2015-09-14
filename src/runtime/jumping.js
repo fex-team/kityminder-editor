@@ -35,6 +35,7 @@ define(function(require, exports, module) {
 
         // normal -> *
         receiver.listen('normal', function(e) {
+            console.log(e.type, e.keyCode);
             // normal -> hotbox
             if ((e.type == 'keydown' && e.is('Space')) || (e.type == 'keyup' && e.is('Space'))) {
                 e.preventDefault();
@@ -45,7 +46,7 @@ define(function(require, exports, module) {
             }
 
             // normal -> input
-            if (e.type == 'keydown' && isIntendToInput(e)) {
+            if ((e.type == 'keydown' || e.type == 'keyup' ) && isIntendToInput(e)) {
                 if (minder.getSelectedNode()) {
                     return fsm.jump('input', 'user-input');
                 } else {
