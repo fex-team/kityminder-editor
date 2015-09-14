@@ -676,11 +676,8 @@ _p[11] = {
                     if (e.is("Ctrl + s")) {
                         minder.fire("savefile");
                         e.preventDefault();
-                    } else if (e.is("Ctrl + F")) {
+                    } else if (e.is("Ctrl + f")) {
                         minder.fire("findNode");
-                        e.preventDefault();
-                    } else if (e.is("esc")) {
-                        minder.fire("exitMenu");
                         e.preventDefault();
                     }
                     return fsm.jump("normal", "shortcut-handle", e);
