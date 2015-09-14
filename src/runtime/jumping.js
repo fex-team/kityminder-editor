@@ -23,8 +23,17 @@ define(function(require, exports, module) {
 
         // 输入法
         if (e.keyCode == 229) return true;
-    }
 
+        return false;
+    }
+    /**
+     * @Desc: 下方使用receiver.enable()和receiver.disable()通过
+     *        修改div contenteditable属性的hack来解决开启热核后依然无法屏蔽浏览器输入的bug;
+     *        特别: win下FF对于此种情况必须要先blur在focus才能解决，但是由于这样做会导致用户
+     *             输入法状态丢失，因此对FF咱不做处理
+     * @Editor: Naixor
+     * @Date: 2015.09.14
+     */
     function JumpingRuntime() {
         var fsm = this.fsm;
         var minder = this.minder;
@@ -35,18 +44,30 @@ define(function(require, exports, module) {
 
         // normal -> *
         receiver.listen('normal', function(e) {
+            receiver.enable();
             // normal -> hotbox
-            if ((e.type == 'keydown' && e.is('Space')) || (e.type == 'keyup' && e.is('Space'))) {
+            if ((e.type == 'keydown' || e.type == 'keyup') && e.is('Space')) {
                 e.preventDefault();
                 return fsm.jump('hotbox', 'space-trigger');
             }
-            if (e.type == 'keydown' && e.keyCode == 229) {
+            if (e.keyCode === 229 || e.keyCode === 0) {
+                e.preventDefault();
                 return;
-            }
-
+            };
             // normal -> input
-            if (e.type == 'keydown' && isIntendToInput(e)) {
+            if (e.type !== 'keypress' && isIntendToInput(e)) {
                 if (minder.getSelectedNode()) {
+                    /**
+                     * @Desc: 这里单独处理下Win系统下，FF的div内输入法中文状态下输入内容会被全部拦截而导致的显示错误
+                     * @Editor: Naixor
+                     * @Date: 2015.09.14
+                     */
+                    if (kity.Browser.platform === "Win") {
+                        if (kity.Browser.gecko) {
+                            receiverElement.innerHTML = minder.getSelectedNode().data.text;
+                            receiver.selectAll();
+                        };
+                    };
                     return fsm.jump('input', 'user-input');
                 } else {
                     receiverElement.innerHTML = '';
@@ -60,6 +81,7 @@ define(function(require, exports, module) {
 
         // hotbox -> normal
         receiver.listen('hotbox', function(e) {
+            receiver.disable();
             e.preventDefault();
             var handleResult = hotbox.dispatch(e);
             if (hotbox.state() == Hotbox.STATE_IDLE && fsm.state() == 'hotbox') {
@@ -69,6 +91,7 @@ define(function(require, exports, module) {
 
         // input => normal
         receiver.listen('input', function(e) {
+            receiver.enable();
             if (e.type == 'keydown') {
                 if (e.is('Enter')) {
                     e.preventDefault();
