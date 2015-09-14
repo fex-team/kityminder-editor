@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.37 - 2015-09-09
+ * kityminder-editor - v1.0.37 - 2015-09-14
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -623,7 +623,16 @@ _p[11] = {
             if (e.keyCode >= 48 && e.keyCode <= 57) return true;
             // 输入法
             if (e.keyCode == 229) return true;
+            return false;
         }
+        /**
+     * @Desc: 下方使用receiver.enable()和receiver.disable()通过
+     *        修改div contenteditable属性的hack来解决开启热核后依然无法屏蔽浏览器输入的bug;
+     *        特别: win下FF对于此种情况必须要先blur在focus才能解决，但是由于这样做会导致用户
+     *             输入法状态丢失，因此对FF咱不做处理
+     * @Editor: Naixor
+     * @Date: 2015.09.14
+     */
         function JumpingRuntime() {
             var fsm = this.fsm;
             var minder = this.minder;
@@ -633,17 +642,30 @@ _p[11] = {
             var hotbox = this.hotbox;
             // normal -> *
             receiver.listen("normal", function(e) {
+                receiver.enable();
                 // normal -> hotbox
-                if (e.type == "keydown" && e.is("Space") || e.type == "keyup" && e.is("Space")) {
+                if ((e.type == "keydown" || e.type == "keyup") && e.is("Space")) {
                     e.preventDefault();
                     return fsm.jump("hotbox", "space-trigger");
                 }
-                if (e.type == "keydown" && e.keyCode == 229) {
+                if (e.keyCode === 229 || e.keyCode === 0) {
+                    e.preventDefault();
                     return;
                 }
                 // normal -> input
-                if (e.type == "keydown" && isIntendToInput(e)) {
+                if (e.type !== "keypress" && isIntendToInput(e)) {
                     if (minder.getSelectedNode()) {
+                        /**
+                     * @Desc: 这里单独处理下Win系统下，FF的div内输入法中文状态下输入内容会被全部拦截而导致的显示错误
+                     * @Editor: Naixor
+                     * @Date: 2015.09.14
+                     */
+                        if (kity.Browser.platform === "Win") {
+                            if (kity.Browser.gecko) {
+                                receiverElement.innerHTML = minder.getSelectedNode().data.text;
+                                receiver.selectAll();
+                            }
+                        }
                         return fsm.jump("input", "user-input");
                     } else {
                         receiverElement.innerHTML = "";
@@ -651,11 +673,22 @@ _p[11] = {
                 }
                 // normal -> normal
                 if (e.type == "keydown") {
+                    if (e.is("Ctrl + s")) {
+                        minder.fire("savefile");
+                        e.preventDefault();
+                    } else if (e.is("Ctrl + F")) {
+                        minder.fire("findNode");
+                        e.preventDefault();
+                    } else if (e.is("esc")) {
+                        minder.fire("exitMenu");
+                        e.preventDefault();
+                    }
                     return fsm.jump("normal", "shortcut-handle", e);
                 }
             });
             // hotbox -> normal
             receiver.listen("hotbox", function(e) {
+                receiver.disable();
                 e.preventDefault();
                 var handleResult = hotbox.dispatch(e);
                 if (hotbox.state() == Hotbox.STATE_IDLE && fsm.state() == "hotbox") {
@@ -664,6 +697,7 @@ _p[11] = {
             });
             // input => normal
             receiver.listen("input", function(e) {
+                receiver.enable();
                 if (e.type == "keydown") {
                     if (e.is("Enter")) {
                         e.preventDefault();
@@ -903,12 +937,20 @@ _p[15] = {
 _p[16] = {
     value: function(require, exports, module) {
         var key = _p.r(21);
+        var hotbox = _p.r(2);
         function ReceiverRuntime() {
             var fsm = this.fsm;
             var minder = this.minder;
+            var me = this;
             // 接收事件的 div
             var element = document.createElement("div");
             element.contentEditable = true;
+            /**
+         * @Desc: 增加tabindex属性使得element的contenteditable不管是trur还是false都能有focus和blur事件
+         * @Editor: Naixor
+         * @Date: 2015.09.14
+         */
+            element.setAttribute("tabindex", -1);
             element.classList.add("receiver");
             element.onkeydown = element.onkeypress = element.onkeyup = dispatchKeyEvent;
             this.container.appendChild(element);
@@ -924,11 +966,26 @@ _p[16] = {
                     selection.removeAllRanges();
                     selection.addRange(range);
                     element.focus();
+                },
+                /**
+             * @Desc: 增加enable和disable方法用于解决热核态的输入法屏蔽问题
+             * @Editor: Naixor
+             * @Date: 2015.09.14
+             */
+                enable: function() {
+                    element.setAttribute("contenteditable", true);
+                },
+                disable: function() {
+                    element.setAttribute("contenteditable", false);
                 }
             };
             receiver.selectAll();
             minder.on("beforemousedown", receiver.selectAll);
             minder.on("receiverfocus", receiver.selectAll);
+            minder.on("readonly", function() {
+                receiver.disable();
+                editor.hotbox.$container.removeChild(editor.hotbox.$element);
+            });
             // 侦听器，接收到的事件会派发给所有侦听器
             var listeners = [];
             // 侦听指定状态下的事件，如果不传 state，侦听所有状态
@@ -1360,12 +1417,17 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/imageBtn/imageBtn.html',
-    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default image-btn\" title=\"{{ 'image' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"addImage()\" ng-disabled=\"minder.queryCommandState('Image') === -1\"></button> <button type=\"button\" class=\"btn btn-default image-btn-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('Image') === -1\" title=\"{{ 'image' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'image' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'image' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addImage()\">{{ 'insertimage' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('Image', null)\">{{ 'removeimage' | lang:'ui' }}</a></li></ul></div>"
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default image-btn\" title=\"{{ 'image' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"addImage()\" ng-disabled=\"minder.queryCommandState('Image') === -1\"></button> <button type=\"button\" class=\"btn btn-default image-btn-caption dropdown-toggle\" ng-disabled=\"minder.queryCommandState('Image') === -1\" title=\"{{ 'image' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'image' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'image' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li><a href ng-click=\"addImage()\">{{ 'insertimage' | lang:'ui' }}</a></li><li><a href ng-click=\"minder.execCommand('Image', '')\">{{ 'removeimage' | lang:'ui' }}</a></li></ul></div>"
   );
 
 
   $templateCache.put('ui/directive/kityminderEditor/kityminderEditor.html',
     "<div class=\"minder-editor-container\"><div class=\"top-tab\" top-tab=\"minder\" editor=\"editor\" ng-if=\"minder\"></div><div class=\"minder-editor\"></div><div class=\"km-note\" note-editor minder=\"minder\" ng-if=\"minder\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div><div class=\"navigator\" navigator minder=\"minder\" ng-if=\"minder\"></div></div>"
+  );
+
+
+  $templateCache.put('ui/directive/kityminderViewer/kityminderViewer.html',
+    "<div class=\"minder-editor-container\"><div class=\"minder-viewer\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div><div class=\"navigator\" navigator minder=\"minder\" ng-if=\"minder\"></div></div>"
   );
 
 
@@ -1445,7 +1507,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/topTab/topTab.html',
-    "<tabset><tab heading=\"{{ 'idea' | lang: 'ui/tabs'; }}\"><undo-redo editor=\"editor\"></undo-redo><append-node minder=\"minder\"></append-node><arrange minder=\"minder\"></arrange><operation minder=\"minder\"></operation><hyper-link minder=\"minder\"></hyper-link><image-btn minder=\"minder\"></image-btn><note-btn minder=\"minder\"></note-btn><priority-editor minder=\"minder\"></priority-editor><progress-editor minder=\"minder\"></progress-editor><resource-editor minder=\"minder\"></resource-editor></tab><tab heading=\"{{ 'appearence' | lang: 'ui/tabs'; }}\"><template-list minder=\"minder\" class=\"inline-directive\"></template-list><theme-list minder=\"minder\"></theme-list><layout minder=\"minder\" class=\"inline-directive\"></layout><style-operator minder=\"minder\" class=\"inline-directive\"></style-operator><font-operator minder=\"minder\" class=\"inline-directive\"></font-operator></tab><tab heading=\"{{ 'view' | lang: 'ui/tabs'; }}\"><expand-level minder=\"minder\"></expand-level><select-all minder=\"minder\"></select-all></tab></tabset>"
+    "<tabset><tab heading=\"{{ 'idea' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('idea')\" select=\"setCurTab('idea')\"><undo-redo editor=\"editor\"></undo-redo><append-node minder=\"minder\"></append-node><arrange minder=\"minder\"></arrange><operation minder=\"minder\"></operation><hyper-link minder=\"minder\"></hyper-link><image-btn minder=\"minder\"></image-btn><note-btn minder=\"minder\"></note-btn><priority-editor minder=\"minder\"></priority-editor><progress-editor minder=\"minder\"></progress-editor><resource-editor minder=\"minder\"></resource-editor></tab><tab heading=\"{{ 'appearence' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('appearance')\" select=\"setCurTab('appearance')\"><template-list minder=\"minder\" class=\"inline-directive\"></template-list><theme-list minder=\"minder\"></theme-list><layout minder=\"minder\" class=\"inline-directive\"></layout><style-operator minder=\"minder\" class=\"inline-directive\"></style-operator><font-operator minder=\"minder\" class=\"inline-directive\"></font-operator></tab><tab heading=\"{{ 'view' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('view')\" select=\"setCurTab('view')\"><expand-level minder=\"minder\"></expand-level><select-all minder=\"minder\"></select-all></tab></tabset>"
   );
 
 
@@ -1455,12 +1517,12 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/dialog/hyperlink/hyperlink.tpl.html',
-    "<div class=\"modal-header\"><h3 class=\"modal-title\">链接</h3></div><div class=\"modal-body\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"link-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"url\" ng-blur=\"urlPassed = R_URL.test(url)\" ng-focus=\"this.value = url\" id=\"link-url\" placeholder=\"以 http(s):// 或 ftp:// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"link-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"title\" ng-blur=\"titlePassed = true\" id=\"link-title\" placeholder=\"鼠标在链接上悬停时提示的文本\"></div></form></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\" ng-disabled=\"urlPassed === false\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
+    "<div class=\"modal-header\"><h3 class=\"modal-title\">链接</h3></div><div class=\"modal-body\"><form><div class=\"form-group\" id=\"link-url-wrap\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"link-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"url\" ng-blur=\"urlPassed = R_URL.test(url)\" ng-focus=\"this.value = url\" ng-keydown=\"shortCut($event)\" id=\"link-url\" placeholder=\"必填：以 http(s):// 或 ftp:// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"link-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"title\" ng-blur=\"titlePassed = true\" id=\"link-title\" placeholder=\"选填：鼠标在链接上悬停时提示的文本\"></div></form></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
   );
 
 
   $templateCache.put('ui/dialog/image/image.tpl.html',
-    "<div class=\"modal-header\"><h3 class=\"modal-title\">图片</h3></div><div class=\"modal-body\"><tabset><tab heading=\"图片搜索\"><form class=\"form-inline\"><div class=\"form-group\"><label for=\"search-keyword\">关键词：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.searchKeyword2\" id=\"search-keyword\" placeholder=\"请输入搜索的关键词\"></div><button class=\"btn btn-primary\" ng-click=\"searchImage()\">百度一下</button></form><div class=\"search-result\" id=\"search-result\"><ul><li ng-repeat=\"image in list\" id=\"{{ 'img-item' + $index }}\" ng-class=\"{'selected' : isSelected}\" ng-click=\"selectImage($event)\"><img id=\"{{ 'img-' + $index }}\" ng-src=\"{{ image.src || '' }}\" alt=\"{{ image.title }}\" onerror=\"this.parentNode.remove()\"> <span>{{ image.title }}</span></li></ul></div></tab><tab heading=\"插入图片\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"image-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.url\" ng-blur=\"urlPassed = data.R_URL.test(url)\" ng-focus=\"this.value = url\" id=\"image-url\" placeholder=\"以 http(s):// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" alt=\"{{ data.title }}\"></div></form></tab></tabset></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\" ng-disabled=\"urlPassed === false\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
+    "<div class=\"modal-header\"><h3 class=\"modal-title\">图片</h3></div><div class=\"modal-body\"><tabset><tab heading=\"图片搜索\"><form class=\"form-inline\"><div class=\"form-group\"><label for=\"search-keyword\">关键词：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.searchKeyword2\" id=\"search-keyword\" placeholder=\"请输入搜索的关键词\"></div><button class=\"btn btn-primary\" ng-click=\"searchImage()\">百度一下</button></form><div class=\"search-result\" id=\"search-result\"><ul><li ng-repeat=\"image in list\" id=\"{{ 'img-item' + $index }}\" ng-class=\"{'selected' : isSelected}\" ng-click=\"selectImage($event)\"><img id=\"{{ 'img-' + $index }}\" ng-src=\"{{ image.src || '' }}\" alt=\"{{ image.title }}\" onerror=\"this.parentNode.remove()\"> <span>{{ image.title }}</span></li></ul></div></tab><tab heading=\"插入图片\" active=\"true\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"image-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.url\" ng-blur=\"urlPassed = data.R_URL.test(data.url)\" ng-focus=\"this.value = data.url\" ng-keydown=\"shortCut($event)\" id=\"image-url\" placeholder=\"必填：以 http(s):// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"选填：鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" alt=\"{{ data.title }}\"></div></form></tab></tabset></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
   );
 
 }]);
@@ -2104,11 +2166,36 @@ angular.module('kityminderEditor')
         $scope.url = link.url || '';
         $scope.title = link.title || '';
 
+        setTimeout(function() {
+            var $linkUrl = $('#link-url');
+            $linkUrl.focus();
+            $linkUrl[0].setSelectionRange(0, $scope.url.length);
+        }, 30);
+
+        $scope.shortCut = function(e) {
+            e.stopPropagation();
+
+            if (e.keyCode == 13) {
+                $scope.ok();
+            } else if (e.keyCode == 27) {
+                $scope.cancel();
+            }
+        };
+
         $scope.ok = function () {
-            $modalInstance.close({
-                url: $scope.url,
-                title: $scope.title
-            });
+            if($scope.R_URL.test($scope.url)) {
+                $modalInstance.close({
+                    url: $scope.url,
+                    title: $scope.title
+                });
+            } else {
+                $scope.urlPassed = false;
+
+                var $linkUrl = $('#link-url');
+                $linkUrl.focus();
+                $linkUrl[0].setSelectionRange(0, $scope.url.length);
+            }
+
         };
 
         $scope.cancel = function () {
@@ -2126,6 +2213,12 @@ angular.module('kityminderEditor')
             title: image.title || '',
             R_URL: /^https?\:\/\/(\w+\.)+\w+/
         };
+
+        setTimeout(function() {
+            var $imageUrl = $('#image-url');
+            $imageUrl.focus();
+            $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
+        }, 300);
 
 
         // 搜索图片按钮点击事件
@@ -2163,11 +2256,30 @@ angular.module('kityminderEditor')
             $scope.data.title = targetImg.attr('alt');
         };
 
+        $scope.shortCut = function(e) {
+            e.stopPropagation();
+
+            if (e.keyCode == 13) {
+                $scope.ok();
+            } else if (e.keyCode == 27) {
+                $scope.cancel();
+            }
+        };
+
         $scope.ok = function () {
-            $modalInstance.close({
-                url: $scope.data.url,
-                title: $scope.data.title
-            });
+            if($scope.data.R_URL.test($scope.data.url)) {
+                $modalInstance.close({
+                    url: $scope.data.url,
+                    title: $scope.data.title
+                });
+            } else {
+                $scope.urlPassed = false;
+
+                var $imageUrl = $('#image-url');
+                $imageUrl.focus();
+                $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
+            }
+
         };
 
         $scope.cancel = function () {
@@ -2497,6 +2609,40 @@ angular.module('kityminderEditor')
 			}
 		}
 	}]);
+angular.module('kityminderEditor')
+    .directive('kityminderViewer', ['config', 'minder.service', function(config, minderService) {
+        return {
+            restrict: 'EA',
+            templateUrl: 'ui/directive/kityminderViewer/kityminderViewer.html',
+            replace: true,
+            scope: {
+                onInit: '&'
+            },
+            link: function(scope, element, attributes) {
+
+                var $minderEditor = element.children('.minder-viewer')[0];
+
+                function onInit(editor, minder) {
+                    scope.onInit({
+                        editor: editor,
+                        minder: minder
+                    });
+
+                    minderService.executeCallback();
+                }
+
+                if (window.kityminder && window.kityminder.Editor) {
+                    var editor = new kityminder.Editor($minderEditor);
+
+                    window.editor = scope.editor = editor;
+                    window.minder = scope.minder = editor.minder;
+
+                    onInit(editor, editor.minder);
+                }
+
+            }
+        }
+    }]);
 angular.module('kityminderEditor')
 	.directive('layout', function() {
 		return {
@@ -3242,9 +3388,74 @@ angular.module('kityminderEditor')
                editor: '='
            },
            link: function(scope) {
-                scope.select = function($event) {
-                    console.log($event);
+
+               /*
+               *
+               * 用户选择一个新的选项卡会执行 setCurTab 和 foldTopTab 两个函数
+               * 用户点击原来的选项卡会执行 foldTopTop 一个函数
+               *
+               * 也就是每次选择新的选项卡都会执行 setCurTab，初始化的时候也会执行 setCurTab 函数
+               * 因此用 executedCurTab 记录是否已经执行了 setCurTab 函数
+               * 用 isInit 记录是否是初始化的状态，在任意一个函数时候 isInit 设置为 false
+               * 用 isOpen 记录是否打开了 topTab
+               *
+               * 因此用到了三个 mutex
+               * */
+               var executedCurTab = false;
+               var isInit = true;
+               var isOpen = true;
+
+               scope.setCurTab = function(tabName) {
+                   setTimeout(function() {
+                       //console.log('set cur tab to : ' + tabName);
+                       executedCurTab = true;
+                       //isOpen = false;
+                       if (tabName != 'idea') {
+                           isInit = false;
+                       }
+                   });
                 };
+
+               scope.toggleTopTab = function() {
+                   setTimeout(function() {
+                       if(!executedCurTab || isInit) {
+                           isInit = false;
+
+                           isOpen ? closeTopTab(): openTopTab();
+                           isOpen = !isOpen;
+                       }
+
+                       executedCurTab = false;
+                   });
+               };
+
+               function closeTopTab() {
+                   var $tabContent = $('.tab-content');
+                   var $minderEditor = $('.minder-editor');
+
+                   $tabContent.animate({
+                       height: 0,
+                       display: 'none'
+                   });
+
+                   $minderEditor.animate({
+                      top: '32px'
+                   });
+               }
+
+               function openTopTab() {
+                   var $tabContent = $('.tab-content');
+                   var $minderEditor = $('.minder-editor');
+
+                   $tabContent.animate({
+                       height: '60px',
+                       display: 'block'
+                   });
+
+                   $minderEditor.animate({
+                       top: '92px'
+                   });
+               }
            }
        }
     });

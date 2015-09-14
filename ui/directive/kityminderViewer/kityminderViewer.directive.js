@@ -1,8 +1,8 @@
-angular.module('kityminder')
+angular.module('kityminderEditor')
     .directive('kityminderViewer', ['config', 'minder.service', function(config, minderService) {
         return {
             restrict: 'EA',
-            templateUrl: 'public/ui/directive/kityminderViewer/kityminderViewer.html',
+            templateUrl: 'ui/directive/kityminderViewer/kityminderViewer.html',
             replace: true,
             scope: {
                 onInit: '&'

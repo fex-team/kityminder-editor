@@ -53,7 +53,7 @@ define(function(require, exports, module) {
             if (e.keyCode === 229 || e.keyCode === 0) {
                 e.preventDefault();
                 return;
-            };
+            }
             // normal -> input
             if (e.type !== 'keypress' && isIntendToInput(e)) {
                 if (minder.getSelectedNode()) {
@@ -66,8 +66,8 @@ define(function(require, exports, module) {
                         if (kity.Browser.gecko) {
                             receiverElement.innerHTML = minder.getSelectedNode().data.text;
                             receiver.selectAll();
-                        };
-                    };
+                        }
+                    }
                     return fsm.jump('input', 'user-input');
                 } else {
                     receiverElement.innerHTML = '';
@@ -75,6 +75,14 @@ define(function(require, exports, module) {
             }
             // normal -> normal
             if (e.type == 'keydown') {
+                if (e.is('Ctrl + s')) {
+                    minder.fire('savefile');
+                    e.preventDefault();
+                } else if (e.is('Ctrl + f')) {
+                    minder.fire('findNode');
+                    e.preventDefault();
+                }
+
                 return fsm.jump('normal', 'shortcut-handle', e);
             }
         });
