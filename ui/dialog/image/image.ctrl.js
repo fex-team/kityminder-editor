@@ -9,6 +9,12 @@ angular.module('kityminderEditor')
             R_URL: /^https?\:\/\/(\w+\.)+\w+/
         };
 
+        setTimeout(function() {
+            var $imageUrl = $('#image-url');
+            $imageUrl.focus();
+            $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
+        }, 300);
+
 
         // 搜索图片按钮点击事件
         $scope.searchImage = function() {
@@ -45,11 +51,30 @@ angular.module('kityminderEditor')
             $scope.data.title = targetImg.attr('alt');
         };
 
+        $scope.shortCut = function(e) {
+            e.stopPropagation();
+
+            if (e.keyCode == 13) {
+                $scope.ok();
+            } else if (e.keyCode == 27) {
+                $scope.cancel();
+            }
+        };
+
         $scope.ok = function () {
-            $modalInstance.close({
-                url: $scope.data.url,
-                title: $scope.data.title
-            });
+            if($scope.data.R_URL.test($scope.data.url)) {
+                $modalInstance.close({
+                    url: $scope.data.url,
+                    title: $scope.data.title
+                });
+            } else {
+                $scope.urlPassed = false;
+
+                var $imageUrl = $('#image-url');
+                $imageUrl.focus();
+                $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
+            }
+
         };
 
         $scope.cancel = function () {
