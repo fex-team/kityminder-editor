@@ -19,6 +19,12 @@ define(function(require, exports, module) {
         // 接收事件的 div
         var element = document.createElement('div');
         element.contentEditable = true;
+        /**
+         * @Desc: 增加tabindex属性使得element的contenteditable不管是trur还是false都能有focus和blur事件
+         * @Editor: Naixor
+         * @Date: 2015.09.14
+         */
+        element.setAttribute("tabindex", -1);
         element.classList.add('receiver');
         element.onkeydown = element.onkeypress = element.onkeyup = dispatchKeyEvent;
         this.container.appendChild(element);
@@ -35,6 +41,17 @@ define(function(require, exports, module) {
                 selection.removeAllRanges();
                 selection.addRange(range);
                 element.focus();
+            },
+            /**
+             * @Desc: 增加enable和disable方法用于解决热核态的输入法屏蔽问题
+             * @Editor: Naixor
+             * @Date: 2015.09.14
+             */
+            enable: function() {
+                element.setAttribute("contenteditable", true);
+            },
+            disable: function() {
+                element.setAttribute("contenteditable", false);
             }
         };
         receiver.selectAll();
@@ -61,7 +78,6 @@ define(function(require, exports, module) {
         };
 
         function dispatchKeyEvent(e) {
-
             e.is = function(keyExpression) {
                 var subs = keyExpression.split('|');
                 for (var i = 0; i < subs.length; i++) {
@@ -69,7 +85,6 @@ define(function(require, exports, module) {
                 }
                 return false;
             };
-
             var listener, jumpState;
             for (var i = 0; i < listeners.length; i++) {
 
