@@ -6,11 +6,36 @@ angular.module('kityminderEditor')
         $scope.url = link.url || '';
         $scope.title = link.title || '';
 
+        setTimeout(function() {
+            var $linkUrl = $('#link-url');
+            $linkUrl.focus();
+            $linkUrl[0].setSelectionRange(0, $scope.url.length);
+        }, 30);
+
+        $scope.shortCut = function(e) {
+            e.stopPropagation();
+
+            if (e.keyCode == 13) {
+                $scope.ok();
+            } else if (e.keyCode == 27) {
+                $scope.cancel();
+            }
+        };
+
         $scope.ok = function () {
-            $modalInstance.close({
-                url: $scope.url,
-                title: $scope.title
-            });
+            if($scope.R_URL.test($scope.url)) {
+                $modalInstance.close({
+                    url: $scope.url,
+                    title: $scope.title
+                });
+            } else {
+                $scope.urlPassed = false;
+
+                var $linkUrl = $('#link-url');
+                $linkUrl.focus();
+                $linkUrl[0].setSelectionRange(0, $scope.url.length);
+            }
+
         };
 
         $scope.cancel = function () {
