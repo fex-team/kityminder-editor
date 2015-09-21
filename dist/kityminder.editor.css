@@ -1170,6 +1170,7 @@ div a.theme-item {
 .btn-group-vertical .expand {
   height: 25px;
   background: url(images/icons.png) no-repeat 0 -995px;
+  background-position-x: 50%;
 }
 .btn-group-vertical .expand-caption {
   height: 20px;
@@ -1211,6 +1212,88 @@ div a.theme-item {
 }
 .btn-group-vertical .select-caption .caption {
   font-size: 12px;
+}
+.btn-group-vertical {
+  vertical-align: middle;
+  margin: 5px;
+}
+.btn-group-vertical .search,
+.btn-group-vertical .search-caption {
+  width: 40px;
+  margin: 0;
+  padding: 0;
+  border: none!important;
+  border-radius: 0!important;
+}
+.btn-group-vertical .search:hover,
+.btn-group-vertical .search-caption:hover {
+  background-color: #eff3fa;
+}
+.btn-group-vertical .search:active,
+.btn-group-vertical .search-caption:active {
+  background-color: #c4d0ee;
+}
+.btn-group-vertical .search.active,
+.btn-group-vertical .search-caption.active {
+  box-shadow: none;
+  background-color: #eff3fa;
+}
+.btn-group-vertical .search {
+  height: 25px;
+  background: url(images/icons.png) no-repeat 0 -345px;
+  background-position-x: 50%;
+}
+.btn-group-vertical .search-caption {
+  height: 20px;
+}
+.btn-group-vertical .search-caption .caption {
+  font-size: 12px;
+}
+.search-box {
+  float: right;
+  background-color: #fff;
+  border: 1px solid #dbdbdb;
+  position: relative;
+  top: 0;
+  z-index: 3;
+  width: 360px;
+  height: 40px;
+  padding: 3px 6px;
+  opacity: 1;
+}
+.search-box .search-input-wrap,
+.search-box .prev-and-next-btn {
+  float: left;
+}
+.search-box .close-search {
+  float: right;
+  height: 16px;
+  width: 16px;
+  padding: 1px;
+  border-radius: 100%;
+  margin-top: 6px;
+  margin-right: 10px;
+}
+.search-box .close-search .glyphicon {
+  top: -1px;
+}
+.search-box .close-search:hover {
+  background-color: #efefef;
+}
+.search-box .close-search:active {
+  background-color: #999;
+}
+.search-box .search-input-wrap {
+  width: 240px;
+}
+.search-box .prev-and-next-btn {
+  margin-left: 5px;
+}
+.search-box .prev-and-next-btn .btn:focus {
+  outline: none;
+}
+.search-box .search-addon {
+  background-color: #fff;
 }
 .tool-group {
   padding: 0;

@@ -1,7 +1,7 @@
 // TODO: 使用一个 div 容器作为 previewer，而不是两个
 angular.module('kityminderEditor')
 
-	.directive('notePreviewer', ['$sce', function($sce) {
+	.directive('notePreviewer', ['$sce', 'valueTransfer', function($sce, valueTransfer) {
 		return {
 			restrict: 'A',
 			templateUrl: 'ui/directive/notePreviewer/notePreviewer.html',
@@ -26,11 +26,14 @@ angular.module('kityminderEditor')
 				minder.on('shownoterequest', function(e) {
 
 					previewTimer = setTimeout(function() {
-						preview(e.node);
+						preview(e.node, e.keyword);
 					}, 300);
 				});
 				minder.on('hidenoterequest', function() {
 					clearTimeout(previewTimer);
+
+                    scope.showNotePreviewer = false;
+                    //scope.$apply();
 				});
 
 				var previewLive = false;

@@ -75,14 +75,6 @@ define(function(require, exports, module) {
             }
             // normal -> normal
             if (e.type == 'keydown') {
-                if (e.is('Ctrl + s')) {
-                    minder.fire('savefile');
-                    e.preventDefault();
-                } else if (e.is('Ctrl + f')) {
-                    minder.fire('findNode');
-                    e.preventDefault();
-                }
-
                 return fsm.jump('normal', 'shortcut-handle', e);
             }
         });

@@ -177,6 +177,8 @@ angular.module('kityminderEditor')
 						'outline': '大纲'
 					},
 
+					'search':'搜索',
+
 					'expandtoleaf': '展开',
 
 					'back': '返回',
