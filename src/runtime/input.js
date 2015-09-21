@@ -205,7 +205,19 @@ define(function(require, exports, module) {
         function commitInputNode(node, text) {
             try {
                 minder.decodeData('text', text).then(function(json) {
-                    minder.importNode(node, json);
+                    function importText(node, json, minder) {
+                        var data = json.data;
+
+                        node.setText(data.text || '');
+
+                        var childrenTreeData = json.children || [];
+                        for (var i = 0; i < childrenTreeData.length; i++) {
+                            var childNode = minder.createNode(null, node);
+                            importText(childNode, childrenTreeData[i], minder);
+                        }
+                        return node;
+                    }
+                    importText(node, json, minder);
                     minder.refresh();
                     // minder._firePharse({
                     //     type: 'contentchange'
