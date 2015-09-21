@@ -43,7 +43,12 @@ define(function(require, exports, module) {
             return str;
         });
         HTMLElement.prototype.__defineSetter__('innerText', function(text) {
-            this.innerHTML = text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+            /**
+             * @Desc: 解决FireFox节点内容删除后text为null，出现报错的问题
+             * @Editor: Naixor
+             * @Date: 2015.9.16
+             */
+            this.innerHTML = (text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
         });
     }
 });

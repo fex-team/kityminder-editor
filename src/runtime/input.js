@@ -117,19 +117,122 @@ define(function(require, exports, module) {
 
         }
 
-        function commitInputResult() {
+        /**
+         * 按照文本提交操作处理
+         * @Desc: 从其他节点复制文字到另一个节点时部分浏览器(chrome)会自动包裹一个span标签，这样试用一下逻辑出来的就不是text节点二是span节点因此导致undefined的情况发生
+         * @Warning: 下方代码使用[].slice.call来将HTMLDomCollection处理成为Array，ie8及以下会有问题
+         * @Editor: Naixor
+         * @Date: 2015.9.16
+         */
+        function commitInputText (textNodes) {
             var text = '';
-            var textNodes = [].slice.call(receiverElement.childNodes);
+            var TAB_CHAR = '\t',
+                ENTER_CHAR = '\n',
+                STR_CHECK = /\S/,
+                SPACE_CHAR = '\u0020',
+                // 针对FF,SG,BD,LB,IE等浏览器下SPACE的charCode存在为32和160的情况做处理
+                SPACE_CHAR_REGEXP = new RegExp('(\u0020|' + String.fromCharCode(160) + ')'),
+                BR = document.createElement('br');
 
-            textNodes.forEach(function(str, i) {
-                if (str.toString() === '[object HTMLBRElement]') {
-                    text += '\n'
-                } else {
-                    text += str.data;
+            for (var str, 
+                    _divChildNodes,
+                    space_l, space_num, tab_num,
+                    i = 0, l = textNodes.length; i < l; i++) {
+                str = textNodes[i];
+
+                switch (str.toString()) {
+                    // 正常情况处理
+                    case '[object HTMLBRElement]': {
+                        text += ENTER_CHAR;
+                        break;
+                    }
+                    case '[object Text]': {
+                        // SG下会莫名其妙的加上&nbsp;影响后续判断，干掉！
+                        str = str.wholeText.replace("&nbsp;", " ");
+                        
+                        if (!STR_CHECK.test(str)) {
+                            space_l = str.length;
+                            while (space_l--) {
+                                if (SPACE_CHAR_REGEXP.test(str[space_l])) {
+                                    text += SPACE_CHAR;
+                                } else if (str[space_l] === TAB_CHAR) {
+                                    text += TAB_CHAR;
+                                }
+                            }
+                        } else {
+                            text += str;
+                        }
+                        break;
+                    }
+                    // 被增加span标签的情况会被处理成正常情况并会推交给上面处理
+                    case '[object HTMLSpanElement]': {
+                        [].splice.apply(textNodes, [i, 1].concat([].slice.call(str.childNodes)));
+                        i--;
+                        break;
+                    }
+                    // 被增加div标签的情况会被处理成正常情况并会推交给上面处理
+                    case '[object HTMLDivElement]': {
+                        _divChildNodes = [];
+                        for (var di = 0, l = str.childNodes.length; di < l; di++) {
+                            _divChildNodes.push(str.childNodes[di]);
+                        }
+                        _divChildNodes.push(BR);
+                        [].splice.apply(textNodes, [i, 1].concat(_divChildNodes));
+                        l = textNodes.length;
+                        i--;
+                        break;
+                    }
+                    default: {
+                        text += "";
+                    }
                 }
-            });
-            minder.execCommand('text', text.replace(/^\n*|\n*$/g, ''));
+            };
+            
+            text = text.replace(/^\n*|\n*$/g, '');
+            text = text.replace(new RegExp('(\n|\r|\n\r)(\u0020|' + String.fromCharCode(160) + '){4}', 'g'), '$1\t');
+            minder.execCommand('text', text);
             exitInputMode();
+            return text;
+        }
+
+        /**
+         * 判断节点的文本信息是否是
+         * @Desc: 从其他节点复制文字到另一个节点时部分浏览器(chrome)会自动包裹一个span标签，这样试用一下逻辑出来的就不是text节点二是span节点因此导致undefined的情况发生
+         * @Notice: 此处逻辑应该拆分到 kityminder-core/core/data中去，单独增加一个对某个节点importJson的事件
+         * @Editor: Naixor
+         * @Date: 2015.9.16
+         */
+        function commitInputNode(node, text) {
+            try {
+                minder.decodeData('text', text).then(function(json) {
+                    minder.importNode(node, json);
+                    minder.refresh();
+                    // minder._firePharse({
+                    //     type: 'contentchange'
+                    // });
+                    // minder._interactChange();
+                });
+            } catch (e) {
+                // 无法被转换成脑图节点则不处理
+                if (e.toString() !== 'Error: Invalid local format') {
+                    throw e;
+                }
+            }
+        }
+
+        function commitInputResult() {
+            /**
+             * @Desc: 进行如下处理：
+             *             根据用户的输入判断是否生成新的节点
+             *        fix #83 https://github.com/fex-team/kityminder-editor/issues/83
+             * @Editor: Naixor
+             * @Date: 2015.9.16
+             */
+            var textNodes = [].slice.call(receiverElement.childNodes);
+            var node = minder.getSelectedNode();
+            
+            textNodes = commitInputText(textNodes);
+            commitInputNode(node, textNodes);
         }
 
         function exitInputMode() {
