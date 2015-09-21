@@ -44,6 +44,38 @@ define(function(require, exports, module) {
             });
         });
 
+        main.button({
+            position: 'bottom',
+            label: '导入节点',
+            key: 'Alt + V',
+            enable: function() {
+                var selectedNodes = minder.getSelectedNodes();
+                return selectedNodes.length == 1;
+            },
+            action: importNodeData,
+            next: 'idle'
+        });
+
+        main.button({
+            position: 'bottom',
+            label: '导出节点',
+            key: 'Alt + C',
+            enable: function() {
+                var selectedNodes = minder.getSelectedNodes();
+                return selectedNodes.length == 1;
+            },
+            action: exportNodeData,
+            next: 'idle'
+        });
+
+        function importNodeData() {
+            minder.fire('importNodeData');
+        }
+
+        function exportNodeData() {
+            minder.fire('exportNodeData');
+        }
+
         //main.button({
         //    position: 'ring',
         //    key: '/',
