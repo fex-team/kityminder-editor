@@ -14,7 +14,7 @@
             <div class="search-result" id="search-result">
                 <ul>
                     <li ng-repeat="image in list" id="{{ 'img-item' + $index }}" ng-class="{'selected' : isSelected}" ng-click="selectImage($event)">
-                        <img id="{{ 'img-' + $index }}" ng-src="{{ image.src || '' }}" alt="{{ image.title }}" onerror="this.parentNode.remove()" />
+                        <img id="{{ 'img-' + $index }}" ng-src="{{ image.src || '' }}" alt="{{ image.title }}" onerror="this.parentNode.removeChild(this)" />
                         <span>{{ image.title }}</span>
                     </li>
                 </ul>
