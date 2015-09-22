@@ -4,9 +4,12 @@ angular.module('kityminderEditor').service('revokeDialog', ['$modal', 'minder.se
 
         // 触发导入节点或导出节点对话框
         var minder = window.minder;
+        var editor = window.editor;
+        var parentFSM = editor.hotbox.getParentFSM();
+
 
         minder.on('importNodeData', function() {
-            //var image = minder.queryCommandValue('image');
+            parentFSM.jump('modal', 'import-text-modal');
 
             var importModal = $modal.open({
                 animation: true,
@@ -27,13 +30,17 @@ angular.module('kityminderEditor').service('revokeDialog', ['$modal', 'minder.se
             });
 
             importModal.result.then(function(result) {
-                console.log('123');
-                //minder.execCommand('image', result.url, result.title || '');
+                try{
+                    minder.Text2Children(minder.getSelectedNode(), result);
+                } catch(e) {
+                    alert(e);
+                }
+                parentFSM.jump('normal', 'import-text-finish');
             });
         });
 
         minder.on('exportNodeData', function() {
-            //var image = minder.queryCommandValue('image');
+            parentFSM.jump('modal', 'export-text-modal');
 
             var exportModal = $modal.open({
                 animation: true,
@@ -45,7 +52,10 @@ angular.module('kityminderEditor').service('revokeDialog', ['$modal', 'minder.se
                         return '导出节点';
                     },
                     defaultValue: function() {
-                        return '';
+                        var selectedNode = minder.getSelectedNode(),
+                            Node2Text = window.kityminder.data.getRegisterProtocol('text').Node2Text;
+
+                        return Node2Text(selectedNode);
                     },
                     type: function() {
                         return 'export';
@@ -54,8 +64,7 @@ angular.module('kityminderEditor').service('revokeDialog', ['$modal', 'minder.se
             });
 
             exportModal.result.then(function(result) {
-                console.log('export Node completed');
-                //minder.execCommand('image', result.url, result.title || '');
+                parentFSM.jump('normal', 'export-text-finish');
             });
         });
 

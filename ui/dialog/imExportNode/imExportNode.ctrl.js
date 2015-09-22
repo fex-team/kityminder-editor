@@ -29,10 +29,17 @@ angular.module('kityminderEditor')
         $scope.shortCut = function(e) {
             e.stopPropagation();
 
-            if (e.keyCode == 13) {
+            if (e.keyCode == 13 && e.shiftKey == false) {
                 $scope.ok();
-            } else if (e.keyCode == 27) {
+            }
+
+            if (e.keyCode == 27) {
                 $scope.cancel();
+            }
+
+            // tab 键屏蔽默认事件
+            if (e.keyCode == 9) {
+                e.preventDefault();
             }
         }
 

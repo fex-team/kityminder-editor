@@ -17,6 +17,8 @@ define(function(require, exports, module) {
 
         var hotbox = new Hotbox(container);
 
+        hotbox.setParentFSM(fsm);
+
         fsm.when('normal -> hotbox', function(exit, enter, reason) {
             var node = minder.getSelectedNode();
             var position;
@@ -38,6 +40,12 @@ define(function(require, exports, module) {
                 } else {
                     minder.dispatchKeyEvent(e);
                 }
+            }
+        });
+
+        fsm.when('modal -> normal', function(exit, enter, reason, e) {
+            if (reason == 'import-text-finish') {
+                receiver.element.focus();
             }
         });
 
