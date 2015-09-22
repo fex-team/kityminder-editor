@@ -8,13 +8,13 @@ define(function(require, exports, module) {
 		/**
 		 * 私有变量
 		 */
-		var SPLITOR = '\x00';
+		var SPLITOR = '\uFEFF';
 		var MIMETYPE = {
-			'application/km': '\x01'
+			'application/km': '\uFFFF'
 		};
 		var SIGN = {
-			'\x00': 'SPLITOR',
-			'\x01': 'application/km'
+			'\uFEFF': 'SPLITOR',
+			'\uFFFF': 'application/km'
 		};
 
 		/**
