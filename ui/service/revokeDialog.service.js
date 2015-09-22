@@ -36,6 +36,10 @@ angular.module('kityminderEditor').service('revokeDialog', ['$modal', 'minder.se
                     alert(e);
                 }
                 parentFSM.jump('normal', 'import-text-finish');
+                editor.receiver.selectAll();
+            }, function() {
+                parentFSM.jump('normal', 'import-text-finish');
+                editor.receiver.selectAll();
             });
         });
 
@@ -65,6 +69,10 @@ angular.module('kityminderEditor').service('revokeDialog', ['$modal', 'minder.se
 
             exportModal.result.then(function(result) {
                 parentFSM.jump('normal', 'export-text-finish');
+                editor.receiver.selectAll();
+            }, function() {
+                parentFSM.jump('normal', 'export-text-finish');
+                editor.receiver.selectAll();
             });
         });
 
