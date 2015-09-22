@@ -26,6 +26,7 @@ define(function(require, exports, module) {
     assemble(require('./runtime/receiver'));
     assemble(require('./runtime/hotbox'));
     assemble(require('./runtime/input'));
+    assemble(require('./runtime/clipboard-mimetype'));
     assemble(require('./runtime/clipboard'));
     assemble(require('./runtime/drag'));
     assemble(require('./runtime/node'));
