@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.37 - 2015-09-14
+ * kityminder-editor - v1.0.39 - 2015-09-23
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -56,18 +56,20 @@ _p[0] = {
             }
         }
         KMEditor.assemble = assemble;
-        assemble(_p.r(5));
         assemble(_p.r(7));
-        assemble(_p.r(12));
-        assemble(_p.r(16));
         assemble(_p.r(9));
-        assemble(_p.r(10));
-        assemble(_p.r(6));
-        assemble(_p.r(13));
-        assemble(_p.r(8));
-        assemble(_p.r(11));
         assemble(_p.r(14));
+        assemble(_p.r(18));
+        assemble(_p.r(11));
+        assemble(_p.r(12));
+        assemble(_p.r(5));
+        assemble(_p.r(6));
+        assemble(_p.r(8));
         assemble(_p.r(15));
+        assemble(_p.r(10));
+        assemble(_p.r(13));
+        assemble(_p.r(16));
+        assemble(_p.r(17));
         return module.exports = KMEditor;
     }
 };
@@ -106,6 +108,234 @@ _p[4] = {
     }
 };
 
+//src/runtime/clipboard-mimetype.js
+/**
+ * @Desc: 新增一个用于处理系统ctrl+c ctrl+v等方式导入导出节点的MIMETYPE处理，如系统不支持clipboardEvent或者是FF则不初始化改class
+ * @Editor: Naixor
+ * @Date: 2015.9.21
+ */
+_p[5] = {
+    value: function(require, exports, module) {
+        function MimeType() {
+            /**
+		 * 私有变量
+		 */
+            var SPLITOR = "\ufeff";
+            var MIMETYPE = {
+                "application/km": "￿"
+            };
+            var SIGN = {
+                "\ufeff": "SPLITOR",
+                "￿": "application/km"
+            };
+            /**
+		 * 用于将一段纯文本封装成符合其数据格式的文本
+		 * @method process 			private
+		 * @param  {MIMETYPE} mimetype 数据格式
+		 * @param  {String} text     原始文本
+		 * @return {String}          符合该数据格式下的文本
+		 * @example
+		 * 			var str = "123";
+		 * 			str = process('application/km', str); // 返回的内容再经过MimeType判断会读取出其数据格式为application/km
+		 * 			process('text/plain', str); // 若接受到一个非纯文本信息，则会将其转换为新的数据格式
+		 */
+            function process(mimetype, text) {
+                if (!this.isPureText(text)) {
+                    var _mimetype = this.whichMimeType(text);
+                    if (!_mimetype) {
+                        throw new Error("unknow mimetype!");
+                    }
+                    text = this.getPureText(text);
+                }
+                if (mimetype === false) {
+                    return text;
+                }
+                return mimetype + SPLITOR + text;
+            }
+            /**
+		 * 注册数据类型的标识
+		 * @method registMimeTypeProtocol  	public
+		 * @param  {String} type 数据类型
+		 * @param  {String} sign 标识
+		 */
+            this.registMimeTypeProtocol = function(type, sign) {
+                if (sign && SIGN[sign]) {
+                    throw new Error("sing has registed!");
+                }
+                if (type && !!MIMETYPE[type]) {
+                    throw new Error("mimetype has registed!");
+                }
+                SIGN[sign] = type;
+                MIMETYPE[type] = sign;
+            };
+            /**
+		 * 获取已注册数据类型的协议
+		 * @method getMimeTypeProtocol  	public
+		 * @param  {String} type 数据类型
+		 * @param  {String} text|undefiend  文本内容或不传入
+		 * @return {String|Function} 
+		 * @example 
+		 * 			text若不传入则直接返回对应数据格式的处理(process)方法
+		 * 			若传入文本则直接调用对应的process方法进行处理，此时返回处理后的内容
+		 * 			var m = new MimeType();
+		 * 			var kmprocess = m.getMimeTypeProtocol('application/km');
+		 * 			kmprocess("123") === m.getMimeTypeProtocol('application/km', "123");
+		 * 			
+		 */
+            this.getMimeTypeProtocol = function(type, text) {
+                var mimetype = MIMETYPE[type] || false;
+                if (text === undefined) {
+                    return process.bind(this, mimetype);
+                }
+                return process(mimetype, text);
+            };
+            this.getSpitor = function() {
+                return SPLITOR;
+            };
+            this.getMimeType = function(sign) {
+                if (sign !== undefined) {
+                    return SIGN[sign] || null;
+                }
+                return MIMETYPE;
+            };
+        }
+        MimeType.prototype.isPureText = function(text) {
+            return !~text.indexOf(this.getSpitor());
+        };
+        MimeType.prototype.getPureText = function(text) {
+            if (this.isPureText(text)) {
+                return text;
+            }
+            return text.split(this.getSpitor())[1];
+        };
+        MimeType.prototype.whichMimeType = function(text) {
+            if (this.isPureText(text)) {
+                return null;
+            }
+            return this.getMimeType(text.split(this.getSpitor())[0]);
+        };
+        function MimeTypeRuntime() {
+            if (this.minder.supportClipboardEvent && !kity.Browser.gecko) {
+                this.MimeType = new MimeType();
+            }
+        }
+        return module.exports = MimeTypeRuntime;
+    }
+};
+
+//src/runtime/clipboard.js
+/**
+ * @Desc: 处理editor的clipboard事件，只在支持ClipboardEvent并且不是FF的情况下工作
+ * @Editor: Naixor
+ * @Date: 2015.9.21
+ */
+_p[6] = {
+    value: function(require, exports, module) {
+        function ClipboardRuntime() {
+            var minder = this.minder;
+            var Data = window.kityminder.data;
+            if (!minder.supportClipboardEvent || kity.Browser.gecko) {
+                return;
+            }
+            var fsm = this.fsm;
+            var receiver = this.receiver;
+            var MimeType = this.MimeType;
+            var kmencode = MimeType.getMimeTypeProtocol("application/km"), decode = Data.getRegisterProtocol("json").decode;
+            function encode(node) {
+                var obj = minder.exportNode(node);
+                return kmencode(Data.getRegisterProtocol("json").encode(obj));
+            }
+            var beforeCopy = function(e) {
+                var clipBoardEvent = e.originEvent;
+                var state = fsm.state();
+                switch (state) {
+                  case "input":
+                    {
+                        break;
+                    }
+
+                  case "normal":
+                    {
+                        var node = minder.getSelectedNode();
+                        if (node) {
+                            clipBoardEvent.clipboardData.setData("text/plain", encode(node));
+                        }
+                        e.preventDefault();
+                        break;
+                    }
+                }
+            };
+            var beforeCut = function(e) {
+                if (minder.getStatus() !== "normal") {
+                    e.preventDefault();
+                    return;
+                }
+                var clipBoardEvent = e.originEvent;
+                var state = fsm.state();
+                switch (state) {
+                  case "input":
+                    {
+                        break;
+                    }
+
+                  case "normal":
+                    {
+                        var node = minder.getSelectedNode();
+                        if (node) {
+                            clipBoardEvent.clipboardData.setData("text/plain", encode(node));
+                            minder.execCommand("RemoveNode");
+                        }
+                        e.preventDefault();
+                        break;
+                    }
+                }
+            };
+            var beforePaste = function(e) {
+                if (minder.getStatus() !== "normal") {
+                    e.preventDefault();
+                    return;
+                }
+                var clipBoardEvent = e.originEvent;
+                var state = fsm.state();
+                var textData = clipBoardEvent.clipboardData.getData("text/plain");
+                switch (state) {
+                  case "input":
+                    {
+                        // input状态下如果格式为application/km则不进行paste操作
+                        if (!MimeType.isPureText(textData)) {
+                            e.preventDefault();
+                            return;
+                        }
+                        break;
+                    }
+
+                  case "normal":
+                    {
+                        /*
+					 * 针对normal状态下通过对选中节点粘贴导入子节点文本进行单独处理
+					 */
+                        var node = minder.getSelectedNode();
+                        if (MimeType.whichMimeType(textData) === "application/km") {
+                            minder.execCommand("AppendChildNode");
+                            node = minder.getSelectedNode();
+                            minder.importNode(node, decode(MimeType.getPureText(textData)));
+                            minder.refresh();
+                        } else {
+                            minder.Text2Children(node, textData);
+                        }
+                        e.preventDefault();
+                        break;
+                    }
+                }
+            };
+            minder.on("beforeCopy", beforeCopy);
+            minder.on("beforeCut", beforeCut);
+            minder.on("beforePaste", beforePaste);
+        }
+        return module.exports = ClipboardRuntime;
+    }
+};
+
 //src/runtime/container.js
 /**
  * @fileOverview
@@ -115,7 +345,7 @@ _p[4] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[5] = {
+_p[7] = {
     value: function(require, exports, module) {
         /**
      * 最先执行的 Runtime，初始化编辑器容器
@@ -146,10 +376,10 @@ _p[5] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[6] = {
+_p[8] = {
     value: function(require, exports, module) {
         var Hotbox = _p.r(2);
-        var Debug = _p.r(17);
+        var Debug = _p.r(19);
         var debug = new Debug("drag");
         function DragRuntime() {
             var fsm = this.fsm;
@@ -204,9 +434,9 @@ _p[6] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[7] = {
+_p[9] = {
     value: function(require, exports, module) {
-        var Debug = _p.r(17);
+        var Debug = _p.r(19);
         var debug = new Debug("fsm");
         function handlerConditionMatch(condition, when, exit, enter) {
             if (condition.when != when) return false;
@@ -312,9 +542,9 @@ _p[7] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[8] = {
+_p[10] = {
     value: function(require, exports, module) {
-        var jsonDiff = _p.r(20);
+        var jsonDiff = _p.r(22);
         function HistoryRuntime() {
             var minder = this.minder;
             var hotbox = this.hotbox;
@@ -432,7 +662,7 @@ _p[8] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[9] = {
+_p[11] = {
     value: function(require, exports, module) {
         var Hotbox = _p.r(2);
         function HotboxRuntime() {
@@ -441,6 +671,7 @@ _p[9] = {
             var receiver = this.receiver;
             var container = this.container;
             var hotbox = new Hotbox(container);
+            hotbox.setParentFSM(fsm);
             fsm.when("normal -> hotbox", function(exit, enter, reason) {
                 var node = minder.getSelectedNode();
                 var position;
@@ -463,6 +694,11 @@ _p[9] = {
                     }
                 }
             });
+            fsm.when("modal -> normal", function(exit, enter, reason, e) {
+                if (reason == "import-text-finish") {
+                    receiver.element.focus();
+                }
+            });
             this.hotbox = hotbox;
         }
         return module.exports = HotboxRuntime;
@@ -478,10 +714,10 @@ _p[9] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[10] = {
+_p[12] = {
     value: function(require, exports, module) {
-        _p.r(19);
-        var Debug = _p.r(17);
+        _p.r(21);
+        var Debug = _p.r(19);
         var debug = new Debug("input");
         function InputRuntime() {
             var fsm = this.fsm;
@@ -566,18 +802,122 @@ _p[10] = {
                     receiverElement.focus();
                 }
             }
-            function commitInputResult() {
+            /**
+         * 按照文本提交操作处理
+         * @Desc: 从其他节点复制文字到另一个节点时部分浏览器(chrome)会自动包裹一个span标签，这样试用一下逻辑出来的就不是text节点二是span节点因此导致undefined的情况发生
+         * @Warning: 下方代码使用[].slice.call来将HTMLDomCollection处理成为Array，ie8及以下会有问题
+         * @Editor: Naixor
+         * @Date: 2015.9.16
+         */
+            function commitInputText(textNodes) {
                 var text = "";
-                var textNodes = [].slice.call(receiverElement.childNodes);
-                textNodes.forEach(function(str, i) {
-                    if (str.toString() === "[object HTMLBRElement]") {
-                        text += "\n";
-                    } else {
-                        text += str.data;
+                var TAB_CHAR = "	", ENTER_CHAR = "\n", STR_CHECK = /\S/, SPACE_CHAR = " ", // 针对FF,SG,BD,LB,IE等浏览器下SPACE的charCode存在为32和160的情况做处理
+                SPACE_CHAR_REGEXP = new RegExp("( |" + String.fromCharCode(160) + ")"), BR = document.createElement("br");
+                for (var str, _divChildNodes, space_l, space_num, tab_num, i = 0, l = textNodes.length; i < l; i++) {
+                    str = textNodes[i];
+                    switch (str.toString()) {
+                      // 正常情况处理
+                        case "[object HTMLBRElement]":
+                        {
+                            text += ENTER_CHAR;
+                            break;
+                        }
+
+                      case "[object Text]":
+                        {
+                            // SG下会莫名其妙的加上&nbsp;影响后续判断，干掉！
+                            str = str.wholeText.replace("&nbsp;", " ");
+                            if (!STR_CHECK.test(str)) {
+                                space_l = str.length;
+                                while (space_l--) {
+                                    if (SPACE_CHAR_REGEXP.test(str[space_l])) {
+                                        text += SPACE_CHAR;
+                                    } else if (str[space_l] === TAB_CHAR) {
+                                        text += TAB_CHAR;
+                                    }
+                                }
+                            } else {
+                                text += str;
+                            }
+                            break;
+                        }
+
+                      // 被增加span标签的情况会被处理成正常情况并会推交给上面处理
+                        case "[object HTMLSpanElement]":
+                        {
+                            [].splice.apply(textNodes, [ i, 1 ].concat([].slice.call(str.childNodes)));
+                            i--;
+                            break;
+                        }
+
+                      // 被增加div标签的情况会被处理成正常情况并会推交给上面处理
+                        case "[object HTMLDivElement]":
+                        {
+                            _divChildNodes = [];
+                            for (var di = 0, l = str.childNodes.length; di < l; di++) {
+                                _divChildNodes.push(str.childNodes[di]);
+                            }
+                            _divChildNodes.push(BR);
+                            [].splice.apply(textNodes, [ i, 1 ].concat(_divChildNodes));
+                            l = textNodes.length;
+                            i--;
+                            break;
+                        }
+
+                      default:
+                        {
+                            text += "";
+                        }
                     }
-                });
-                minder.execCommand("text", text.replace(/^\n*|\n*$/g, ""));
+                }
+                text = text.replace(/^\n*|\n*$/g, "");
+                text = text.replace(new RegExp("(\n|\r|\n\r)( |" + String.fromCharCode(160) + "){4}", "g"), "$1	");
+                minder.execCommand("text", text);
                 exitInputMode();
+                return text;
+            }
+            /**
+         * 判断节点的文本信息是否是
+         * @Desc: 从其他节点复制文字到另一个节点时部分浏览器(chrome)会自动包裹一个span标签，这样试用一下逻辑出来的就不是text节点二是span节点因此导致undefined的情况发生
+         * @Notice: 此处逻辑应该拆分到 kityminder-core/core/data中去，单独增加一个对某个节点importJson的事件
+         * @Editor: Naixor
+         * @Date: 2015.9.16
+         */
+            function commitInputNode(node, text) {
+                try {
+                    minder.decodeData("text", text).then(function(json) {
+                        function importText(node, json, minder) {
+                            var data = json.data;
+                            node.setText(data.text || "");
+                            var childrenTreeData = json.children || [];
+                            for (var i = 0; i < childrenTreeData.length; i++) {
+                                var childNode = minder.createNode(null, node);
+                                importText(childNode, childrenTreeData[i], minder);
+                            }
+                            return node;
+                        }
+                        importText(node, json, minder);
+                        minder.refresh();
+                    });
+                } catch (e) {
+                    // 无法被转换成脑图节点则不处理
+                    if (e.toString() !== "Error: Invalid local format") {
+                        throw e;
+                    }
+                }
+            }
+            function commitInputResult() {
+                /**
+             * @Desc: 进行如下处理：
+             *             根据用户的输入判断是否生成新的节点
+             *        fix #83 https://github.com/fex-team/kityminder-editor/issues/83
+             * @Editor: Naixor
+             * @Date: 2015.9.16
+             */
+                var textNodes = [].slice.call(receiverElement.childNodes);
+                var node = minder.getSelectedNode();
+                textNodes = commitInputText(textNodes);
+                commitInputNode(node, textNodes);
             }
             function exitInputMode() {
                 receiverElement.classList.remove("input");
@@ -611,7 +951,7 @@ _p[10] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[11] = {
+_p[13] = {
     value: function(require, exports, module) {
         var Hotbox = _p.r(2);
         // Nice: http://unixpapa.com/js/key.html
@@ -673,13 +1013,6 @@ _p[11] = {
                 }
                 // normal -> normal
                 if (e.type == "keydown") {
-                    if (e.is("Ctrl + s")) {
-                        minder.fire("savefile");
-                        e.preventDefault();
-                    } else if (e.is("Ctrl + f")) {
-                        minder.fire("findNode");
-                        e.preventDefault();
-                    }
                     return fsm.jump("normal", "shortcut-handle", e);
                 }
             });
@@ -770,7 +1103,7 @@ _p[11] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[12] = {
+_p[14] = {
     value: function(require, exports, module) {
         var Minder = _p.r(4);
         function MinderRuntime() {
@@ -792,7 +1125,7 @@ _p[12] = {
 };
 
 //src/runtime/node.js
-_p[13] = {
+_p[15] = {
     value: function(require, exports, module) {
         function NodeRuntime() {
             var runtime = this;
@@ -825,13 +1158,41 @@ _p[13] = {
                     }
                 });
             });
+            main.button({
+                position: "bottom",
+                label: "导入节点",
+                key: "Alt + V",
+                enable: function() {
+                    var selectedNodes = minder.getSelectedNodes();
+                    return selectedNodes.length == 1;
+                },
+                action: importNodeData,
+                next: "idle"
+            });
+            main.button({
+                position: "bottom",
+                label: "导出节点",
+                key: "Alt + C",
+                enable: function() {
+                    var selectedNodes = minder.getSelectedNodes();
+                    return selectedNodes.length == 1;
+                },
+                action: exportNodeData,
+                next: "idle"
+            });
+            function importNodeData() {
+                minder.fire("importNodeData");
+            }
+            function exportNodeData() {
+                minder.fire("exportNodeData");
+            }
         }
         return module.exports = NodeRuntime;
     }
 };
 
 //src/runtime/priority.js
-_p[14] = {
+_p[16] = {
     value: function(require, exports, module) {
         function PriorityRuntime() {
             var minder = this.minder;
@@ -877,7 +1238,7 @@ _p[14] = {
 };
 
 //src/runtime/progress.js
-_p[15] = {
+_p[17] = {
     value: function(require, exports, module) {
         function ProgressRuntime() {
             var minder = this.minder;
@@ -931,9 +1292,9 @@ _p[15] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[16] = {
+_p[18] = {
     value: function(require, exports, module) {
-        var key = _p.r(21);
+        var key = _p.r(23);
         var hotbox = _p.r(2);
         function ReceiverRuntime() {
             var fsm = this.fsm;
@@ -1045,9 +1406,9 @@ _p[16] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[17] = {
+_p[19] = {
     value: function(require, exports, module) {
-        var format = _p.r(18);
+        var format = _p.r(20);
         function noop() {}
         function stringHash(str) {
             var hash = 0;
@@ -1076,7 +1437,7 @@ _p[17] = {
 };
 
 //src/tool/format.js
-_p[18] = {
+_p[20] = {
     value: function(require, exports, module) {
         function format(template, args) {
             if (typeof args != "object") {
@@ -1099,7 +1460,7 @@ _p[18] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[19] = {
+_p[21] = {
     value: function(require, exports, module) {
         if (!("innerText" in document.createElement("a")) && "getSelection" in window) {
             HTMLElement.prototype.__defineGetter__("innerText", function() {
@@ -1126,7 +1487,12 @@ _p[19] = {
                 return str;
             });
             HTMLElement.prototype.__defineSetter__("innerText", function(text) {
-                this.innerHTML = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+                /**
+             * @Desc: 解决FireFox节点内容删除后text为null，出现报错的问题
+             * @Editor: Naixor
+             * @Date: 2015.9.16
+             */
+                this.innerHTML = (text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
             });
         }
     }
@@ -1141,7 +1507,7 @@ _p[19] = {
  * @author: techird
  * @copyright: Baidu FEX, 2014
  */
-_p[20] = {
+_p[22] = {
     value: function(require, exports, module) {
         /*!
     * https://github.com/Starcounter-Jack/Fast-JSON-Patch
@@ -1227,9 +1593,9 @@ _p[20] = {
 };
 
 //src/tool/key.js
-_p[21] = {
+_p[23] = {
     value: function(require, exports, module) {
-        var keymap = _p.r(22);
+        var keymap = _p.r(24);
         var CTRL_MASK = 4096;
         var ALT_MASK = 8192;
         var SHIFT_MASK = 16384;
@@ -1288,7 +1654,7 @@ _p[21] = {
 };
 
 //src/tool/keymap.js
-_p[22] = {
+_p[24] = {
     value: function(require, exports, module) {
         var keymap = {
             Shift: 16,
@@ -1419,7 +1785,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/kityminderEditor/kityminderEditor.html',
-    "<div class=\"minder-editor-container\"><div class=\"top-tab\" top-tab=\"minder\" editor=\"editor\" ng-if=\"minder\"></div><div class=\"minder-editor\"></div><div class=\"km-note\" note-editor minder=\"minder\" ng-if=\"minder\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div><div class=\"navigator\" navigator minder=\"minder\" ng-if=\"minder\"></div></div>"
+    "<div class=\"minder-editor-container\"><div class=\"top-tab\" top-tab=\"minder\" editor=\"editor\" ng-if=\"minder\"></div><div search-box minder=\"minder\" ng-if=\"minder\"></div><div class=\"minder-editor\"></div><div class=\"km-note\" note-editor minder=\"minder\" ng-if=\"minder\"></div><div class=\"note-previewer\" note-previewer ng-if=\"minder\"></div><div class=\"navigator\" navigator minder=\"minder\" ng-if=\"minder\"></div></div>"
   );
 
 
@@ -1483,6 +1849,16 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
   );
 
 
+  $templateCache.put('ui/directive/searchBox/searchBox.html',
+    "<div id=\"search\" class=\"search-box clearfix\" ng-show=\"showSearch\"><div class=\"input-group input-group-sm search-input-wrap\"><input type=\"text\" id=\"search-input\" class=\"form-control search-input\" ng-model=\"keyword\" ng-keydown=\"handleKeyDown($event)\" aria-describedby=\"basic-addon2\"> <span class=\"input-group-addon search-addon\" id=\"basic-addon2\" ng-show=\"showTip\" ng-bind=\"'第 ' + curIndex + ' 条，共 ' + resultNum + ' 条'\"></span></div><div class=\"btn-group btn-group-sm prev-and-next-btn\" role=\"group\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"doSearch(keyword, 'prev')\"><span class=\"glyphicon glyphicon-chevron-up\"></span></button> <button type=\"button\" class=\"btn btn-default\" ng-click=\"doSearch(keyword, 'next')\"><span class=\"glyphicon glyphicon-chevron-down\"></span></button></div><div class=\"close-search\" ng-click=\"exitSearch()\"><span class=\"glyphicon glyphicon-remove\"></span></div></div>"
+  );
+
+
+  $templateCache.put('ui/directive/searchBtn/searchBtn.html',
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default search\" title=\"{{ 'search' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"enterSearch()\"></button> <button type=\"button\" class=\"btn btn-default search-caption dropdown-toggle\" ng-click=\"enterSearch()\" title=\"{{ 'search' | lang:'ui' }}\"><span class=\"caption\">{{ 'search' | lang:'ui' }}</span> <span class=\"sr-only\">{{ 'search' | lang:'ui' }}</span></button></div>"
+  );
+
+
   $templateCache.put('ui/directive/selectAll/selectAll.html',
     "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default select\" title=\"{{ 'selectall' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"select['all']()\"></button> <button type=\"button\" class=\"btn btn-default select-caption dropdown-toggle\" title=\"{{ 'selectall' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'selectall' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'selectall' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"item in items\"><a href ng-click=\"select[item]()\">{{ 'select' + item | lang:'ui' }}</a></li></ul></div>"
   );
@@ -1504,7 +1880,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/topTab/topTab.html',
-    "<tabset><tab heading=\"{{ 'idea' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('idea')\" select=\"setCurTab('idea')\"><undo-redo editor=\"editor\"></undo-redo><append-node minder=\"minder\"></append-node><arrange minder=\"minder\"></arrange><operation minder=\"minder\"></operation><hyper-link minder=\"minder\"></hyper-link><image-btn minder=\"minder\"></image-btn><note-btn minder=\"minder\"></note-btn><priority-editor minder=\"minder\"></priority-editor><progress-editor minder=\"minder\"></progress-editor><resource-editor minder=\"minder\"></resource-editor></tab><tab heading=\"{{ 'appearence' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('appearance')\" select=\"setCurTab('appearance')\"><template-list minder=\"minder\" class=\"inline-directive\"></template-list><theme-list minder=\"minder\"></theme-list><layout minder=\"minder\" class=\"inline-directive\"></layout><style-operator minder=\"minder\" class=\"inline-directive\"></style-operator><font-operator minder=\"minder\" class=\"inline-directive\"></font-operator></tab><tab heading=\"{{ 'view' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('view')\" select=\"setCurTab('view')\"><expand-level minder=\"minder\"></expand-level><select-all minder=\"minder\"></select-all></tab></tabset>"
+    "<tabset><tab heading=\"{{ 'idea' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('idea')\" select=\"setCurTab('idea')\"><undo-redo editor=\"editor\"></undo-redo><append-node minder=\"minder\"></append-node><arrange minder=\"minder\"></arrange><operation minder=\"minder\"></operation><hyper-link minder=\"minder\"></hyper-link><image-btn minder=\"minder\"></image-btn><note-btn minder=\"minder\"></note-btn><priority-editor minder=\"minder\"></priority-editor><progress-editor minder=\"minder\"></progress-editor><resource-editor minder=\"minder\"></resource-editor></tab><tab heading=\"{{ 'appearence' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('appearance')\" select=\"setCurTab('appearance')\"><template-list minder=\"minder\" class=\"inline-directive\"></template-list><theme-list minder=\"minder\"></theme-list><layout minder=\"minder\" class=\"inline-directive\"></layout><style-operator minder=\"minder\" class=\"inline-directive\"></style-operator><font-operator minder=\"minder\" class=\"inline-directive\"></font-operator></tab><tab heading=\"{{ 'view' | lang: 'ui/tabs'; }}\" ng-click=\"toggleTopTab('view')\" select=\"setCurTab('view')\"><expand-level minder=\"minder\"></expand-level><select-all minder=\"minder\"></select-all><search-btn minder=\"minder\"></search-btn></tab></tabset>"
   );
 
 
@@ -1518,8 +1894,14 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
   );
 
 
+  $templateCache.put('ui/dialog/imExportNode/imExportNode.tpl.html',
+    "<div class=\"modal-header\"><h3 class=\"modal-title\">{{ title }}</h3></div><div class=\"modal-body\"><textarea type=\"text\" class=\"form-control single-input\" rows=\"8\" ng-keydown=\"shortCut($event);\" ng-model=\"value\" ng-readonly=\"type === 'export'\">\n" +
+    "    </textarea></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\" ng-disabled=\"type === 'import' && value == ''\">OK</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">Cancel</button></div>"
+  );
+
+
   $templateCache.put('ui/dialog/image/image.tpl.html',
-    "<div class=\"modal-header\"><h3 class=\"modal-title\">图片</h3></div><div class=\"modal-body\"><tabset><tab heading=\"图片搜索\"><form class=\"form-inline\"><div class=\"form-group\"><label for=\"search-keyword\">关键词：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.searchKeyword2\" id=\"search-keyword\" placeholder=\"请输入搜索的关键词\"></div><button class=\"btn btn-primary\" ng-click=\"searchImage()\">百度一下</button></form><div class=\"search-result\" id=\"search-result\"><ul><li ng-repeat=\"image in list\" id=\"{{ 'img-item' + $index }}\" ng-class=\"{'selected' : isSelected}\" ng-click=\"selectImage($event)\"><img id=\"{{ 'img-' + $index }}\" ng-src=\"{{ image.src || '' }}\" alt=\"{{ image.title }}\" onerror=\"this.parentNode.remove()\"> <span>{{ image.title }}</span></li></ul></div></tab><tab heading=\"插入图片\" active=\"true\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"image-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.url\" ng-blur=\"urlPassed = data.R_URL.test(data.url)\" ng-focus=\"this.value = data.url\" ng-keydown=\"shortCut($event)\" id=\"image-url\" placeholder=\"必填：以 http(s):// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"选填：鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" alt=\"{{ data.title }}\"></div></form></tab></tabset></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
+    "<div class=\"modal-header\"><h3 class=\"modal-title\">图片</h3></div><div class=\"modal-body\"><tabset><tab heading=\"图片搜索\"><form class=\"form-inline\"><div class=\"form-group\"><label for=\"search-keyword\">关键词：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.searchKeyword2\" id=\"search-keyword\" placeholder=\"请输入搜索的关键词\"></div><button class=\"btn btn-primary\" ng-click=\"searchImage()\">百度一下</button></form><div class=\"search-result\" id=\"search-result\"><ul><li ng-repeat=\"image in list\" id=\"{{ 'img-item' + $index }}\" ng-class=\"{'selected' : isSelected}\" ng-click=\"selectImage($event)\"><img id=\"{{ 'img-' + $index }}\" ng-src=\"{{ image.src || '' }}\" alt=\"{{ image.title }}\" onerror=\"this.parentNode.removeChild(this)\"> <span>{{ image.title }}</span></li></ul></div></tab><tab heading=\"插入图片\" active=\"true\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"image-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.url\" ng-blur=\"urlPassed = data.R_URL.test(data.url)\" ng-focus=\"this.value = data.url\" ng-keydown=\"shortCut($event)\" id=\"image-url\" placeholder=\"必填：以 http(s):// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"选填：鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" alt=\"{{ data.title }}\"></div></form></tab></tabset></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
   );
 
 }]);
@@ -1743,6 +2125,8 @@ angular.module('kityminderEditor')
 						'fullscreen': '全屏',
 						'outline': '大纲'
 					},
+
+					'search':'搜索',
 
 					'expandtoleaf': '展开',
 
@@ -2073,7 +2457,6 @@ angular.module('kityminderEditor')
     var openScope = null;
 
     this.open = function( dropdownScope ) {
-        console.log('Enter open function');
         if ( !openScope ) {
             $document.bind('click', closeDropdown);
             $document.bind('keydown', escapeKeyBind);
@@ -2087,7 +2470,6 @@ angular.module('kityminderEditor')
     };
 
     this.close = function( dropdownScope ) {
-        console.log('Enter close function');
         if ( openScope === dropdownScope ) {
             openScope = null;
             $document.unbind('click', closeDropdown);
@@ -2098,7 +2480,7 @@ angular.module('kityminderEditor')
     var closeDropdown = function( evt ) {
         // This method may still be called during the same mouse event that
         // unbound this event handler. So check openScope before proceeding.
-        console.log(evt, openScope);
+        //console.log(evt, openScope);
         if (!openScope) { return; }
 
         var toggleElement = openScope.getToggleElement();
@@ -2119,6 +2501,88 @@ angular.module('kityminderEditor')
         }
     };
 }])
+angular.module('kityminderEditor').service('revokeDialog', ['$modal', 'minder.service', function($modal, minderService) {
+
+    minderService.registerEvent(function() {
+
+        // 触发导入节点或导出节点对话框
+        var minder = window.minder;
+        var editor = window.editor;
+        var parentFSM = editor.hotbox.getParentFSM();
+
+
+        minder.on('importNodeData', function() {
+            parentFSM.jump('modal', 'import-text-modal');
+
+            var importModal = $modal.open({
+                animation: true,
+                templateUrl: 'ui/dialog/imExportNode/imExportNode.tpl.html',
+                controller: 'imExportNode.ctrl',
+                size: 'md',
+                resolve: {
+                    title: function() {
+                        return '导入节点';
+                    },
+                    defaultValue: function() {
+                        return '';
+                    },
+                    type: function() {
+                        return 'import';
+                    }
+                }
+            });
+
+            importModal.result.then(function(result) {
+                try{
+                    minder.Text2Children(minder.getSelectedNode(), result);
+                } catch(e) {
+                    alert(e);
+                }
+                parentFSM.jump('normal', 'import-text-finish');
+                editor.receiver.selectAll();
+            }, function() {
+                parentFSM.jump('normal', 'import-text-finish');
+                editor.receiver.selectAll();
+            });
+        });
+
+        minder.on('exportNodeData', function() {
+            parentFSM.jump('modal', 'export-text-modal');
+
+            var exportModal = $modal.open({
+                animation: true,
+                templateUrl: 'ui/dialog/imExportNode/imExportNode.tpl.html',
+                controller: 'imExportNode.ctrl',
+                size: 'md',
+                resolve: {
+                    title: function() {
+                        return '导出节点';
+                    },
+                    defaultValue: function() {
+                        var selectedNode = minder.getSelectedNode(),
+                            Node2Text = window.kityminder.data.getRegisterProtocol('text').Node2Text;
+
+                        return Node2Text(selectedNode);
+                    },
+                    type: function() {
+                        return 'export';
+                    }
+                }
+            });
+
+            exportModal.result.then(function(result) {
+                parentFSM.jump('normal', 'export-text-finish');
+                editor.receiver.selectAll();
+            }, function() {
+                parentFSM.jump('normal', 'export-text-finish');
+                editor.receiver.selectAll();
+            });
+        });
+
+    });
+
+    return {};
+}]);
 angular.module('kityminderEditor')
     .service('valueTransfer', function() {
         return {};
@@ -2198,6 +2662,100 @@ angular.module('kityminderEditor')
         $scope.cancel = function () {
             $modalInstance.dismiss('cancel');
         };
+
+    }]);
+angular.module('kityminderEditor')
+    .controller('imExportNode.ctrl', ["$scope", "$modalInstance", "title", "defaultValue", "type", function ($scope, $modalInstance, title, defaultValue, type) {
+
+        $scope.title = title;
+
+        $scope.value = defaultValue;
+
+        $scope.type = type;
+
+        $scope.ok = function () {
+            if ($scope.value == '') {
+                return;
+            }
+            $modalInstance.close($scope.value);
+
+        };
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('cancel');
+        };
+
+        setTimeout(function() {
+            $('.single-input').focus();
+
+            $('.single-input')[0].setSelectionRange(0, defaultValue.length);
+
+        }, 30);
+
+        $scope.shortCut = function(e) {
+            e.stopPropagation();
+
+            //if (e.keyCode == 13 && e.shiftKey == false) {
+            //    $scope.ok();
+            //}
+
+            if (e.keyCode == 27) {
+                $scope.cancel();
+            }
+
+            // tab 键屏蔽默认事件 和 backspace 键屏蔽默认事件
+            if (e.keyCode == 8 && type == 'export') {
+                e.preventDefault();
+            }
+
+            if (e.keyCode == 9) {
+                e.preventDefault();
+                var $textarea = e.target;
+                var pos = getCursortPosition($textarea);
+                var str = $textarea.value;
+                $textarea.value = str.substr(0, pos) + '\t' + str.substr(pos);
+                setCaretPosition($textarea, pos + 1);
+            }
+
+        };
+
+        /*
+        * 获取 textarea 的光标位置
+        * @Author: Naixor
+        * @date: 2015.09.23
+        * */
+        function getCursortPosition (ctrl) {
+            var CaretPos = 0;	// IE Support
+            if (document.selection) {
+                ctrl.focus ();
+                var Sel = document.selection.createRange ();
+                Sel.moveStart ('character', -ctrl.value.length);
+                CaretPos = Sel.text.length;
+            }
+            // Firefox support
+            else if (ctrl.selectionStart || ctrl.selectionStart == '0') {
+                CaretPos = ctrl.selectionStart;
+            }
+            return (CaretPos);
+        }
+
+        /*
+         * 设置 textarea 的光标位置
+         * @Author: Naixor
+         * @date: 2015.09.23
+         * */
+        function setCaretPosition(ctrl, pos){
+            if(ctrl.setSelectionRange) {
+                ctrl.focus();
+                ctrl.setSelectionRange(pos,pos);
+            } else if (ctrl.createTextRange) {
+                var range = ctrl.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', pos);
+                range.moveStart('character', pos);
+                range.select();
+            }
+        }
 
     }]);
 angular.module('kityminderEditor')
@@ -2536,7 +3094,7 @@ angular.module('kityminderEditor')
         }
     }]);
 angular.module('kityminderEditor')
-	.directive('kityminderEditor', ['config', 'minder.service', function(config, minderService) {
+	.directive('kityminderEditor', ['config', 'minder.service', 'revokeDialog', function(config, minderService, revokeDialog) {
 		return {
 			restrict: 'EA',
 			templateUrl: 'ui/directive/kityminderEditor/kityminderEditor.html',
@@ -2942,7 +3500,7 @@ angular.module('kityminderEditor')
 // TODO: 使用一个 div 容器作为 previewer，而不是两个
 angular.module('kityminderEditor')
 
-	.directive('notePreviewer', ['$sce', function($sce) {
+	.directive('notePreviewer', ['$sce', 'valueTransfer', function($sce, valueTransfer) {
 		return {
 			restrict: 'A',
 			templateUrl: 'ui/directive/notePreviewer/notePreviewer.html',
@@ -2967,11 +3525,14 @@ angular.module('kityminderEditor')
 				minder.on('shownoterequest', function(e) {
 
 					previewTimer = setTimeout(function() {
-						preview(e.node);
+						preview(e.node, e.keyword);
 					}, 300);
 				});
 				minder.on('hidenoterequest', function() {
 					clearTimeout(previewTimer);
+
+                    scope.showNotePreviewer = false;
+                    //scope.$apply();
 				});
 
 				var previewLive = false;
@@ -3211,6 +3772,171 @@ angular.module('kityminderEditor')
             }
         };
     }]);
+angular.module('kityminderEditor')
+    .directive('searchBox', function() {
+        return {
+            restrict: 'A',
+            templateUrl: 'ui/directive/searchBox/searchBox.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            controller: ["$scope", function ($scope) {
+                var minder = $scope.minder;
+                var editor = window.editor;
+                $scope.handleKeyDown = handleKeyDown;
+                $scope.doSearch = doSearch;
+                $scope.exitSearch = exitSearch;
+                $scope.showTip = false;
+                $scope.showSearch = false;
+
+                // 处理输入框按键事件
+                function handleKeyDown(e) {
+                    if (e.keyCode == 13) {
+                        var direction = e.shiftKey ? 'prev' : 'next';
+                        doSearch($scope.keyword, direction);
+                    }
+                    if (e.keyCode == 27) {
+                        exitSearch();
+                    }
+                }
+
+                function exitSearch() {
+                    $('#search-input').blur();
+                    $scope.showSearch = false;
+                    minder.fire('hidenoterequest');
+                    editor.receiver.selectAll();
+                }
+
+                function enterSearch() {
+                    $scope.showSearch = true;
+                    setTimeout(function() {
+                        $('#search-input').focus();
+                    }, 10);
+
+                    if ($scope.keyword) {
+                        $('#search-input')[0].setSelectionRange(0, $scope.keyword.length);
+                    }
+                }
+
+                $('body').on('keydown', function(e) {
+                    if (e.keyCode == 70 && (e.ctrlKey || e.metaKey)) {
+                        enterSearch();
+
+                        $scope.$apply();
+                        e.preventDefault();
+                    }
+                });
+
+                minder.on('searchNode', function() {
+                    enterSearch();
+                });
+
+
+                var nodeSequence = [];
+                var searchSequence = [];
+
+
+                minder.on('contentchange', makeNodeSequence);
+
+                makeNodeSequence();
+
+
+                function makeNodeSequence() {
+                    nodeSequence = [];
+                    minder.getRoot().traverse(function(node) {
+                        nodeSequence.push(node);
+                    });
+                }
+
+                function makeSearchSequence(keyword) {
+                    searchSequence = [];
+
+                    for (var i = 0; i < nodeSequence.length; i++) {
+                        var node = nodeSequence[i];
+                        var text = node.getText().toLowerCase();
+                        if (text.indexOf(keyword) != -1) {
+                            searchSequence.push({node:node});
+                        }
+                        var note = node.getData('note');
+                        if (note && note.indexOf(keyword) != -1) {
+                            searchSequence.push({node: node, keyword: keyword});
+                        }
+                    }
+                }
+
+
+                function doSearch(keyword, direction) {
+                    $scope.showTip = false;
+                    minder.fire('hidenoterequest');
+
+                    if (!keyword || !/\S/.exec(keyword)) {
+                        $('#search-input').focus();
+                        return;
+                    }
+
+                    // 当搜索不到节点时候默认的选项
+                    $scope.showTip = true;
+                    $scope.curIndex = 0;
+                    $scope.resultNum = 0;
+
+
+                    keyword = keyword.toLowerCase();
+                    var newSearch = doSearch.lastKeyword != keyword;
+
+                    doSearch.lastKeyword = keyword;
+
+                    if (newSearch) {
+                        makeSearchSequence(keyword);
+                    }
+
+                    $scope.resultNum = searchSequence.length;
+
+                    if (searchSequence.length) {
+                        var curIndex = newSearch ? 0 : (direction === 'next' ? doSearch.lastIndex + 1 : doSearch.lastIndex - 1) || 0;
+                        curIndex = (searchSequence.length + curIndex) % searchSequence.length;
+
+                        setSearchResult(searchSequence[curIndex].node, searchSequence[curIndex].keyword);
+
+                        doSearch.lastIndex = curIndex;
+
+                        $scope.curIndex = curIndex + 1;
+
+                        function setSearchResult(node, previewKeyword) {
+                            minder.execCommand('camera', node, 50);
+                            setTimeout(function () {
+                                minder.select(node, true);
+                                if (!node.isExpanded()) minder.execCommand('expand', true);
+                                if (previewKeyword) {
+                                    minder.fire('shownoterequest', {node: node, keyword: previewKeyword});
+                                }
+                            }, 60);
+                        }
+                    }
+                }
+
+
+            }]
+        }
+    });
+angular.module('kityminderEditor')
+    .directive('searchBtn', function() {
+        return {
+            restrict: 'E',
+            templateUrl: 'ui/directive/searchBtn/searchBtn.html',
+            scope: {
+                minder: '='
+            },
+            replace: true,
+            link: function (scope) {
+                scope.enterSearch = enterSearch;
+
+                function enterSearch() {
+                    minder.fire('searchNode');
+                }
+            }
+        }
+    });
 angular.module('kityminderEditor')
     .directive('selectAll', function() {
         return {
