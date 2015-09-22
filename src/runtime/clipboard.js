@@ -5,7 +5,7 @@
  */
 define(function(require, exports, module) {
 
-	var ClipboardRuntime = function() {
+	function ClipboardRuntime () {
 		var minder = this.minder;
 		var Data = window.kityminder.data;
 
@@ -114,5 +114,5 @@ define(function(require, exports, module) {
 		minder.on('beforePaste', beforePaste);
 	}
 
-	module.exports = ClipboardRuntime;
+	return module.exports = ClipboardRuntime;
 });
