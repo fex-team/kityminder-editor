@@ -37,8 +37,8 @@ angular.module('kityminderEditor')
                 $scope.cancel();
             }
 
-            // tab 键屏蔽默认事件
-            if (e.keyCode == 9) {
+            // tab 键屏蔽默认事件 和 backspace 键屏蔽默认事件
+            if (e.keyCode == 9 || e.keyCode == 8) {
                 e.preventDefault();
             }
         }
