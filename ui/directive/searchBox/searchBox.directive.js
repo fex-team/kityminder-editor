@@ -9,6 +9,7 @@ angular.module('kityminderEditor')
             replace: true,
             controller: function ($scope) {
                 var minder = $scope.minder;
+                var editor = window.editor;
                 $scope.handleKeyDown = handleKeyDown;
                 $scope.doSearch = doSearch;
                 $scope.exitSearch = exitSearch;
@@ -30,6 +31,7 @@ angular.module('kityminderEditor')
                     $('#search-input').blur();
                     $scope.showSearch = false;
                     minder.fire('hidenoterequest');
+                    editor.receiver.selectAll();
                 }
 
                 function enterSearch() {
