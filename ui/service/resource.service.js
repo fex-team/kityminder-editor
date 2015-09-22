@@ -3,7 +3,6 @@ angular.module('kityminderEditor')
     var openScope = null;
 
     this.open = function( dropdownScope ) {
-        console.log('Enter open function');
         if ( !openScope ) {
             $document.bind('click', closeDropdown);
             $document.bind('keydown', escapeKeyBind);
@@ -17,7 +16,6 @@ angular.module('kityminderEditor')
     };
 
     this.close = function( dropdownScope ) {
-        console.log('Enter close function');
         if ( openScope === dropdownScope ) {
             openScope = null;
             $document.unbind('click', closeDropdown);
@@ -28,7 +26,7 @@ angular.module('kityminderEditor')
     var closeDropdown = function( evt ) {
         // This method may still be called during the same mouse event that
         // unbound this event handler. So check openScope before proceeding.
-        console.log(evt, openScope);
+        //console.log(evt, openScope);
         if (!openScope) { return; }
 
         var toggleElement = openScope.getToggleElement();
