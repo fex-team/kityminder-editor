@@ -27,7 +27,7 @@ define(function(require, exports, module) {
 		}
 
 		var beforeCopy = function (e) {
-			var clipBoardEvent = e.originEvent;
+			var clipBoardEvent = e;
 			var state = fsm.state();
 
 			switch (state) {
@@ -51,7 +51,7 @@ define(function(require, exports, module) {
 				return;
 			};
 
-			var clipBoardEvent = e.originEvent;
+			var clipBoardEvent = e;
 			var state = fsm.state();
 
 			switch (state) {
@@ -76,7 +76,7 @@ define(function(require, exports, module) {
 				return;
 			};
 
-			var clipBoardEvent = e.originEvent;
+			var clipBoardEvent = e;
 			var state = fsm.state();
 			var textData = clipBoardEvent.clipboardData.getData('text/plain');
 
@@ -108,10 +108,14 @@ define(function(require, exports, module) {
 				}
 			}
 		}
-
-		minder.on('beforeCopy', beforeCopy);
-		minder.on('beforeCut', beforeCut);
-		minder.on('beforePaste', beforePaste);
+		/**
+		 * 由editor的receiver统一处理全部事件，包括clipboard事件
+		 * @Editor: Naixor
+		 * @Date: 2015.9.24
+		 */
+		receiver.element.addEventListener('copy', beforeCopy);
+        receiver.element.addEventListener('cut', beforeCut);
+        receiver.element.addEventListener('paste', beforePaste);
 	}
 
 	return module.exports = ClipboardRuntime;
