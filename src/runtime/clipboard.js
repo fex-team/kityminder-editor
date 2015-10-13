@@ -20,10 +20,15 @@ define(function(require, exports, module) {
 		var kmencode = MimeType.getMimeTypeProtocol('application/km'),
 			decode = Data.getRegisterProtocol('json').decode;
 
-
+		/*
+		 * 增加对多节点赋值粘贴的处理
+		 */
 		function encode (node) {
-			var obj = minder.exportNode(node);
-			return kmencode(Data.getRegisterProtocol('json').encode(obj));
+			var _nodes = [];
+			for (var i = 0, l = nodes.length; i < l; i++) {
+				_nodes.push(minder.exportNode(nodes[i]));
+			}
+			return kmencode(Data.getRegisterProtocol('json').encode(_nodes));
 		}
 
 		var beforeCopy = function (e) {
@@ -35,9 +40,10 @@ define(function(require, exports, module) {
 					break;
 				}
 				case 'normal': {
-					var node = minder.getSelectedNode();
-					if (node) {
-			            clipBoardEvent.clipboardData.setData('text/plain', encode(node));
+					var nodes = minder.getSelectedNodes();
+					if (nodes.length) {
+						var str = encode(nodes);
+			            clipBoardEvent.clipboardData.setData('text/plain', str);
 			        }
             		e.preventDefault();			
 					break;
@@ -59,11 +65,12 @@ define(function(require, exports, module) {
 					break;
 				}
 				case 'normal': {
-					var node = minder.getSelectedNode();
-					if (node) {
-			            clipBoardEvent.clipboardData.setData('text/plain', encode(node));
+					var nodes = minder.getSelectedNodes();
+					if (nodes.length) {
+			            clipBoardEvent.clipboardData.setData('text/plain', encode(nodes));
 			            minder.execCommand('RemoveNode');
 			        }
+            		e.preventDefault();
             		e.preventDefault();			
 					break;
 				}
@@ -96,9 +103,13 @@ define(function(require, exports, module) {
 					var node = minder.getSelectedNode();
 					
 					if (MimeType.whichMimeType(textData) === 'application/km') {
-						minder.execCommand('AppendChildNode');
-						node = minder.getSelectedNode();
-						minder.importNode(node, decode(MimeType.getPureText(textData)));
+						var nodes = decode(MimeType.getPureText(textData));
+						var _node;
+						for (var i = 0, l = nodes.length; i < l; i++) {
+							_node = minder.createNode(null, node);
+							minder.importNode(_node, nodes[i]);
+							node.appendChild(_node);
+						}
 						minder.refresh();
 					} else {
 						minder.Text2Children(node, textData);						
