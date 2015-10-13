@@ -11,8 +11,6 @@ angular.module('kityminderEditor')
 				var minder = scope.minder;
 				var currentTheme = minder.getThemeItems();
 
-				scope.hexPicker = scope.hexPicker || currentTheme['main-color'] ;
-
 				scope.fontSizeList = [10, 12, 16, 18, 24, 32, 48];
                 scope.fontFamilyList = [{
                     name: '宋体',
@@ -52,10 +50,14 @@ angular.module('kityminderEditor')
                     val: 'sans-serif'
                 }];
 
-				scope.$on('colorpicker-selected', function(e, msg) {
-					minder.execCommand('forecolor', msg.value);
-					scope.customColor = msg.value;
-				});
+                scope.foreColor = minder.queryCommandValue('forecolor') || currentTheme['main-color'] || '#000';
+
+                scope.$on('colorPicked', function(event, color) {
+                    event.stopPropagation();
+
+                    scope.foreColor = color;
+                    minder.execCommand('forecolor', color);
+                });
 
 				minder.on('interactchange', function() {
 					scope.customColor = minder.queryCommandValue('forecolor') || '#000000';

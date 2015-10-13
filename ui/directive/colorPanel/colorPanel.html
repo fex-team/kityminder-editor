@@ -1,8 +1,16 @@
-<div class="color-wrap"
-    ng-disabled="minder.queryCommandState('background') === -1">
-    <span colorpicker
-          class="color-item"
-          ng-model="hexPicker"
-          ng-style="{ 'background-color': customColor }"
-          title="{{ hexPicker }}"></span>
+<div class="bg-color-wrap">
+        <span class="quick-bg-color"
+              ng-click="minder.execCommand('background', bgColor)"
+              ng-disabled="minder.queryCommandState('background') === -1"></span>
+		<span color-picker
+              class="bg-color"
+              default-color="#ff0000"
+              ng-disabled="minder.queryCommandState('background') === -1">
+            <span class="caret"></span>
+        </span>
+        <span class="bg-color-preview"
+              ng-style="{ 'background-color': bgColor }"
+              ng-click="minder.execCommand('background', bgColor)"
+              ng-disabled="minder.queryCommandState('background') === -1"></span>
+
 </div>

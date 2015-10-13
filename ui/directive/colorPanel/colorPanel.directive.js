@@ -12,16 +12,12 @@ angular.module('kityminderEditor')
 				var minder = scope.minder;
 				var currentTheme = minder.getThemeItems();
 
-				scope.hexPicker = scope.hexPicker || currentTheme['background'] ;
+				scope.bgColor = minder.queryCommandValue('background') || currentTheme['background'] || '#fff';
 
-
-				scope.$on('colorpicker-selected', function(e, msg) {
-                    e.stopPropagation();
-
-					// colorPicker 的 bug ： 初次选择 value 为 undefined
-					minder.execCommand('background', msg.value);
-
-					scope.customColor = msg.value;
+				scope.$on('colorPicked', function(event, color) {
+                    event.stopPropagation();
+					scope.bgColor = color;
+					minder.execCommand('background', color);
 				});
 
 				minder.on('interactchange', function() {
