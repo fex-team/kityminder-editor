@@ -19,6 +19,7 @@ define(function(require, exports, module) {
 		
 		var kmencode = MimeType.getMimeTypeProtocol('application/km'),
 			decode = Data.getRegisterProtocol('json').decode;
+		var _selectedNodes = [];
 
 		/*
 		 * 增加对多节点赋值粘贴的处理
@@ -136,16 +137,19 @@ define(function(require, exports, module) {
 						
 						if (MimeType.whichMimeType(textData) === 'application/km') {
 							var nodes = decode(MimeType.getPureText(textData));
-							var _node;
+							var _node; 
 							sNodes.forEach(function(node) {
 								// 由于粘贴逻辑中为了排除子节点重新排序导致逆序，因此复制的时候倒过来
 								for (var i = nodes.length-1; i >= 0; i--) {
 									_node = minder.createNode(null, node);
 									minder.importNode(_node, nodes[i]);
+									_selectedNodes.push(_node);
 									node.appendChild(_node);
 								}
 							});
-							
+							minder.select(_selectedNodes, true);
+							_selectedNodes = [];
+
 							minder.refresh();
 						} else {
 							sNodes.forEach(function(node) {
