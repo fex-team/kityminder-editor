@@ -52,6 +52,17 @@ define(function(require, exports, module) {
             },
             disable: function() {
                 element.setAttribute("contenteditable", false);
+            },
+            /**
+             * @Desc: hack FF下div contenteditable的光标丢失BUG
+             * @Editor: Naixor
+             * @Date: 2015.10.15
+             */
+            fixFFCaretDisappeared: function() {
+                element.removeAttribute("contenteditable");
+                element.setAttribute("contenteditable", "true");
+                element.blur();
+                element.focus();
             }
         };
         receiver.selectAll();
@@ -88,7 +99,6 @@ define(function(require, exports, module) {
             for (var i = 0; i < listeners.length; i++) {
 
                 listener = listeners[i];
-
                 // 忽略不在侦听状态的侦听器
                 if (listener.notifyState != '*' && listener.notifyState != fsm.state()) {
                     continue;

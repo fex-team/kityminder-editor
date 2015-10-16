@@ -19,6 +19,7 @@ define(function(require, exports, module) {
         var hotbox = this.hotbox;
         var receiver = this.receiver;
         var receiverElement = receiver.element;
+        var isGecko = window.kity.Browser.gecko;
 
         // setup everything to go
         setupReciverElement();
@@ -100,6 +101,9 @@ define(function(require, exports, module) {
         // edit for the selected node
         function editText() {
             receiverElement.innerText = minder.queryCommandValue('text');
+            if (isGecko) {
+                receiver.fixFFCaretDisappeared();
+            };
             fsm.jump('input', 'input-request');
             receiver.selectAll();
         }
@@ -139,8 +143,7 @@ define(function(require, exports, module) {
                     space_l, space_num, tab_num,
                     i = 0, l = textNodes.length; i < l; i++) {
                 str = textNodes[i];
-
-                switch (str.toString()) {
+                switch (Object.prototype.toString.call(str)) {
                     // 正常情况处理
                     case '[object HTMLBRElement]': {
                         text += ENTER_CHAR;
@@ -148,8 +151,15 @@ define(function(require, exports, module) {
                     }
                     case '[object Text]': {
                         // SG下会莫名其妙的加上&nbsp;影响后续判断，干掉！
-                        str = str.wholeText.replace("&nbsp;", " ");
-                        
+                        /**
+                         * FF下的wholeText会导致如下问题：
+                         *     |123| -> 在一个节点中输入一段字符，此时TextNode为[#Text 123]
+                         *     提交并重新编辑，在后面追加几个字符
+                         *     |123abc| -> 此时123为一个TextNode为[#Text 123, #Text abc]，但是对这两个任意取值wholeText均为全部内容123abc
+                         * 上述BUG仅存在在FF中，故将wholeText更改为textContent
+                         */
+                        str = str.textContent.replace("&nbsp;", " ");
+
                         if (!STR_CHECK.test(str)) {
                             space_l = str.length;
                             while (space_l--) {
@@ -167,7 +177,19 @@ define(function(require, exports, module) {
                     // 被增加span标签的情况会被处理成正常情况并会推交给上面处理
                     case '[object HTMLSpanElement]': {
                         [].splice.apply(textNodes, [i, 1].concat([].slice.call(str.childNodes)));
+                        l = textNodes.length;
                         i--;
+                        break;
+                    }
+                    // 若标签为image标签，则判断是否为合法url，是将其加载进来
+                    case '[object HTMLImageElement]': {
+                        if (str.src) {
+                            if (/http(|s):\/\//.test(str.src)) {
+                                minder.execCommand("Image", str.src, str.alt);
+                            } else {
+                                // data:image协议情况
+                            }
+                        };
                         break;
                     }
                     // 被增加div标签的情况会被处理成正常情况并会推交给上面处理
@@ -183,7 +205,23 @@ define(function(require, exports, module) {
                         break;
                     }
                     default: {
-                        text += "";
+                        if (str && str.childNodes.length) {
+                            _divChildNodes = [];
+                            for (var di = 0, l = str.childNodes.length; di < l; di++) {
+                                _divChildNodes.push(str.childNodes[di]);
+                            }
+                            _divChildNodes.push(BR);
+                            [].splice.apply(textNodes, [i, 1].concat(_divChildNodes));
+                            l = textNodes.length;
+                            i--;
+                        } else {
+                            if (str && str.textContent !== undefined) {
+                                text += str.textContent;
+                            } else {
+                                text += "";
+                            }    
+                        }
+                        // // 其他带有样式的节点被粘贴进来，则直接取textContent，若取不出来则置空
                     }
                 }
             };
@@ -197,7 +235,7 @@ define(function(require, exports, module) {
 
         /**
          * 判断节点的文本信息是否是
-         * @Desc: 从其他节点复制文字到另一个节点时部分浏览器(chrome)会自动包裹一个span标签，这样试用一下逻辑出来的就不是text节点二是span节点因此导致undefined的情况发生
+         * @Desc: 从其他节点复制文字到另一个节点时部分浏览器(chrome)会自动包裹一个span标签，这样使用以下逻辑出来的就不是text节点二是span节点因此导致undefined的情况发生
          * @Notice: 此处逻辑应该拆分到 kityminder-core/core/data中去，单独增加一个对某个节点importJson的事件
          * @Editor: Naixor
          * @Date: 2015.9.16

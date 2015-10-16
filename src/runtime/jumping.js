@@ -30,7 +30,7 @@ define(function(require, exports, module) {
      * @Desc: 下方使用receiver.enable()和receiver.disable()通过
      *        修改div contenteditable属性的hack来解决开启热核后依然无法屏蔽浏览器输入的bug;
      *        特别: win下FF对于此种情况必须要先blur在focus才能解决，但是由于这样做会导致用户
-     *             输入法状态丢失，因此对FF咱不做处理
+     *             输入法状态丢失，因此对FF暂不做处理
      * @Editor: Naixor
      * @Date: 2015.09.14
      */
