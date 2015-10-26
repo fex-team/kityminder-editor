@@ -50,8 +50,6 @@ angular.module('kityminderEditor')
                     val: 'sans-serif'
                 }];
 
-                scope.foreColor = minder.queryCommandValue('forecolor') || currentTheme['main-color'] || '#000';
-
                 scope.$on('colorPicked', function(event, color) {
                     event.stopPropagation();
 
@@ -59,10 +57,15 @@ angular.module('kityminderEditor')
                     minder.execCommand('forecolor', color);
                 });
 
-				minder.on('interactchange', function() {
-					scope.customColor = minder.queryCommandValue('forecolor') || '#000000';
-                    scope.$apply();
-				});
+                scope.setDefaultColor = function() {
+                    var currentNode = minder.getSelectedNode();
+                    var fontColor = minder.getNodeStyle(currentNode, 'color');
+
+                    // 有可能是 kity 的颜色类
+                    return typeof fontColor === 'object' ? fontColor.toHEX() : fontColor;
+                };
+
+                scope.foreColor = scope.setDefaultColor() || '#000';
 
                 scope.getFontfamilyName = function(val) {
                     var fontName = '';

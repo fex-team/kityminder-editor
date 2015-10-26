@@ -12,18 +12,21 @@ angular.module('kityminderEditor')
 				var minder = scope.minder;
 				var currentTheme = minder.getThemeItems();
 
-				scope.bgColor = minder.queryCommandValue('background') || currentTheme['background'] || '#fff';
-
 				scope.$on('colorPicked', function(event, color) {
                     event.stopPropagation();
 					scope.bgColor = color;
 					minder.execCommand('background', color);
 				});
 
-				minder.on('interactchange', function() {
-                    scope.customColor = minder.queryCommandValue('background') || '#000000';
-                    scope.$apply();
-				});
+				scope.setDefaultBg = function() {
+                    var currentNode = minder.getSelectedNode();
+                    var bgColor = minder.getNodeStyle(currentNode, 'background');
+
+                    // 有可能是 kity 的颜色类
+                    return typeof bgColor === 'object' ? bgColor.toHEX() : bgColor;
+                };
+
+                scope.bgColor = scope.setDefaultBg() || '#fff';
 
 			}
 		}
