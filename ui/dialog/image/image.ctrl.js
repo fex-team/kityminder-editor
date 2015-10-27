@@ -27,8 +27,8 @@ angular.module('kityminderEditor')
                             if(json.data[i].objURL) {
                                 $scope.list.push({
                                     title: json.data[i].fromPageTitleEnc,
-                                    src: json.data[i].objURL,
-                                    url: json.data[i].fromURL
+                                    src: json.data[i].middleURL,
+                                    url: json.data[i].middleURL
                                 });
                             }
                         }
@@ -44,7 +44,7 @@ angular.module('kityminderEditor')
             var targetItem = $('#img-item'+ (this.$index));
             var targetImg = $('#img-'+ (this.$index));
 
-            targetItem.siblings('.selected').removeClass('selected')
+            targetItem.siblings('.selected').removeClass('selected');
             targetItem.addClass('selected');
 
             $scope.data.url = targetImg.attr('src');
@@ -83,8 +83,8 @@ angular.module('kityminderEditor')
 
         function getImageData(){
             var key = $scope.data.searchKeyword2;
-            var keepOriginName = '1';
-            var url = "http://image.baidu.com/i?ct=201326592&cl=2&lm=-1&st=-1&tn=baiduimagejson&istype=2&rn=3200&fm=index&pv=&word=" + key + "&ie=utf-8&oe=utf-8&keeporiginname=" + keepOriginName + "&" + +new Date + "&callback=JSON_CALLBACK";
+            var currentTime = new Date();
+            var url = 'http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&fp=result&queryWord='+ key +'&cl=2&lm=-1&ie=utf-8&oe=utf-8&st=-1&ic=0&word='+ key +'&face=0&istype=2&nc=1&pn=60&rn=60&gsm=3c&'+ currentTime.getTime() +'=&callback=JSON_CALLBACK';
 
             return $http.jsonp(url);
         }
