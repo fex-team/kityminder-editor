@@ -283,6 +283,12 @@ define(function(require, exports, module) {
             
             textNodes = commitInputText(textNodes);
             commitInputNode(node, textNodes);
+
+            if (node.type == 'root') {
+                var rootText = minder.getRoot().getText();
+                minder.fire('initChangeRoot', rootText);
+            }
+
         }
 
         function exitInputMode() {
