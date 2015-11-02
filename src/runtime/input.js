@@ -256,11 +256,8 @@ define(function(require, exports, module) {
                         return node;
                     }
                     importText(node, json, minder);
-                    minder.refresh();
-                    // minder._firePharse({
-                    //     type: 'contentchange'
-                    // });
-                    // minder._interactChange();
+                    minder.getRoot().renderTree();
+                    minder.layout(300);  
                 });
             } catch (e) {
                 // 无法被转换成脑图节点则不处理
@@ -279,6 +276,8 @@ define(function(require, exports, module) {
              * @Date: 2015.9.16
              */
             var textNodes = [].slice.call(receiverElement.childNodes);
+            // 解决过大内容导致SVG窜位问题
+            receiverElement.innerHTML = "";
             var node = minder.getSelectedNode();
             
             textNodes = commitInputText(textNodes);
