@@ -30,13 +30,21 @@
           ng-class="{'font-italics-selected' : minder.queryCommandState('italic') == 1}"
           ng-disabled="minder.queryCommandState('italic') === -1">
     </span>
-    <div class="font-color-wrap" >
-		<span colorpicker
+    <div class="font-color-wrap">
+        <span class="quick-font-color"
+              ng-click="minder.execCommand('forecolor', foreColor)"
+              ng-disabled="minder.queryCommandState('forecolor') === -1">A</span>
+		<span color-picker
               class="font-color"
-              ng-model="hexPicker"
-              ng-style="{ 'background-color': customColor }"
-              ng-disabled="minder.queryCommandState('forecolor') === -1"
-              title="{{ hexPicker }}"></span>
+              set-color="setDefaultColor()"
+              ng-disabled="minder.queryCommandState('forecolor') === -1">
+            <span class="caret"></span>
+        </span>
+        <span class="font-color-preview"
+              ng-style="{ 'background-color': foreColor }"
+              ng-click="minder.execCommand('forecolor', foreColor)"
+              ng-disabled="minder.queryCommandState('forecolor') === -1"></span>
+
     </div>
     <color-panel minder="minder" class="inline-directive"></color-panel>
 

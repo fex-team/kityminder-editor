@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.39 - 2015-09-23
+ * kityminder-editor - v1.0.40 - 2015-11-02
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -241,96 +241,152 @@ _p[6] = {
             var receiver = this.receiver;
             var MimeType = this.MimeType;
             var kmencode = MimeType.getMimeTypeProtocol("application/km"), decode = Data.getRegisterProtocol("json").decode;
-            function encode(node) {
-                var obj = minder.exportNode(node);
-                return kmencode(Data.getRegisterProtocol("json").encode(obj));
+            var _selectedNodes = [];
+            /*
+		 * 增加对多节点赋值粘贴的处理
+		 */
+            function encode(nodes) {
+                var _nodes = [];
+                for (var i = 0, l = nodes.length; i < l; i++) {
+                    _nodes.push(minder.exportNode(nodes[i]));
+                }
+                return kmencode(Data.getRegisterProtocol("json").encode(_nodes));
             }
             var beforeCopy = function(e) {
-                var clipBoardEvent = e.originEvent;
-                var state = fsm.state();
-                switch (state) {
-                  case "input":
-                    {
-                        break;
-                    }
-
-                  case "normal":
-                    {
-                        var node = minder.getSelectedNode();
-                        if (node) {
-                            clipBoardEvent.clipboardData.setData("text/plain", encode(node));
+                if (document.activeElement == receiver.element) {
+                    var clipBoardEvent = e;
+                    var state = fsm.state();
+                    switch (state) {
+                      case "input":
+                        {
+                            break;
                         }
-                        e.preventDefault();
-                        break;
+
+                      case "normal":
+                        {
+                            var nodes = [].concat(minder.getSelectedNodes());
+                            if (nodes.length) {
+                                // 这里由于被粘贴复制的节点的id信息也都一样，故做此算法
+                                // 这里有个疑问，使用node.getParent()或者node.parent会离奇导致出现非选中节点被渲染成选中节点，因此使用isAncestorOf，而没有使用自行回溯的方式
+                                if (nodes.length > 1) {
+                                    var targetLevel;
+                                    nodes.sort(function(a, b) {
+                                        return a.getLevel() - b.getLevel();
+                                    });
+                                    targetLevel = nodes[0].getLevel();
+                                    if (targetLevel !== nodes[nodes.length - 1].getLevel()) {
+                                        var plevel, pnode, idx = 0, l = nodes.length, pidx = l - 1;
+                                        pnode = nodes[pidx];
+                                        while (pnode.getLevel() !== targetLevel) {
+                                            idx = 0;
+                                            while (idx < l && nodes[idx].getLevel() === targetLevel) {
+                                                if (nodes[idx].isAncestorOf(pnode)) {
+                                                    nodes.splice(pidx, 1);
+                                                    break;
+                                                }
+                                                idx++;
+                                            }
+                                            pidx--;
+                                            pnode = nodes[pidx];
+                                        }
+                                    }
+                                }
+                                var str = encode(nodes);
+                                clipBoardEvent.clipboardData.setData("text/plain", str);
+                            }
+                            e.preventDefault();
+                            break;
+                        }
                     }
                 }
             };
             var beforeCut = function(e) {
-                if (minder.getStatus() !== "normal") {
-                    e.preventDefault();
-                    return;
-                }
-                var clipBoardEvent = e.originEvent;
-                var state = fsm.state();
-                switch (state) {
-                  case "input":
-                    {
-                        break;
-                    }
-
-                  case "normal":
-                    {
-                        var node = minder.getSelectedNode();
-                        if (node) {
-                            clipBoardEvent.clipboardData.setData("text/plain", encode(node));
-                            minder.execCommand("RemoveNode");
-                        }
+                if (document.activeElement == receiver.element) {
+                    if (minder.getStatus() !== "normal") {
                         e.preventDefault();
-                        break;
+                        return;
+                    }
+                    var clipBoardEvent = e;
+                    var state = fsm.state();
+                    switch (state) {
+                      case "input":
+                        {
+                            break;
+                        }
+
+                      case "normal":
+                        {
+                            var nodes = minder.getSelectedNodes();
+                            if (nodes.length) {
+                                clipBoardEvent.clipboardData.setData("text/plain", encode(nodes));
+                                minder.execCommand("removenode");
+                            }
+                            e.preventDefault();
+                            break;
+                        }
                     }
                 }
             };
             var beforePaste = function(e) {
-                if (minder.getStatus() !== "normal") {
-                    e.preventDefault();
-                    return;
-                }
-                var clipBoardEvent = e.originEvent;
-                var state = fsm.state();
-                var textData = clipBoardEvent.clipboardData.getData("text/plain");
-                switch (state) {
-                  case "input":
-                    {
-                        // input状态下如果格式为application/km则不进行paste操作
-                        if (!MimeType.isPureText(textData)) {
-                            e.preventDefault();
-                            return;
-                        }
-                        break;
-                    }
-
-                  case "normal":
-                    {
-                        /*
-					 * 针对normal状态下通过对选中节点粘贴导入子节点文本进行单独处理
-					 */
-                        var node = minder.getSelectedNode();
-                        if (MimeType.whichMimeType(textData) === "application/km") {
-                            minder.execCommand("AppendChildNode");
-                            node = minder.getSelectedNode();
-                            minder.importNode(node, decode(MimeType.getPureText(textData)));
-                            minder.refresh();
-                        } else {
-                            minder.Text2Children(node, textData);
-                        }
+                if (document.activeElement == receiver.element) {
+                    if (minder.getStatus() !== "normal") {
                         e.preventDefault();
-                        break;
+                        return;
+                    }
+                    var clipBoardEvent = e;
+                    var state = fsm.state();
+                    var textData = clipBoardEvent.clipboardData.getData("text/plain");
+                    switch (state) {
+                      case "input":
+                        {
+                            // input状态下如果格式为application/km则不进行paste操作
+                            if (!MimeType.isPureText(textData)) {
+                                e.preventDefault();
+                                return;
+                            }
+                            break;
+                        }
+
+                      case "normal":
+                        {
+                            /*
+						 * 针对normal状态下通过对选中节点粘贴导入子节点文本进行单独处理
+						 */
+                            var sNodes = minder.getSelectedNodes();
+                            if (MimeType.whichMimeType(textData) === "application/km") {
+                                var nodes = decode(MimeType.getPureText(textData));
+                                var _node;
+                                sNodes.forEach(function(node) {
+                                    // 由于粘贴逻辑中为了排除子节点重新排序导致逆序，因此复制的时候倒过来
+                                    for (var i = nodes.length - 1; i >= 0; i--) {
+                                        _node = minder.createNode(null, node);
+                                        minder.importNode(_node, nodes[i]);
+                                        _selectedNodes.push(_node);
+                                        node.appendChild(_node);
+                                    }
+                                });
+                                minder.select(_selectedNodes, true);
+                                _selectedNodes = [];
+                                minder.refresh();
+                            } else {
+                                sNodes.forEach(function(node) {
+                                    minder.Text2Children(node, textData);
+                                });
+                            }
+                            e.preventDefault();
+                            break;
+                        }
                     }
                 }
             };
-            minder.on("beforeCopy", beforeCopy);
-            minder.on("beforeCut", beforeCut);
-            minder.on("beforePaste", beforePaste);
+            /**
+		 * 由editor的receiver统一处理全部事件，包括clipboard事件
+		 * @Editor: Naixor
+		 * @Date: 2015.9.24
+		 */
+            document.addEventListener("copy", beforeCopy);
+            document.addEventListener("cut", beforeCut);
+            document.addEventListener("paste", beforePaste);
         }
         return module.exports = ClipboardRuntime;
     }
@@ -725,6 +781,7 @@ _p[12] = {
             var hotbox = this.hotbox;
             var receiver = this.receiver;
             var receiverElement = receiver.element;
+            var isGecko = window.kity.Browser.gecko;
             // setup everything to go
             setupReciverElement();
             setupFsm();
@@ -788,6 +845,9 @@ _p[12] = {
             // edit for the selected node
             function editText() {
                 receiverElement.innerText = minder.queryCommandValue("text");
+                if (isGecko) {
+                    receiver.fixFFCaretDisappeared();
+                }
                 fsm.jump("input", "input-request");
                 receiver.selectAll();
             }
@@ -815,7 +875,7 @@ _p[12] = {
                 SPACE_CHAR_REGEXP = new RegExp("( |" + String.fromCharCode(160) + ")"), BR = document.createElement("br");
                 for (var str, _divChildNodes, space_l, space_num, tab_num, i = 0, l = textNodes.length; i < l; i++) {
                     str = textNodes[i];
-                    switch (str.toString()) {
+                    switch (Object.prototype.toString.call(str)) {
                       // 正常情况处理
                         case "[object HTMLBRElement]":
                         {
@@ -826,7 +886,14 @@ _p[12] = {
                       case "[object Text]":
                         {
                             // SG下会莫名其妙的加上&nbsp;影响后续判断，干掉！
-                            str = str.wholeText.replace("&nbsp;", " ");
+                            /**
+                         * FF下的wholeText会导致如下问题：
+                         *     |123| -> 在一个节点中输入一段字符，此时TextNode为[#Text 123]
+                         *     提交并重新编辑，在后面追加几个字符
+                         *     |123abc| -> 此时123为一个TextNode为[#Text 123, #Text abc]，但是对这两个任意取值wholeText均为全部内容123abc
+                         * 上述BUG仅存在在FF中，故将wholeText更改为textContent
+                         */
+                            str = str.textContent.replace("&nbsp;", " ");
                             if (!STR_CHECK.test(str)) {
                                 space_l = str.length;
                                 while (space_l--) {
@@ -846,7 +913,19 @@ _p[12] = {
                         case "[object HTMLSpanElement]":
                         {
                             [].splice.apply(textNodes, [ i, 1 ].concat([].slice.call(str.childNodes)));
+                            l = textNodes.length;
                             i--;
+                            break;
+                        }
+
+                      // 若标签为image标签，则判断是否为合法url，是将其加载进来
+                        case "[object HTMLImageElement]":
+                        {
+                            if (str.src) {
+                                if (/http(|s):\/\//.test(str.src)) {
+                                    minder.execCommand("Image", str.src, str.alt);
+                                } else {}
+                            }
                             break;
                         }
 
@@ -866,7 +945,22 @@ _p[12] = {
 
                       default:
                         {
-                            text += "";
+                            if (str && str.childNodes.length) {
+                                _divChildNodes = [];
+                                for (var di = 0, l = str.childNodes.length; di < l; di++) {
+                                    _divChildNodes.push(str.childNodes[di]);
+                                }
+                                _divChildNodes.push(BR);
+                                [].splice.apply(textNodes, [ i, 1 ].concat(_divChildNodes));
+                                l = textNodes.length;
+                                i--;
+                            } else {
+                                if (str && str.textContent !== undefined) {
+                                    text += str.textContent;
+                                } else {
+                                    text += "";
+                                }
+                            }
                         }
                     }
                 }
@@ -878,7 +972,7 @@ _p[12] = {
             }
             /**
          * 判断节点的文本信息是否是
-         * @Desc: 从其他节点复制文字到另一个节点时部分浏览器(chrome)会自动包裹一个span标签，这样试用一下逻辑出来的就不是text节点二是span节点因此导致undefined的情况发生
+         * @Desc: 从其他节点复制文字到另一个节点时部分浏览器(chrome)会自动包裹一个span标签，这样使用以下逻辑出来的就不是text节点二是span节点因此导致undefined的情况发生
          * @Notice: 此处逻辑应该拆分到 kityminder-core/core/data中去，单独增加一个对某个节点importJson的事件
          * @Editor: Naixor
          * @Date: 2015.9.16
@@ -918,6 +1012,10 @@ _p[12] = {
                 var node = minder.getSelectedNode();
                 textNodes = commitInputText(textNodes);
                 commitInputNode(node, textNodes);
+                if (node.type == "root") {
+                    var rootText = minder.getRoot().getText();
+                    minder.fire("initChangeRoot", rootText);
+                }
             }
             function exitInputMode() {
                 receiverElement.classList.remove("input");
@@ -969,7 +1067,7 @@ _p[13] = {
      * @Desc: 下方使用receiver.enable()和receiver.disable()通过
      *        修改div contenteditable属性的hack来解决开启热核后依然无法屏蔽浏览器输入的bug;
      *        特别: win下FF对于此种情况必须要先blur在focus才能解决，但是由于这样做会导致用户
-     *             输入法状态丢失，因此对FF咱不做处理
+     *             输入法状态丢失，因此对FF暂不做处理
      * @Editor: Naixor
      * @Date: 2015.09.14
      */
@@ -1335,6 +1433,17 @@ _p[18] = {
                 },
                 disable: function() {
                     element.setAttribute("contenteditable", false);
+                },
+                /**
+             * @Desc: hack FF下div contenteditable的光标丢失BUG
+             * @Editor: Naixor
+             * @Date: 2015.10.15
+             */
+                fixFFCaretDisappeared: function() {
+                    element.removeAttribute("contenteditable");
+                    element.setAttribute("contenteditable", "true");
+                    element.blur();
+                    element.focus();
                 }
             };
             receiver.selectAll();
@@ -1734,7 +1843,7 @@ function use(name) {
 angular.module('kityminderEditor', [
     'ui.bootstrap',
 	'ui.codemirror',
-	'colorpicker.module'
+	'ui.colorpicker'
 ])
 	.config(["$sceDelegateProvider", function($sceDelegateProvider) {
 		$sceDelegateProvider.resourceUrlWhitelist([
@@ -1760,17 +1869,17 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/colorPanel/colorPanel.html',
-    "<div class=\"color-wrap\" ng-disabled=\"minder.queryCommandState('background') === -1\"><span colorpicker class=\"color-item\" ng-model=\"hexPicker\" ng-style=\"{ 'background-color': customColor }\" title=\"{{ hexPicker }}\"></span></div>"
+    "<div class=\"bg-color-wrap\"><span class=\"quick-bg-color\" ng-click=\"minder.execCommand('background', bgColor)\" ng-disabled=\"minder.queryCommandState('background') === -1\"></span> <span color-picker class=\"bg-color\" set-color=\"setDefaultBg()\" ng-disabled=\"minder.queryCommandState('background') === -1\"><span class=\"caret\"></span></span> <span class=\"bg-color-preview\" ng-style=\"{ 'background-color': bgColor }\" ng-click=\"minder.execCommand('background', bgColor)\" ng-disabled=\"minder.queryCommandState('background') === -1\"></span></div>"
   );
 
 
   $templateCache.put('ui/directive/expandLevel/expandLevel.html',
-    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default expand\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"minder.execCommand('expand')\"></button> <button type=\"button\" class=\"btn btn-default expand-caption dropdown-toggle\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'expandtoleaf' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'expandtoleaf' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"level in levels\"><a href ng-click=\"minder.execCommand('ExpandToLevel', level)\">{{ 'expandtolevel' + level | lang:'ui/command' }}</a></li></ul></div>"
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default expand\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"minder.execCommand('ExpandToLevel', 9999)\"></button> <button type=\"button\" class=\"btn btn-default expand-caption dropdown-toggle\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'expandtoleaf' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'expandtoleaf' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"level in levels\"><a href ng-click=\"minder.execCommand('ExpandToLevel', level)\">{{ 'expandtolevel' + level | lang:'ui/command' }}</a></li></ul></div>"
   );
 
 
   $templateCache.put('ui/directive/fontOperator/fontOperator.html',
-    "<div class=\"font-operator\"><div class=\"dropdown font-family-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontfamily') === -1\"><a href class=\"current-font-family\" title=\"{{ 'fontfamily' | lang: 'ui' }}\">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontFamilyList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontfamily', f.val)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontfamily') }\" ng-style=\"{'font-family': f.val }\">{{ f.name }}</a></li></ul></div><div class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-size\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || '字号' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></div><span class=\"s-btn-icon font-bold\" ng-click=\"minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\"></span> <span class=\"s-btn-icon font-italics\" ng-click=\"minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"></span><div class=\"font-color-wrap\"><span colorpicker class=\"font-color\" ng-model=\"hexPicker\" ng-style=\"{ 'background-color': customColor }\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\" title=\"{{ hexPicker }}\"></span></div><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></div>"
+    "<div class=\"font-operator\"><div class=\"dropdown font-family-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontfamily') === -1\"><a href class=\"current-font-family\" title=\"{{ 'fontfamily' | lang: 'ui' }}\">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontFamilyList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontfamily', f.val)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontfamily') }\" ng-style=\"{'font-family': f.val }\">{{ f.name }}</a></li></ul></div><div class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-size\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || '字号' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></div><span class=\"s-btn-icon font-bold\" ng-click=\"minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\"></span> <span class=\"s-btn-icon font-italics\" ng-click=\"minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"></span><div class=\"font-color-wrap\"><span class=\"quick-font-color\" ng-click=\"minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\">A</span> <span color-picker class=\"font-color\" set-color=\"setDefaultColor()\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"><span class=\"caret\"></span></span> <span class=\"font-color-preview\" ng-style=\"{ 'background-color': foreColor }\" ng-click=\"minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"></span></div><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></div>"
   );
 
 
@@ -2787,8 +2896,8 @@ angular.module('kityminderEditor')
                             if(json.data[i].objURL) {
                                 $scope.list.push({
                                     title: json.data[i].fromPageTitleEnc,
-                                    src: json.data[i].objURL,
-                                    url: json.data[i].fromURL
+                                    src: json.data[i].middleURL,
+                                    url: json.data[i].middleURL
                                 });
                             }
                         }
@@ -2804,7 +2913,7 @@ angular.module('kityminderEditor')
             var targetItem = $('#img-item'+ (this.$index));
             var targetImg = $('#img-'+ (this.$index));
 
-            targetItem.siblings('.selected').removeClass('selected')
+            targetItem.siblings('.selected').removeClass('selected');
             targetItem.addClass('selected');
 
             $scope.data.url = targetImg.attr('src');
@@ -2843,8 +2952,8 @@ angular.module('kityminderEditor')
 
         function getImageData(){
             var key = $scope.data.searchKeyword2;
-            var keepOriginName = '1';
-            var url = "http://image.baidu.com/i?ct=201326592&cl=2&lm=-1&st=-1&tn=baiduimagejson&istype=2&rn=3200&fm=index&pv=&word=" + key + "&ie=utf-8&oe=utf-8&keeporiginname=" + keepOriginName + "&" + +new Date + "&callback=JSON_CALLBACK";
+            var currentTime = new Date();
+            var url = 'http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&fp=result&queryWord='+ key +'&cl=2&lm=-1&ie=utf-8&oe=utf-8&st=-1&ic=0&word='+ key +'&face=0&istype=2&nc=1&pn=60&rn=60&gsm=3c&'+ currentTime.getTime() +'=&callback=JSON_CALLBACK';
 
             return $http.jsonp(url);
         }
@@ -2910,22 +3019,21 @@ angular.module('kityminderEditor')
 				var minder = scope.minder;
 				var currentTheme = minder.getThemeItems();
 
-				scope.hexPicker = scope.hexPicker || currentTheme['background'] ;
-
-
-				scope.$on('colorpicker-selected', function(e, msg) {
-                    e.stopPropagation();
-
-					// colorPicker 的 bug ： 初次选择 value 为 undefined
-					minder.execCommand('background', msg.value);
-
-					scope.customColor = msg.value;
+				scope.$on('colorPicked', function(event, color) {
+                    event.stopPropagation();
+					scope.bgColor = color;
+					minder.execCommand('background', color);
 				});
 
-				minder.on('interactchange', function() {
-                    scope.customColor = minder.queryCommandValue('background') || '#000000';
-                    scope.$apply();
-				});
+				scope.setDefaultBg = function() {
+                    var currentNode = minder.getSelectedNode();
+                    var bgColor = minder.getNodeStyle(currentNode, 'background');
+
+                    // 有可能是 kity 的颜色类
+                    return typeof bgColor === 'object' ? bgColor.toHEX() : bgColor;
+                };
+
+                scope.bgColor = scope.setDefaultBg() || '#fff';
 
 			}
 		}
@@ -2957,8 +3065,6 @@ angular.module('kityminderEditor')
 			link: function(scope) {
 				var minder = scope.minder;
 				var currentTheme = minder.getThemeItems();
-
-				scope.hexPicker = scope.hexPicker || currentTheme['main-color'] ;
 
 				scope.fontSizeList = [10, 12, 16, 18, 24, 32, 48];
                 scope.fontFamilyList = [{
@@ -2999,15 +3105,22 @@ angular.module('kityminderEditor')
                     val: 'sans-serif'
                 }];
 
-				scope.$on('colorpicker-selected', function(e, msg) {
-					minder.execCommand('forecolor', msg.value);
-					scope.customColor = msg.value;
-				});
+                scope.$on('colorPicked', function(event, color) {
+                    event.stopPropagation();
 
-				minder.on('interactchange', function() {
-					scope.customColor = minder.queryCommandValue('forecolor') || '#000000';
-                    scope.$apply();
-				});
+                    scope.foreColor = color;
+                    minder.execCommand('forecolor', color);
+                });
+
+                scope.setDefaultColor = function() {
+                    var currentNode = minder.getSelectedNode();
+                    var fontColor = minder.getNodeStyle(currentNode, 'color');
+
+                    // 有可能是 kity 的颜色类
+                    return typeof fontColor === 'object' ? fontColor.toHEX() : fontColor;
+                };
+
+                scope.foreColor = scope.setDefaultColor() || '#000';
 
                 scope.getFontfamilyName = function(val) {
                     var fontName = '';
@@ -3820,7 +3933,7 @@ angular.module('kityminderEditor')
                 }
 
                 $('body').on('keydown', function(e) {
-                    if (e.keyCode == 70 && (e.ctrlKey || e.metaKey)) {
+                    if (e.keyCode == 70 && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
                         enterSearch();
 
                         $scope.$apply();
@@ -4075,7 +4188,7 @@ angular.module('kityminderEditor')
 					}
 
 					return style;
-				}
+				};
 
 				// 维护 theme key 列表以保证列表美观（不按字母顺序排序）
 				$scope.themeKeyList = [
@@ -4095,6 +4208,8 @@ angular.module('kityminderEditor')
 					'fresh-soil-compat',
 					'snow',
 					'snow-compact',
+					'tianpan',
+					'tianpan-compact',
 					'fish',
 					'wire'
 				];

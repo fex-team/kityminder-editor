@@ -24,7 +24,7 @@ angular.module('kityminderEditor')
 					}
 
 					return style;
-				}
+				};
 
 				// 维护 theme key 列表以保证列表美观（不按字母顺序排序）
 				$scope.themeKeyList = [
@@ -44,6 +44,8 @@ angular.module('kityminderEditor')
 					'fresh-soil-compat',
 					'snow',
 					'snow-compact',
+					'tianpan',
+					'tianpan-compact',
 					'fish',
 					'wire'
 				];

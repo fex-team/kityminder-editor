@@ -11,8 +11,6 @@ angular.module('kityminderEditor')
 				var minder = scope.minder;
 				var currentTheme = minder.getThemeItems();
 
-				scope.hexPicker = scope.hexPicker || currentTheme['main-color'] ;
-
 				scope.fontSizeList = [10, 12, 16, 18, 24, 32, 48];
                 scope.fontFamilyList = [{
                     name: '宋体',
@@ -52,15 +50,22 @@ angular.module('kityminderEditor')
                     val: 'sans-serif'
                 }];
 
-				scope.$on('colorpicker-selected', function(e, msg) {
-					minder.execCommand('forecolor', msg.value);
-					scope.customColor = msg.value;
-				});
+                scope.$on('colorPicked', function(event, color) {
+                    event.stopPropagation();
 
-				minder.on('interactchange', function() {
-					scope.customColor = minder.queryCommandValue('forecolor') || '#000000';
-                    scope.$apply();
-				});
+                    scope.foreColor = color;
+                    minder.execCommand('forecolor', color);
+                });
+
+                scope.setDefaultColor = function() {
+                    var currentNode = minder.getSelectedNode();
+                    var fontColor = minder.getNodeStyle(currentNode, 'color');
+
+                    // 有可能是 kity 的颜色类
+                    return typeof fontColor === 'object' ? fontColor.toHEX() : fontColor;
+                };
+
+                scope.foreColor = scope.setDefaultColor() || '#000';
 
                 scope.getFontfamilyName = function(val) {
                     var fontName = '';

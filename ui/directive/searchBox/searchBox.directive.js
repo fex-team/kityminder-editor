@@ -46,7 +46,7 @@ angular.module('kityminderEditor')
                 }
 
                 $('body').on('keydown', function(e) {
-                    if (e.keyCode == 70 && (e.ctrlKey || e.metaKey)) {
+                    if (e.keyCode == 70 && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
                         enterSearch();
 
                         $scope.$apply();
