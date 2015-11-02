@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.40 - 2015-11-02
+ * kityminder-editor - v1.0.42 - 2015-11-02
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -991,7 +991,8 @@ _p[12] = {
                             return node;
                         }
                         importText(node, json, minder);
-                        minder.refresh();
+                        minder.getRoot().renderTree();
+                        minder.layout(300);
                     });
                 } catch (e) {
                     // 无法被转换成脑图节点则不处理
@@ -1009,6 +1010,8 @@ _p[12] = {
              * @Date: 2015.9.16
              */
                 var textNodes = [].slice.call(receiverElement.childNodes);
+                // 解决过大内容导致SVG窜位问题
+                receiverElement.innerHTML = "";
                 var node = minder.getSelectedNode();
                 textNodes = commitInputText(textNodes);
                 commitInputNode(node, textNodes);
