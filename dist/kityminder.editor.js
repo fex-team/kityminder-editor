@@ -1014,7 +1014,9 @@ _p[12] = {
                 commitInputNode(node, textNodes);
                 if (node.type == "root") {
                     var rootText = minder.getRoot().getText();
-                    minder.fire("initChangeRoot", rootText);
+                    minder.fire("initChangeRoot", {
+                        text: rootText
+                    });
                 }
             }
             function exitInputMode() {
