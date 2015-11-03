@@ -96,6 +96,38 @@ angular.module('kityminderEditor')
 
                 var contentView = new kity.Box(), visibleView = new kity.Box();
 
+                /**
+                 * 增加一个对天盘图情况缩略图的处理,
+                 * @Editor: Naixor line 104~129
+                 * @Date: 2015.11.3
+                 */
+                var pathHandler = getPathHandler(minder.getTheme());
+
+                // 主题切换事件
+                minder.on('themechange', function(e) {
+                    pathHandler = getPathHandler(e.theme);
+                });
+
+                function getPathHandler(theme) {
+                    switch (theme) {
+                        case "tianpan":
+                        case "tianpan-compact":
+                            return function(nodePathData, x, y, width, height) {
+                                var r = width >> 1;
+                                nodePathData.push('M', x, y + r,
+                                    'a', r, r, 0, 1, 1, 0, 0.01,
+                                    'z');
+                            }
+                        default: {
+                            return function(nodePathData, x, y, width, height) {
+                                nodePathData.push('M', x, y,
+                                    'h', width, 'v', height,
+                                    'h', -width, 'z');
+                            }
+                        }
+                    }
+                }
+
                 navigate();
 
                 function navigate() {
@@ -133,7 +165,6 @@ angular.module('kityminderEditor')
                     });
                 }
 
-
                 function updateContentView() {
 
                     var view = minder.getRenderContainer().getBoundaryBox();
@@ -153,9 +184,7 @@ angular.module('kityminderEditor')
 
                     minder.getRoot().traverse(function(node) {
                         var box = node.getLayoutBox();
-                        nodePathData.push('M', box.x, box.y,
-                            'h', box.width, 'v', box.height,
-                            'h', -box.width, 'z');
+                        pathHandler(nodePathData, box.x, box.y, box.width, box.height);
                         if (node.getConnection() && node.parent && node.parent.isExpanded()) {
                             connectionThumbData.push(node.getConnection().getPathData());
                         }
