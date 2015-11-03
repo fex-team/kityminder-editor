@@ -100,7 +100,7 @@ define(function(require, exports, module) {
 
         // edit for the selected node
         function editText() {
-            receiverElement.innerText = minder.queryCommandValue('text');
+            receiverElement.innerText = minder.getSelectedNode().getText() || "";
             if (isGecko) {
                 receiver.fixFFCaretDisappeared();
             };
