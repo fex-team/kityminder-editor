@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.43 - 2015-11-03
+ * kityminder-editor - v1.0.44 - 2015-11-03
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -844,7 +844,7 @@ _p[12] = {
             }
             // edit for the selected node
             function editText() {
-                receiverElement.innerText = minder.queryCommandValue("text");
+                receiverElement.innerText = minder.getSelectedNode().getText() || "";
                 if (isGecko) {
                     receiver.fixFFCaretDisappeared();
                 }
@@ -1011,7 +1011,10 @@ _p[12] = {
              */
                 var textNodes = [].slice.call(receiverElement.childNodes);
                 // 解决过大内容导致SVG窜位问题
-                receiverElement.innerHTML = "";
+                while (receiverElement.hasChildNodes()) {
+                    receiverElement.removeChild(receiverElement.lastChild);
+                }
+                //receiverElement.innerText = '';
                 var node = minder.getSelectedNode();
                 textNodes = commitInputText(textNodes);
                 commitInputNode(node, textNodes);
