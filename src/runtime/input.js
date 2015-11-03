@@ -277,7 +277,12 @@ define(function(require, exports, module) {
              */
             var textNodes = [].slice.call(receiverElement.childNodes);
             // 解决过大内容导致SVG窜位问题
-            receiverElement.innerHTML = "";
+            while (receiverElement.hasChildNodes()) {
+                receiverElement.removeChild(receiverElement.lastChild);
+            }
+
+            //receiverElement.innerText = '';
+
             var node = minder.getSelectedNode();
             
             textNodes = commitInputText(textNodes);
