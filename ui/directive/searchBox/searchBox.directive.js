@@ -85,7 +85,7 @@ angular.module('kityminderEditor')
                             searchSequence.push({node:node});
                         }
                         var note = node.getData('note');
-                        if (note && note.indexOf(keyword) != -1) {
+                        if (note && note.toLowerCase().indexOf(keyword) != -1) {
                             searchSequence.push({node: node, keyword: keyword});
                         }
                     }
