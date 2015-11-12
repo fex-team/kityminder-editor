@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.44 - 2015-11-03
+ * kityminder-editor - v1.0.45 - 2015-11-12
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -4009,7 +4009,7 @@ angular.module('kityminderEditor')
                             searchSequence.push({node:node});
                         }
                         var note = node.getData('note');
-                        if (note && note.indexOf(keyword) != -1) {
+                        if (note && note.toLowerCase().indexOf(keyword) != -1) {
                             searchSequence.push({node: node, keyword: keyword});
                         }
                     }
