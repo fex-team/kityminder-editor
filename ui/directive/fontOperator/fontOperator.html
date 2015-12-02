@@ -22,17 +22,17 @@
         </ul>
     </div>
     <span class="s-btn-icon font-bold"
-          ng-click="minder.execCommand('bold')"
+          ng-click="minder.queryCommandState('bold') === -1 || minder.execCommand('bold')"
           ng-class="{'font-bold-selected' : minder.queryCommandState('bold') == 1}"
           ng-disabled="minder.queryCommandState('bold') === -1"></span>
     <span class="s-btn-icon font-italics"
-          ng-click="minder.execCommand('italic')"
+          ng-click="minder.queryCommandState('italic') === -1 || minder.execCommand('italic')"
           ng-class="{'font-italics-selected' : minder.queryCommandState('italic') == 1}"
           ng-disabled="minder.queryCommandState('italic') === -1">
     </span>
     <div class="font-color-wrap">
         <span class="quick-font-color"
-              ng-click="minder.execCommand('forecolor', foreColor)"
+              ng-click="minder.queryCommandState('forecolor') === -1 || minder.execCommand('forecolor', foreColor)"
               ng-disabled="minder.queryCommandState('forecolor') === -1">A</span>
 		<span color-picker
               class="font-color"
@@ -42,7 +42,7 @@
         </span>
         <span class="font-color-preview"
               ng-style="{ 'background-color': foreColor }"
-              ng-click="minder.execCommand('forecolor', foreColor)"
+              ng-click="minder.queryCommandState('forecolor') === -1 || minder.execCommand('forecolor', foreColor)"
               ng-disabled="minder.queryCommandState('forecolor') === -1"></span>
 
     </div>

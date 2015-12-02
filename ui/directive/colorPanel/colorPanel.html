@@ -1,6 +1,6 @@
 <div class="bg-color-wrap">
         <span class="quick-bg-color"
-              ng-click="minder.execCommand('background', bgColor)"
+              ng-click="minder.queryCommandState('background') === -1 || minder.execCommand('background', bgColor)"
               ng-disabled="minder.queryCommandState('background') === -1"></span>
 		<span color-picker
               class="bg-color"
@@ -10,7 +10,7 @@
         </span>
         <span class="bg-color-preview"
               ng-style="{ 'background-color': bgColor }"
-              ng-click="minder.execCommand('background', bgColor)"
+              ng-click="minder.queryCommandState('background') === -1 || minder.execCommand('background', bgColor)"
               ng-disabled="minder.queryCommandState('background') === -1"></span>
 
 </div>
