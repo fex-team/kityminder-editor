@@ -47,8 +47,12 @@ define(function(require, exports, module) {
             // 为了防止处理进入edit模式而丢失处理的首字母,此时receiver必须为enable
             receiver.enable();
             // normal -> hotbox
-            if ((e.type == 'keydown' || e.type == 'keyup') && e.is('Space')) {
+            if (e.is('Space')) {
                 e.preventDefault();
+                // safari下Space触发hotbox,然而这时Space已在receiver上留下作案痕迹,因此抹掉
+                if (kity.Browser.safari) {
+                    eceiverElement.innerHTML = '';
+                }
                 return fsm.jump('hotbox', 'space-trigger');
             }
 
