@@ -12,11 +12,12 @@ angular.module('kityminderEditor')
                 return;
             }
             $modalInstance.close($scope.value);
-
+            editor.receiver.selectAll();
         };
 
         $scope.cancel = function () {
             $modalInstance.dismiss('cancel');
+            editor.receiver.selectAll();
         };
 
         setTimeout(function() {

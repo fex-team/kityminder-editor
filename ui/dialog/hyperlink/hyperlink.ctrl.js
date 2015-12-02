@@ -35,11 +35,12 @@ angular.module('kityminderEditor')
                 $linkUrl.focus();
                 $linkUrl[0].setSelectionRange(0, $scope.url.length);
             }
-
+            editor.receiver.selectAll();
         };
 
         $scope.cancel = function () {
             $modalInstance.dismiss('cancel');
+            editor.receiver.selectAll();
         };
 
     });
