@@ -78,7 +78,9 @@ define(function(require, exports, module) {
         minder.on('beforemousedown', receiver.selectAll);
         minder.on('receiverfocus', receiver.selectAll);
         minder.on('readonly', function() {
-            receiver.disable();
+            // 屏蔽minder的事件接受，删除receiver和hotbox
+            minder.disable();
+            editor.receiver.element.parentElement.removeChild(editor.receiver.element);
             editor.hotbox.$container.removeChild(editor.hotbox.$element);
         });
 

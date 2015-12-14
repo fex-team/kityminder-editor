@@ -169,8 +169,10 @@ define(function(require, exports, module) {
                 // 针对FF,SG,BD,LB,IE等浏览器下SPACE的charCode存在为32和160的情况做处理
                 SPACE_CHAR_REGEXP = new RegExp('(\u0020|' + String.fromCharCode(160) + ')'),
                 BR = document.createElement('br');
+            var isBold = false,
+                isItalic = false;
 
-            for (var str, 
+            for (var str,
                     _divChildNodes,
                     space_l, space_num, tab_num,
                     i = 0, l = textNodes.length; i < l; i++) {
@@ -210,11 +212,11 @@ define(function(require, exports, module) {
                     case '[object HTMLElement]': {
                         switch (str.nodeName) {
                             case "B": {
-                                minder.queryCommandState('bold') || minder.execCommand("bold");
+                                isBold = true;
                                 break;
                             }
                             case "I": {
-                                minder.queryCommandState('italic') || minder.execCommand("italic");
+                                isItalic = true;
                                 break;
                             }
                             default: {}
@@ -269,16 +271,27 @@ define(function(require, exports, module) {
                                 text += str.textContent;
                             } else {
                                 text += "";
-                            }    
+                            }
                         }
                         // // 其他带有样式的节点被粘贴进来，则直接取textContent，若取不出来则置空
                     }
                 }
             };
-            
+
             text = text.replace(/^\n*|\n*$/g, '');
             text = text.replace(new RegExp('(\n|\r|\n\r)(\u0020|' + String.fromCharCode(160) + '){4}', 'g'), '$1\t');
             minder.execCommand('text', text);
+            if (isBold) {
+                minder.queryCommandState('bold') || minder.execCommand('bold');
+            } else {
+                minder.queryCommandState('bold') && minder.execCommand('bold');
+            }
+
+            if (isItalic) {
+                minder.queryCommandState('italic') || minder.execCommand('italic');
+            } else {
+                minder.queryCommandState('italic') && minder.execCommand('italic');
+            }
             exitInputMode();
             return text;
         }
@@ -307,7 +320,7 @@ define(function(require, exports, module) {
                     }
                     importText(node, json, minder);
                     minder.getRoot().renderTree();
-                    minder.layout(300);  
+                    minder.layout(300);
                 });
             } catch (e) {
                 // 无法被转换成脑图节点则不处理
@@ -329,13 +342,13 @@ define(function(require, exports, module) {
             // 解决过大内容导致SVG窜位问题
             receiverElement.innerHTML = "";
             var node = minder.getSelectedNode();
-            
+
             textNodes = commitInputText(textNodes);
             commitInputNode(node, textNodes);
 
             if (node.type == 'root') {
                 var rootText = minder.getRoot().getText();
-                minder.fire('initChangeRoot', rootText);
+                minder.fire('initChangeRoot', {text: rootText});
             }
 
         }
