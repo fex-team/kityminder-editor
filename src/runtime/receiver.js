@@ -63,6 +63,14 @@ define(function(require, exports, module) {
                 element.setAttribute("contenteditable", "true");
                 element.blur();
                 element.focus();
+            },
+            /**
+             * 以此事件代替通过mouse事件来判断receiver丢失焦点的事件
+             * @editor Naixor
+             * @Date 2015-12-2
+             */
+            onblur: function (handler) {
+                element.onblur = handler;
             }
         };
         receiver.selectAll();

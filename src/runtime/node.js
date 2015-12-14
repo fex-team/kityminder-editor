@@ -10,7 +10,7 @@ define(function(require, exports, module) {
 
         var buttons = [
             '前移:Alt+Up:ArrangeUp',
-            '下级:Tab:AppendChildNode',
+            '下级:Tab|Insert:AppendChildNode',
             '同级:Enter:AppendSiblingNode',
             '后移:Alt+Down:ArrangeDown',
             '删除:Delete|Backspace:RemoveNode',
@@ -32,7 +32,7 @@ define(function(require, exports, module) {
                         minder.execCommand(command, '分支主题');
 
                         // provide in input runtime
-                        runtime.editText();
+                        // runtime.editText();
                     } else {
                         minder.execCommand(command);
                         fsm.jump('normal', 'command-executed');
