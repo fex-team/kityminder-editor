@@ -335,7 +335,7 @@ define(function(require, exports, module) {
 
             if (node.type == 'root') {
                 var rootText = minder.getRoot().getText();
-                minder.fire('initChangeRoot', rootText);
+                minder.fire('initChangeRoot', {text: rootText});
             }
 
         }
