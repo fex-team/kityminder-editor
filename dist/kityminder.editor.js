@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.46 - 2015-12-14
+ * kityminder-editor - v1.0.47 - 2015-12-14
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -903,6 +903,7 @@ _p[12] = {
                 var text = "";
                 var TAB_CHAR = "	", ENTER_CHAR = "\n", STR_CHECK = /\S/, SPACE_CHAR = " ", // 针对FF,SG,BD,LB,IE等浏览器下SPACE的charCode存在为32和160的情况做处理
                 SPACE_CHAR_REGEXP = new RegExp("( |" + String.fromCharCode(160) + ")"), BR = document.createElement("br");
+                var isBold = false, isItalic = false;
                 for (var str, _divChildNodes, space_l, space_num, tab_num, i = 0, l = textNodes.length; i < l; i++) {
                     str = textNodes[i];
                     switch (Object.prototype.toString.call(str)) {
@@ -945,13 +946,13 @@ _p[12] = {
                             switch (str.nodeName) {
                               case "B":
                                 {
-                                    minder.queryCommandState("bold") || minder.execCommand("bold");
+                                    isBold = true;
                                     break;
                                 }
 
                               case "I":
                                 {
-                                    minder.queryCommandState("italic") || minder.execCommand("italic");
+                                    isItalic = true;
                                     break;
                                 }
 
@@ -1022,6 +1023,16 @@ _p[12] = {
                 text = text.replace(/^\n*|\n*$/g, "");
                 text = text.replace(new RegExp("(\n|\r|\n\r)( |" + String.fromCharCode(160) + "){4}", "g"), "$1	");
                 minder.execCommand("text", text);
+                if (isBold) {
+                    minder.queryCommandState("bold") || minder.execCommand("bold");
+                } else {
+                    minder.queryCommandState("bold") && minder.execCommand("bold");
+                }
+                if (isItalic) {
+                    minder.queryCommandState("italic") || minder.execCommand("italic");
+                } else {
+                    minder.queryCommandState("italic") && minder.execCommand("italic");
+                }
                 exitInputMode();
                 return text;
             }
@@ -1072,7 +1083,9 @@ _p[12] = {
                 commitInputNode(node, textNodes);
                 if (node.type == "root") {
                     var rootText = minder.getRoot().getText();
-                    minder.fire("initChangeRoot", rootText);
+                    minder.fire("initChangeRoot", {
+                        text: rootText
+                    });
                 }
             }
             function exitInputMode() {
@@ -1520,7 +1533,9 @@ _p[18] = {
             minder.on("beforemousedown", receiver.selectAll);
             minder.on("receiverfocus", receiver.selectAll);
             minder.on("readonly", function() {
-                receiver.disable();
+                // 屏蔽minder的事件接受，删除receiver和hotbox
+                minder.disable();
+                editor.receiver.element.parentElement.removeChild(editor.receiver.element);
                 editor.hotbox.$container.removeChild(editor.hotbox.$element);
             });
             // 侦听器，接收到的事件会派发给所有侦听器
@@ -1939,7 +1954,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
   'use strict';
 
   $templateCache.put('ui/directive/appendNode/appendNode.html',
-    "<div class=\"km-btn-group append-group\"><div class=\"km-btn-item append-child-node\" ng-disabled=\"minder.queryCommandState('AppendChildNode') === -1\" ng-click=\"minder.queryCommandState('AppendChildNode') === -1 || execCommand('AppendChildNode')\" title=\"{{ 'appendchildnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendchildnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-parent-node\" ng-disabled=\"minder.queryCommandState('AppendParentNode') === -1\" ng-click=\"minder.queryCommandState('AppendParentNode') === -1 || execCommand('AppendParentNode')\" title=\"{{ 'appendparentnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendparentnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-sibling-node\" ng-disabled=\"minder.queryCommandState('AppendSiblingNode') === -1\" ng-click=\"execCommand('AppendSiblingNode')\" title=\"{{ 'appendsiblingnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendsiblingnode' | lang:'ui/command' }}</span></div></div>"
+    "<div class=\"km-btn-group append-group\"><div class=\"km-btn-item append-child-node\" ng-disabled=\"minder.queryCommandState('AppendChildNode') === -1\" ng-click=\"minder.queryCommandState('AppendChildNode') === -1 || execCommand('AppendChildNode')\" title=\"{{ 'appendchildnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendchildnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-parent-node\" ng-disabled=\"minder.queryCommandState('AppendParentNode') === -1\" ng-click=\"minder.queryCommandState('AppendParentNode') === -1 || execCommand('AppendParentNode')\" title=\"{{ 'appendparentnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendparentnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-sibling-node\" ng-disabled=\"minder.queryCommandState('AppendSiblingNode') === -1\" ng-click=\"minder.queryCommandState('AppendSiblingNode') === -1 ||execCommand('AppendSiblingNode')\" title=\"{{ 'appendsiblingnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendsiblingnode' | lang:'ui/command' }}</span></div></div>"
   );
 
 
