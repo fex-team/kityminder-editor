@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.45 - 2015-11-12
+ * kityminder-editor - v1.0.46 - 2015-12-14
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -804,6 +804,11 @@ _p[12] = {
                     }
                 });
                 // lost focus to commit
+                receiver.onblur(function() {
+                    if (fsm.state() == "input") {
+                        fsm.jump("normal", "input-commit");
+                    }
+                });
                 minder.on("beforemousedown", function() {
                     if (fsm.state() == "input") {
                         fsm.jump("normal", "input-commit");
@@ -842,15 +847,38 @@ _p[12] = {
                     action: editText
                 });
             }
+            /**
+         * 增加对字体的鉴别，以保证用户在编辑状态ctrl/cmd + b/i所触发的加粗斜体与显示一致
+         * @editor Naixor
+         * @Date 2015-12-2
+         */
             // edit for the selected node
             function editText() {
-                receiverElement.innerText = minder.getSelectedNode().getText() || "";
+                var node = minder.getSelectedNode();
+                var textContainer = receiverElement;
+                receiverElement.innerHTML = "";
+                if (node.getData("font-weight") === "bold") {
+                    var b = document.createElement("b");
+                    textContainer.appendChild(b);
+                    textContainer = b;
+                }
+                if (node.getData("font-style") === "italic") {
+                    var i = document.createElement("i");
+                    textContainer.appendChild(i);
+                    textContainer = i;
+                }
+                textContainer.innerText = minder.queryCommandValue("text");
                 if (isGecko) {
                     receiver.fixFFCaretDisappeared();
                 }
                 fsm.jump("input", "input-request");
                 receiver.selectAll();
             }
+            /**
+         * 增加对字体的鉴别，以保证用户在编辑状态ctrl/cmd + b/i所触发的加粗斜体与显示一致
+         * @editor Naixor
+         * @Date 2015-12-2
+         */
             function enterInputMode() {
                 var node = minder.getSelectedNode();
                 if (node) {
@@ -858,6 +886,8 @@ _p[12] = {
                     receiverElement.style.fontSize = fontSize + "px";
                     receiverElement.style.minWidth = 0;
                     receiverElement.style.minWidth = receiverElement.clientWidth + "px";
+                    receiverElement.style.fontWeight = node.getData("font-weight") || "";
+                    receiverElement.style.fontStyle = node.getData("font-style") || "";
                     receiverElement.classList.add("input");
                     receiverElement.focus();
                 }
@@ -906,6 +936,31 @@ _p[12] = {
                             } else {
                                 text += str;
                             }
+                            break;
+                        }
+
+                      // ctrl + b/i 会给字体加上<b>/<i>标签来实现黑体和斜体
+                        case "[object HTMLElement]":
+                        {
+                            switch (str.nodeName) {
+                              case "B":
+                                {
+                                    minder.queryCommandState("bold") || minder.execCommand("bold");
+                                    break;
+                                }
+
+                              case "I":
+                                {
+                                    minder.queryCommandState("italic") || minder.execCommand("italic");
+                                    break;
+                                }
+
+                              default:
+                                {}
+                            }
+                            [].splice.apply(textNodes, [ i, 1 ].concat([].slice.call(str.childNodes)));
+                            l = textNodes.length;
+                            i--;
                             break;
                         }
 
@@ -1011,18 +1066,13 @@ _p[12] = {
              */
                 var textNodes = [].slice.call(receiverElement.childNodes);
                 // 解决过大内容导致SVG窜位问题
-                while (receiverElement.hasChildNodes()) {
-                    receiverElement.removeChild(receiverElement.lastChild);
-                }
-                //receiverElement.innerText = '';
+                receiverElement.innerHTML = "";
                 var node = minder.getSelectedNode();
                 textNodes = commitInputText(textNodes);
                 commitInputNode(node, textNodes);
                 if (node.type == "root") {
                     var rootText = minder.getRoot().getText();
-                    minder.fire("initChangeRoot", {
-                        text: rootText
-                    });
+                    minder.fire("initChangeRoot", rootText);
                 }
             }
             function exitInputMode() {
@@ -1068,7 +1118,7 @@ _p[13] = {
             // 0-9 以及其上面的符号
             if (e.keyCode >= 48 && e.keyCode <= 57) return true;
             // 输入法
-            if (e.keyCode == 229) return true;
+            if (e.keyCode == 229 || e.keyCode === 0) return true;
             return false;
         }
         /**
@@ -1088,38 +1138,44 @@ _p[13] = {
             var hotbox = this.hotbox;
             // normal -> *
             receiver.listen("normal", function(e) {
+                // 为了防止处理进入edit模式而丢失处理的首字母,此时receiver必须为enable
                 receiver.enable();
                 // normal -> hotbox
-                if ((e.type == "keydown" || e.type == "keyup") && e.is("Space")) {
+                if (e.is("Space")) {
                     e.preventDefault();
+                    // safari下Space触发hotbox,然而这时Space已在receiver上留下作案痕迹,因此抹掉
+                    if (kity.Browser.safari) {
+                        eceiverElement.innerHTML = "";
+                    }
                     return fsm.jump("hotbox", "space-trigger");
                 }
-                if (e.keyCode === 229 || e.keyCode === 0) {
-                    e.preventDefault();
-                    return;
-                }
-                // normal -> input
-                if (e.type !== "keypress" && isIntendToInput(e)) {
-                    if (minder.getSelectedNode()) {
-                        /**
-                     * @Desc: 这里单独处理下Win系统下，FF的div内输入法中文状态下输入内容会被全部拦截而导致的显示错误
-                     * @Editor: Naixor
-                     * @Date: 2015.09.14
-                     */
-                        if (kity.Browser.platform === "Win") {
-                            if (kity.Browser.gecko) {
-                                receiverElement.innerHTML = minder.getSelectedNode().data.text;
-                                receiver.selectAll();
+                /**
+             * check
+             * @editor Naixor
+             * @Date 2015-12-2
+             */
+                switch (e.type) {
+                  case "keydown":
+                    {
+                        if (minder.getSelectedNode()) {
+                            if (isIntendToInput(e)) {
+                                return fsm.jump("input", "user-input");
                             }
+                        } else {
+                            receiverElement.innerHTML = "";
                         }
-                        return fsm.jump("input", "user-input");
-                    } else {
-                        receiverElement.innerHTML = "";
+                        // normal -> normal shortcut
+                        fsm.jump("normal", "shortcut-handle", e);
+                        break;
                     }
-                }
-                // normal -> normal
-                if (e.type == "keydown") {
-                    return fsm.jump("normal", "shortcut-handle", e);
+
+                  case "keyup":
+                    {
+                        break;
+                    }
+
+                  default:
+                    {}
                 }
             });
             // hotbox -> normal
@@ -1239,7 +1295,7 @@ _p[15] = {
             var hotbox = this.hotbox;
             var fsm = this.fsm;
             var main = hotbox.state("main");
-            var buttons = [ "前移:Alt+Up:ArrangeUp", "下级:Tab:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "上级:Shift+Tab|Shift+Insert:AppendParentNode" ];
+            var buttons = [ "前移:Alt+Up:ArrangeUp", "下级:Tab|Insert:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "上级:Shift+Tab|Shift+Insert:AppendParentNode" ];
             buttons.forEach(function(button) {
                 var parts = button.split(":");
                 var label = parts.shift();
@@ -1252,8 +1308,6 @@ _p[15] = {
                     action: function() {
                         if (command.indexOf("Append") === 0) {
                             minder.execCommand(command, "分支主题");
-                            // provide in input runtime
-                            runtime.editText();
                         } else {
                             minder.execCommand(command);
                             fsm.jump("normal", "command-executed");
@@ -1452,6 +1506,14 @@ _p[18] = {
                     element.setAttribute("contenteditable", "true");
                     element.blur();
                     element.focus();
+                },
+                /**
+             * 以此事件代替通过mouse事件来判断receiver丢失焦点的事件
+             * @editor Naixor
+             * @Date 2015-12-2
+             */
+                onblur: function(handler) {
+                    element.onblur = handler;
                 }
             };
             receiver.selectAll();
@@ -1739,7 +1801,17 @@ _p[23] = {
                 hashCode |= SHIFT_MASK;
             }
             // Shift, Control, Alt KeyCode ignored.
-            if ([ 16, 17, 18, 91 ].indexOf(keyEvent.keyCode) == -1) {
+            if ([ 16, 17, 18, 91 ].indexOf(keyEvent.keyCode) === -1) {
+                /**
+             * 解决浏览器输入法状态下对keyDown的keyCode判断不准确的问题,使用keyIdentifier,
+             * 可以解决chrome和safari下的各种问题,其他浏览器依旧有问题,然而那并不影响我们对特
+             * 需判断的按键进行判断(比如Space在safari输入法态下就是229,其他的就不是)
+             * @editor Naixor
+             * @Date 2015-12-2
+             */
+                if (keyEvent.keyCode === 229 && keyEvent.keyIdentifier) {
+                    return hashCode |= parseInt(keyEvent.keyIdentifier.substr(2), 16);
+                }
                 hashCode |= keyEvent.keyCode;
             }
             return hashCode;
@@ -1867,17 +1939,17 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
   'use strict';
 
   $templateCache.put('ui/directive/appendNode/appendNode.html',
-    "<div class=\"km-btn-group append-group\"><div class=\"km-btn-item append-child-node\" ng-disabled=\"minder.queryCommandState('AppendChildNode') === -1\" ng-click=\"execCommand('AppendChildNode')\" title=\"{{ 'appendchildnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendchildnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-parent-node\" ng-disabled=\"minder.queryCommandState('AppendParentNode') === -1\" ng-click=\"execCommand('AppendParentNode')\" title=\"{{ 'appendparentnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendparentnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-sibling-node\" ng-disabled=\"minder.queryCommandState('AppendSiblingNode') === -1\" ng-click=\"execCommand('AppendSiblingNode')\" title=\"{{ 'appendsiblingnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendsiblingnode' | lang:'ui/command' }}</span></div></div>"
+    "<div class=\"km-btn-group append-group\"><div class=\"km-btn-item append-child-node\" ng-disabled=\"minder.queryCommandState('AppendChildNode') === -1\" ng-click=\"minder.queryCommandState('AppendChildNode') === -1 || execCommand('AppendChildNode')\" title=\"{{ 'appendchildnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendchildnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-parent-node\" ng-disabled=\"minder.queryCommandState('AppendParentNode') === -1\" ng-click=\"minder.queryCommandState('AppendParentNode') === -1 || execCommand('AppendParentNode')\" title=\"{{ 'appendparentnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendparentnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-sibling-node\" ng-disabled=\"minder.queryCommandState('AppendSiblingNode') === -1\" ng-click=\"execCommand('AppendSiblingNode')\" title=\"{{ 'appendsiblingnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendsiblingnode' | lang:'ui/command' }}</span></div></div>"
   );
 
 
   $templateCache.put('ui/directive/arrange/arrange.html',
-    "<div class=\"km-btn-group arrange-group\"><div class=\"km-btn-item arrange-up\" ng-disabled=\"minder.queryCommandState('ArrangeUp') === -1\" ng-click=\"minder.execCommand('ArrangeUp')\" title=\"{{ 'arrangeup' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangeup' | lang:'ui/command' }}</span></div><div class=\"km-btn-item arrange-down\" ng-disabled=\"minder.queryCommandState('ArrangeDown') === -1\" ng-click=\"minder.execCommand('ArrangeDown');\" title=\"{{ 'arrangedown' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangedown' | lang:'ui/command' }}</span></div></div>"
+    "<div class=\"km-btn-group arrange-group\"><div class=\"km-btn-item arrange-up\" ng-disabled=\"minder.queryCommandState('ArrangeUp') === -1\" ng-click=\"minder.queryCommandState('ArrangeUp') === -1 || minder.execCommand('ArrangeUp')\" title=\"{{ 'arrangeup' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangeup' | lang:'ui/command' }}</span></div><div class=\"km-btn-item arrange-down\" ng-disabled=\"minder.queryCommandState('ArrangeDown') === -1\" ng-click=\"minder.queryCommandState('ArrangeDown') === -1 || minder.execCommand('ArrangeDown');\" title=\"{{ 'arrangedown' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangedown' | lang:'ui/command' }}</span></div></div>"
   );
 
 
   $templateCache.put('ui/directive/colorPanel/colorPanel.html',
-    "<div class=\"bg-color-wrap\"><span class=\"quick-bg-color\" ng-click=\"minder.execCommand('background', bgColor)\" ng-disabled=\"minder.queryCommandState('background') === -1\"></span> <span color-picker class=\"bg-color\" set-color=\"setDefaultBg()\" ng-disabled=\"minder.queryCommandState('background') === -1\"><span class=\"caret\"></span></span> <span class=\"bg-color-preview\" ng-style=\"{ 'background-color': bgColor }\" ng-click=\"minder.execCommand('background', bgColor)\" ng-disabled=\"minder.queryCommandState('background') === -1\"></span></div>"
+    "<div class=\"bg-color-wrap\"><span class=\"quick-bg-color\" ng-click=\"minder.queryCommandState('background') === -1 || minder.execCommand('background', bgColor)\" ng-disabled=\"minder.queryCommandState('background') === -1\"></span> <span color-picker class=\"bg-color\" set-color=\"setDefaultBg()\" ng-disabled=\"minder.queryCommandState('background') === -1\"><span class=\"caret\"></span></span> <span class=\"bg-color-preview\" ng-style=\"{ 'background-color': bgColor }\" ng-click=\"minder.queryCommandState('background') === -1 || minder.execCommand('background', bgColor)\" ng-disabled=\"minder.queryCommandState('background') === -1\"></span></div>"
   );
 
 
@@ -1887,7 +1959,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/fontOperator/fontOperator.html',
-    "<div class=\"font-operator\"><div class=\"dropdown font-family-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontfamily') === -1\"><a href class=\"current-font-family\" title=\"{{ 'fontfamily' | lang: 'ui' }}\">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontFamilyList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontfamily', f.val)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontfamily') }\" ng-style=\"{'font-family': f.val }\">{{ f.name }}</a></li></ul></div><div class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-size\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || '字号' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></div><span class=\"s-btn-icon font-bold\" ng-click=\"minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\"></span> <span class=\"s-btn-icon font-italics\" ng-click=\"minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"></span><div class=\"font-color-wrap\"><span class=\"quick-font-color\" ng-click=\"minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\">A</span> <span color-picker class=\"font-color\" set-color=\"setDefaultColor()\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"><span class=\"caret\"></span></span> <span class=\"font-color-preview\" ng-style=\"{ 'background-color': foreColor }\" ng-click=\"minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"></span></div><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></div>"
+    "<div class=\"font-operator\"><div class=\"dropdown font-family-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontfamily') === -1\"><a href class=\"current-font-family\" title=\"{{ 'fontfamily' | lang: 'ui' }}\">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontFamilyList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontfamily', f.val)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontfamily') }\" ng-style=\"{'font-family': f.val }\">{{ f.name }}</a></li></ul></div><div class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-size\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || '字号' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></div><span class=\"s-btn-icon font-bold\" ng-click=\"minder.queryCommandState('bold') === -1 || minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\"></span> <span class=\"s-btn-icon font-italics\" ng-click=\"minder.queryCommandState('italic') === -1 || minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"></span><div class=\"font-color-wrap\"><span class=\"quick-font-color\" ng-click=\"minder.queryCommandState('forecolor') === -1 || minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\">A</span> <span color-picker class=\"font-color\" set-color=\"setDefaultColor()\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"><span class=\"caret\"></span></span> <span class=\"font-color-preview\" ng-style=\"{ 'background-color': foreColor }\" ng-click=\"minder.queryCommandState('forecolor') === -1 || minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"></span></div><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></div>"
   );
 
 
@@ -1912,7 +1984,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/layout/layout.html',
-    "<div class=\"readjust-layout\"><a ng-click=\"minder.execCommand('resetlayout')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('resetlayout') === -1\"><span class=\"btn-icon reset-layout-icon\"></span> <span class=\"btn-label\">{{ 'resetlayout' | lang: 'ui/command' }}</span></a></div>"
+    "<div class=\"readjust-layout\"><a ng-click=\"minder.queryCommandState('resetlayout') === -1 || minder.execCommand('resetlayout')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('resetlayout') === -1\"><span class=\"btn-icon reset-layout-icon\"></span> <span class=\"btn-label\">{{ 'resetlayout' | lang: 'ui/command' }}</span></a></div>"
   );
 
 
@@ -1947,17 +2019,17 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/operation/operation.html',
-    "<div class=\"km-btn-group operation-group\"><div class=\"km-btn-item edit-node\" ng-disabled=\"minder.queryCommandState('text') === -1\" ng-click=\"editNode()\" title=\"{{ 'editnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'editnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item remove-node\" ng-disabled=\"minder.queryCommandState('RemoveNode') === -1\" ng-click=\"minder.execCommand('RemoveNode');\" title=\"{{ 'removenode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'removenode' | lang:'ui/command' }}</span></div></div>"
+    "<div class=\"km-btn-group operation-group\"><div class=\"km-btn-item edit-node\" ng-disabled=\"minder.queryCommandState('text') === -1\" ng-click=\"minder.queryCommandState('text') === -1 || editNode()\" title=\"{{ 'editnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'editnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item remove-node\" ng-disabled=\"minder.queryCommandState('RemoveNode') === -1\" ng-click=\"minder.queryCommandState('RemoveNode') === -1 || minder.execCommand('RemoveNode');\" title=\"{{ 'removenode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'removenode' | lang:'ui/command' }}</span></div></div>"
   );
 
 
   $templateCache.put('ui/directive/priorityEditor/priorityEditor.html',
-    "<ul class=\"km-priority tool-group\" ng-disabled=\"commandDisabled\"><li class=\"km-priority-item tool-group-item\" ng-repeat=\"p in priorities\" ng-click=\"minder.execCommand('priority', p)\" ng-class=\"{ active: commandValue == p }\" title=\"{{ getPriorityTitle(p) }}\"><div class=\"km-priority-icon tool-group-icon priority-{{p}}\"></div></li></ul>"
+    "<ul class=\"km-priority tool-group\" ng-disabled=\"commandDisabled\"><li class=\"km-priority-item tool-group-item\" ng-repeat=\"p in priorities\" ng-click=\"commandDisabled || minder.execCommand('priority', p)\" ng-class=\"{ active: commandValue == p }\" title=\"{{ getPriorityTitle(p) }}\"><div class=\"km-priority-icon tool-group-icon priority-{{p}}\"></div></li></ul>"
   );
 
 
   $templateCache.put('ui/directive/progressEditor/progressEditor.html',
-    "<ul class=\"km-progress tool-group\" ng-disabled=\"commandDisabled\"><li class=\"km-progress-item tool-group-item\" ng-repeat=\"p in progresses\" ng-click=\"minder.execCommand('progress', p)\" ng-class=\"{ active: commandValue == p }\" title=\"{{ getProgressTitle(p) }}\"><div class=\"km-progress-icon tool-group-icon progress-{{p}}\"></div></li></ul>"
+    "<ul class=\"km-progress tool-group\" ng-disabled=\"commandDisabled\"><li class=\"km-progress-item tool-group-item\" ng-repeat=\"p in progresses\" ng-click=\"commandDisabled || minder.execCommand('progress', p)\" ng-class=\"{ active: commandValue == p }\" title=\"{{ getProgressTitle(p) }}\"><div class=\"km-progress-icon tool-group-icon progress-{{p}}\"></div></li></ul>"
   );
 
 
@@ -1982,7 +2054,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/styleOperator/styleOperator.html',
-    "<div class=\"style-operator\"><a ng-click=\"minder.execCommand('clearstyle')\" class=\"btn-wrap clear-style\" ng-disabled=\"minder.queryCommandState('clearstyle') === -1;\"><span class=\"btn-icon clear-style-icon\"></span> <span class=\"btn-label\">{{ 'clearstyle' | lang: 'ui' }}</span></a><div class=\"s-btn-group-vertical\"><a class=\"s-btn-wrap\" href ng-click=\"minder.execCommand('copystyle')\" ng-disabled=\"minder.queryCommandState('copystyle') === -1;\"><span class=\"s-btn-icon copy-style-icon\"></span> <span class=\"s-btn-label\">{{ 'copystyle' | lang: 'ui' }}</span></a> <a class=\"s-btn-wrap paste-style-wrap\" href ng-click=\"minder.execCommand('pastestyle')\" ng-disabled=\"minder.queryCommandState('pastestyle') === -1;\"><span class=\"s-btn-icon paste-style-icon\"></span> <span class=\"s-btn-label\">{{ 'pastestyle' | lang: 'ui' }}</span></a></div></div>"
+    "<div class=\"style-operator\"><a ng-click=\"minder.queryCommandState('clearstyle') === -1 || minder.execCommand('clearstyle')\" class=\"btn-wrap clear-style\" ng-disabled=\"minder.queryCommandState('clearstyle') === -1\"><span class=\"btn-icon clear-style-icon\"></span> <span class=\"btn-label\">{{ 'clearstyle' | lang: 'ui' }}</span></a><div class=\"s-btn-group-vertical\"><a class=\"s-btn-wrap\" href ng-click=\"minder.queryCommandState('copystyle') === -1 || minder.execCommand('copystyle')\" ng-disabled=\"minder.queryCommandState('copystyle') === -1\"><span class=\"s-btn-icon copy-style-icon\"></span> <span class=\"s-btn-label\">{{ 'copystyle' | lang: 'ui' }}</span></a> <a class=\"s-btn-wrap paste-style-wrap\" href ng-click=\"minder.queryCommandState('pastestyle') === -1 || minder.execCommand('pastestyle')\" ng-disabled=\"minder.queryCommandState('pastestyle') === -1\"><span class=\"s-btn-icon paste-style-icon\"></span> <span class=\"s-btn-label\">{{ 'pastestyle' | lang: 'ui' }}</span></a></div></div>"
   );
 
 
@@ -2002,7 +2074,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/undoRedo/undoRedo.html',
-    "<div class=\"km-btn-group do-group\"><div class=\"km-btn-item undo\" ng-disabled=\"editor.history.hasUndo() == false\" ng-click=\"editor.history.undo();\" title=\"{{ 'undo' | lang:'ui' }}\"><i class=\"km-btn-icon\"></i></div><div class=\"km-btn-item redo\" ng-disabled=\"editor.history.hasRedo() == false\" ng-click=\"editor.history.redo()\" title=\"{{ 'redo' | lang:'ui' }}\"><i class=\"km-btn-icon\"></i></div></div>"
+    "<div class=\"km-btn-group do-group\"><div class=\"km-btn-item undo\" ng-disabled=\"editor.history.hasUndo() == false\" ng-click=\"editor.history.hasUndo() == false || editor.history.undo();\" title=\"{{ 'undo' | lang:'ui' }}\"><i class=\"km-btn-icon\"></i></div><div class=\"km-btn-item redo\" ng-disabled=\"editor.history.hasRedo() == false\" ng-click=\"editor.history.hasRedo() == false || editor.history.redo()\" title=\"{{ 'redo' | lang:'ui' }}\"><i class=\"km-btn-icon\"></i></div></div>"
   );
 
 
@@ -2773,11 +2845,12 @@ angular.module('kityminderEditor')
                 $linkUrl.focus();
                 $linkUrl[0].setSelectionRange(0, $scope.url.length);
             }
-
+            editor.receiver.selectAll();
         };
 
         $scope.cancel = function () {
             $modalInstance.dismiss('cancel');
+            editor.receiver.selectAll();
         };
 
     }]);
@@ -2795,11 +2868,12 @@ angular.module('kityminderEditor')
                 return;
             }
             $modalInstance.close($scope.value);
-
+            editor.receiver.selectAll();
         };
 
         $scope.cancel = function () {
             $modalInstance.dismiss('cancel');
+            editor.receiver.selectAll();
         };
 
         setTimeout(function() {
@@ -2952,10 +3026,12 @@ angular.module('kityminderEditor')
                 $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
             }
 
+            editor.receiver.selectAll();
         };
 
         $scope.cancel = function () {
             $modalInstance.dismiss('cancel');
+            editor.receiver.selectAll();
         };
 
         function getImageData(){
@@ -3639,6 +3715,7 @@ angular.module('kityminderEditor')
 
                 $scope.closeNoteEditor = function() {
                     valueTransfer.noteEditorOpen = false;
+					editor.receiver.selectAll();
                 };
 
 
