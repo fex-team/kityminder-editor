@@ -339,8 +339,16 @@ define(function(require, exports, module) {
              * @Date: 2015.9.16
              */
             var textNodes = [].slice.call(receiverElement.childNodes);
-            // 解决过大内容导致SVG窜位问题
-            receiverElement.innerHTML = "";
+            /**
+             * @Desc: 增加setTimeout的原因：ie下receiverElement.innerHTML=""会导致后
+             * 		  面commitInputText中使用textContent报错，不要问我什么原因！
+             * @Editor: Naixor
+             * @Date: 2015.12.14
+             */
+            setTimeout(function () {
+                // 解决过大内容导致SVG窜位问题
+                receiverElement.innerHTML = "";
+            }, 0);
             var node = minder.getSelectedNode();
 
             textNodes = commitInputText(textNodes);
