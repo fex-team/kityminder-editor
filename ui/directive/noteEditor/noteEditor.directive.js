@@ -65,6 +65,7 @@ angular.module('kityminderEditor')
 
                 $scope.closeNoteEditor = function() {
                     valueTransfer.noteEditorOpen = false;
+					editor.receiver.selectAll();
                 };
 
 

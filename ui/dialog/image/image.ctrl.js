@@ -75,10 +75,12 @@ angular.module('kityminderEditor')
                 $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
             }
 
+            editor.receiver.selectAll();
         };
 
         $scope.cancel = function () {
             $modalInstance.dismiss('cancel');
+            editor.receiver.selectAll();
         };
 
         function getImageData(){
