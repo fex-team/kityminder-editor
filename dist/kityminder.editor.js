@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.47 - 2015-12-14
+ * kityminder-editor - v1.0.48 - 2015-12-14
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2015 ; Licensed 
@@ -1076,8 +1076,16 @@ _p[12] = {
              * @Date: 2015.9.16
              */
                 var textNodes = [].slice.call(receiverElement.childNodes);
-                // 解决过大内容导致SVG窜位问题
-                receiverElement.innerHTML = "";
+                /**
+             * @Desc: 增加setTimeout的原因：ie下receiverElement.innerHTML=""会导致后
+             * 		  面commitInputText中使用textContent报错，不要问我什么原因！
+             * @Editor: Naixor
+             * @Date: 2015.12.14
+             */
+                setTimeout(function() {
+                    // 解决过大内容导致SVG窜位问题
+                    receiverElement.innerHTML = "";
+                }, 0);
                 var node = minder.getSelectedNode();
                 textNodes = commitInputText(textNodes);
                 commitInputNode(node, textNodes);
