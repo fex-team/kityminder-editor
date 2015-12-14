@@ -22,7 +22,7 @@ define(function(require, exports, module) {
         if (e.keyCode >= 48 && e.keyCode <= 57) return true;
 
         // 输入法
-        if (e.keyCode == 229) return true;
+        if (e.keyCode == 229 || e.keyCode === 0) return true;
 
         return false;
     }
@@ -44,38 +44,40 @@ define(function(require, exports, module) {
 
         // normal -> *
         receiver.listen('normal', function(e) {
+            // 为了防止处理进入edit模式而丢失处理的首字母,此时receiver必须为enable
             receiver.enable();
             // normal -> hotbox
-            if ((e.type == 'keydown' || e.type == 'keyup') && e.is('Space')) {
+            if (e.is('Space')) {
                 e.preventDefault();
+                // safari下Space触发hotbox,然而这时Space已在receiver上留下作案痕迹,因此抹掉
+                if (kity.Browser.safari) {
+                    eceiverElement.innerHTML = '';
+                }
                 return fsm.jump('hotbox', 'space-trigger');
             }
-            if (e.keyCode === 229 || e.keyCode === 0) {
-                e.preventDefault();
-                return;
-            }
-            // normal -> input
-            if (e.type !== 'keypress' && isIntendToInput(e)) {
-                if (minder.getSelectedNode()) {
-                    /**
-                     * @Desc: 这里单独处理下Win系统下，FF的div内输入法中文状态下输入内容会被全部拦截而导致的显示错误
-                     * @Editor: Naixor
-                     * @Date: 2015.09.14
-                     */
-                    if (kity.Browser.platform === "Win") {
-                        if (kity.Browser.gecko) {
-                            receiverElement.innerHTML = minder.getSelectedNode().data.text;
-                            receiver.selectAll();
-                        }
+
+            /**
+             * check
+             * @editor Naixor
+             * @Date 2015-12-2
+             */
+            switch (e.type) {
+                case 'keydown': {
+                    if (minder.getSelectedNode()) {
+                        if (isIntendToInput(e)) {
+                            return fsm.jump('input', 'user-input');
+                        };
+                    } else {
+                        receiverElement.innerHTML = '';
                     }
-                    return fsm.jump('input', 'user-input');
-                } else {
-                    receiverElement.innerHTML = '';
+                    // normal -> normal shortcut
+                    fsm.jump('normal', 'shortcut-handle', e);
+                    break;
                 }
-            }
-            // normal -> normal
-            if (e.type == 'keydown') {
-                return fsm.jump('normal', 'shortcut-handle', e);
+                case 'keyup': {
+                    break;
+                }
+                default: {}
             }
         });
 

@@ -48,7 +48,13 @@ define(function(require, exports, module) {
             });
 
             // lost focus to commit
-            minder.on('beforemousedown', function() {
+            receiver.onblur(function () {
+                if (fsm.state() == 'input') {
+                    fsm.jump('normal', 'input-commit');
+                }
+            });
+
+            minder.on('beforemousedown', function () {
                 if (fsm.state() == 'input') {
                     fsm.jump('normal', 'input-commit');
                 }
@@ -98,9 +104,28 @@ define(function(require, exports, module) {
         }
 
 
-        // edit for the selected node
+        /**
+         * 增加对字体的鉴别，以保证用户在编辑状态ctrl/cmd + b/i所触发的加粗斜体与显示一致
+         * @editor Naixor
+         * @Date 2015-12-2
+         */
+         // edit for the selected node
         function editText() {
-            receiverElement.innerText = minder.queryCommandValue('text');
+            var node = minder.getSelectedNode();
+            var textContainer = receiverElement;
+            receiverElement.innerHTML = "";
+            if (node.getData('font-weight') === 'bold') {
+                var b = document.createElement('b');
+                textContainer.appendChild(b);
+                textContainer = b;
+            }
+            if (node.getData('font-style') === 'italic') {
+                var i = document.createElement('i');
+                textContainer.appendChild(i);
+                textContainer = i;
+            }
+            textContainer.innerText = minder.queryCommandValue('text');
+
             if (isGecko) {
                 receiver.fixFFCaretDisappeared();
             };
@@ -108,6 +133,11 @@ define(function(require, exports, module) {
             receiver.selectAll();
         }
 
+        /**
+         * 增加对字体的鉴别，以保证用户在编辑状态ctrl/cmd + b/i所触发的加粗斜体与显示一致
+         * @editor Naixor
+         * @Date 2015-12-2
+         */
         function enterInputMode() {
             var node = minder.getSelectedNode();
             if (node) {
@@ -115,10 +145,12 @@ define(function(require, exports, module) {
                 receiverElement.style.fontSize = fontSize + 'px';
                 receiverElement.style.minWidth = 0;
                 receiverElement.style.minWidth = receiverElement.clientWidth + 'px';
+                receiverElement.style.fontWeight = node.getData('font-weight') || '';
+                receiverElement.style.fontStyle = node.getData('font-style') || '';
+
                 receiverElement.classList.add('input');
                 receiverElement.focus();
             }
-
         }
 
         /**
@@ -172,6 +204,24 @@ define(function(require, exports, module) {
                         } else {
                             text += str;
                         }
+                        break;
+                    }
+                    // ctrl + b/i 会给字体加上<b>/<i>标签来实现黑体和斜体
+                    case '[object HTMLElement]': {
+                        switch (str.nodeName) {
+                            case "B": {
+                                minder.queryCommandState('bold') || minder.execCommand("bold");
+                                break;
+                            }
+                            case "I": {
+                                minder.queryCommandState('italic') || minder.execCommand("italic");
+                                break;
+                            }
+                            default: {}
+                        }
+                        [].splice.apply(textNodes, [i, 1].concat([].slice.call(str.childNodes)));
+                        l = textNodes.length;
+                        i--;
                         break;
                     }
                     // 被增加span标签的情况会被处理成正常情况并会推交给上面处理
