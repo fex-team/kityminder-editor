@@ -51,7 +51,7 @@ define(function(require, exports, module) {
                 e.preventDefault();
                 // safari下Space触发hotbox,然而这时Space已在receiver上留下作案痕迹,因此抹掉
                 if (kity.Browser.safari) {
-                    eceiverElement.innerHTML = '';
+                    receiverElement.innerHTML = '';
                 }
                 return fsm.jump('hotbox', 'space-trigger');
             }
