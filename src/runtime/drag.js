@@ -1,7 +1,7 @@
 /**
  * @fileOverview
  *
- * 用于拖拽节点是屏蔽键盘事件
+ * 用于拖拽节点时屏蔽键盘事件
  *
  * @author: techird
  * @copyright: Baidu FEX, 2014
