@@ -21,6 +21,10 @@ define(function(require, exports, module) {
         // 0-9 以及其上面的符号
         if (e.keyCode >= 48 && e.keyCode <= 57) return true;
 
+        // 小键盘区域 (除回车外)
+        // @yinheli from pull request
+        if (e.keyCode != 108 && e.keyCode >= 96 && e.keyCode <= 111) return true;
+
         // 输入法
         if (e.keyCode == 229 || e.keyCode === 0) return true;
 
