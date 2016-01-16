@@ -32,7 +32,11 @@ define(function(require, exports, module) {
                         minder.execCommand(command, '分支主题');
 
                         // provide in input runtime
-                        // runtime.editText();
+                        function afterAppend () {
+                            runtime.editText();
+                            minder.off('layoutallfinish', afterAppend);
+                        }
+                        minder.on('layoutallfinish', afterAppend);
                     } else {
                         minder.execCommand(command);
                         fsm.jump('normal', 'command-executed');
