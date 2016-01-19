@@ -41,20 +41,79 @@ define(function(require, exports, module) {
         var MOUSE_HAS_DOWN = 0;
         var MOUSE_HAS_UP = 1;
         var flag = MOUSE_HAS_UP;
+        var maxX, maxY, osx, osy;
+        var freeHorizen = false, freeVirtical = false;
+        var frame;
+
+        function move(direction, speed) {
+            if (!direction) {
+                frame && kity.releaseFrame(frame);
+                frame = null;
+                return;
+            }
+            if (!frame) {
+                frame = kity.requestFrame((function (direction, speed, minder) {
+                    return function (frame) {
+                        switch (direction) {
+                            case 'left':
+                                minder._viewDragger.move({x: -speed, y: 0}, 0);
+                                break;
+                            case 'top':
+                                minder._viewDragger.move({x: 0, y: -speed}, 0);
+                                break;
+                            case 'right':
+                                minder._viewDragger.move({x: speed, y: 0}, 0);
+                                break;
+                            case 'bottom':
+                                minder._viewDragger.move({x: 0, y: speed}, 0);
+                                break;
+                            default:
+                                return;
+                        }
+                        frame.next();
+                    }
+                })(direction, speed, minder));
+            }
+        }
 
         minder.on('mousedown', function(e) {
             flag = MOUSE_HAS_DOWN;
-            downX = e.clientX;
-            downY = e.clientY;
+            downX = e.originEvent.clientX;
+            downY = e.originEvent.clientY;
+            maxX = minder.getPaper().container.clientWidth;
+            maxY = minder.getPaper().container.clientHeight;
         });
 
         minder.on('mousemove', function(e) {
-
+            if (fsm.state() === 'drag' && flag == MOUSE_HAS_DOWN && minder.getSelectedNode()
+                && (Math.abs(downX - e.originEvent.clientX) > 10
+                    || Math.abs(downY - e.originEvent.clientY) > 10)) {
+                osx = e.originEvent.offsetX;
+                osy = e.originEvent.offsetY;
+                if (osx < 10) {
+                    move('right', 10 - osx);
+                } else if (osx > maxX - 10) {
+                    move('left', 10 + osx - maxX);
+                } else {
+                    freeHorizen = true;
+                }
+                if (osy < 10) {
+                    move('bottom', osy);
+                } else if (osy > maxY - 10) {
+                    move('top', 10 + osy - maxY);
+                } else {
+                    freeVirtical = true;
+                }
+                if (freeHorizen && freeVirtical) {
+                    freeHorizen = freeVirtical = false;
+                    move(false);
+                }
+            }
             if (fsm.state() != 'drag'
                 && flag == MOUSE_HAS_DOWN
                 && minder.getSelectedNode()
-                || (Math.abs(downX - e.clientX) > 10
-                || Math.abs(downY - e.clientY) > 10)) {
+                && (Math.abs(downX - e.originEvent.clientX) > 10
+                || Math.abs(downY - e.originEvent.clientY) > 10)) {
 
                 if (fsm.state() == 'hotbox') {
                     hotbox.active(Hotbox.STATE_IDLE);
@@ -62,7 +121,6 @@ define(function(require, exports, module) {
 
                 return fsm.jump('drag', 'user-drag');
             }
-
         });
 
         document.body.onmouseup = function(e) {

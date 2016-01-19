@@ -24,6 +24,10 @@ define(function(require, exports, module) {
         // 小键盘区域 (除回车外)
         if (e.keyCode != 108 && e.keyCode >= 96 && e.keyCode <= 111) return true;
 
+        // 小键盘区域 (除回车外)
+        // @yinheli from pull request
+        if (e.keyCode != 108 && e.keyCode >= 96 && e.keyCode <= 111) return true;
+
         // 输入法
         if (e.keyCode == 229 || e.keyCode === 0) return true;
 
@@ -54,7 +58,7 @@ define(function(require, exports, module) {
                 e.preventDefault();
                 // safari下Space触发hotbox,然而这时Space已在receiver上留下作案痕迹,因此抹掉
                 if (kity.Browser.safari) {
-                    eceiverElement.innerHTML = '';
+                    receiverElement.innerHTML = '';
                 }
                 return fsm.jump('hotbox', 'space-trigger');
             }

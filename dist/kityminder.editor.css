@@ -759,6 +759,8 @@ div.minder-editor-container {
   margin-bottom: 3px;
   padding: 0;
   list-style-type: none;
+  overflow: scroll;
+  max-height: 500px;
 }
 .resource-editor .resource-dropdown .km-resource.open {
   z-index: 3;
