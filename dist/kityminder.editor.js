@@ -1,9 +1,9 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.48 - 2015-12-14
+ * kityminder-editor - v1.0.49 - 2016-01-19
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
- * Copyright (c) 2015 ; Licensed 
+ * Copyright (c) 2016 ; Licensed 
  * ====================================================
  */
 
@@ -427,7 +427,7 @@ _p[7] = {
 /**
  * @fileOverview
  *
- * 用于拖拽节点是屏蔽键盘事件
+ * 用于拖拽节点时屏蔽键盘事件
  *
  * @author: techird
  * @copyright: Baidu FEX, 2014
@@ -457,13 +457,86 @@ _p[8] = {
             var MOUSE_HAS_DOWN = 0;
             var MOUSE_HAS_UP = 1;
             var flag = MOUSE_HAS_UP;
+            var maxX, maxY, osx, osy;
+            var freeHorizen = false, freeVirtical = false;
+            var frame;
+            function move(direction, speed) {
+                if (!direction) {
+                    frame && kity.releaseFrame(frame);
+                    frame = null;
+                    return;
+                }
+                if (!frame) {
+                    frame = kity.requestFrame(function(direction, speed, minder) {
+                        return function(frame) {
+                            switch (direction) {
+                              case "left":
+                                minder._viewDragger.move({
+                                    x: -speed,
+                                    y: 0
+                                }, 0);
+                                break;
+
+                              case "top":
+                                minder._viewDragger.move({
+                                    x: 0,
+                                    y: -speed
+                                }, 0);
+                                break;
+
+                              case "right":
+                                minder._viewDragger.move({
+                                    x: speed,
+                                    y: 0
+                                }, 0);
+                                break;
+
+                              case "bottom":
+                                minder._viewDragger.move({
+                                    x: 0,
+                                    y: speed
+                                }, 0);
+                                break;
+
+                              default:
+                                return;
+                            }
+                            frame.next();
+                        };
+                    }(direction, speed, minder));
+                }
+            }
             minder.on("mousedown", function(e) {
                 flag = MOUSE_HAS_DOWN;
-                downX = e.clientX;
-                downY = e.clientY;
+                downX = e.originEvent.clientX;
+                downY = e.originEvent.clientY;
+                maxX = minder.getPaper().container.clientWidth;
+                maxY = minder.getPaper().container.clientHeight;
             });
             minder.on("mousemove", function(e) {
-                if (fsm.state() != "drag" && flag == MOUSE_HAS_DOWN && minder.getSelectedNode() || (Math.abs(downX - e.clientX) > 10 || Math.abs(downY - e.clientY) > 10)) {
+                if (fsm.state() === "drag" && flag == MOUSE_HAS_DOWN && minder.getSelectedNode() && (Math.abs(downX - e.originEvent.clientX) > 10 || Math.abs(downY - e.originEvent.clientY) > 10)) {
+                    osx = e.originEvent.offsetX;
+                    osy = e.originEvent.offsetY;
+                    if (osx < 10) {
+                        move("right", 10 - osx);
+                    } else if (osx > maxX - 10) {
+                        move("left", 10 + osx - maxX);
+                    } else {
+                        freeHorizen = true;
+                    }
+                    if (osy < 10) {
+                        move("bottom", osy);
+                    } else if (osy > maxY - 10) {
+                        move("top", 10 + osy - maxY);
+                    } else {
+                        freeVirtical = true;
+                    }
+                    if (freeHorizen && freeVirtical) {
+                        freeHorizen = freeVirtical = false;
+                        move(false);
+                    }
+                }
+                if (fsm.state() != "drag" && flag == MOUSE_HAS_DOWN && minder.getSelectedNode() && (Math.abs(downX - e.originEvent.clientX) > 10 || Math.abs(downY - e.originEvent.clientY) > 10)) {
                     if (fsm.state() == "hotbox") {
                         hotbox.active(Hotbox.STATE_IDLE);
                     }
@@ -1138,6 +1211,11 @@ _p[13] = {
             if (e.keyCode >= 65 && e.keyCode <= 90) return true;
             // 0-9 以及其上面的符号
             if (e.keyCode >= 48 && e.keyCode <= 57) return true;
+            // 小键盘区域 (除回车外)
+            if (e.keyCode != 108 && e.keyCode >= 96 && e.keyCode <= 111) return true;
+            // 小键盘区域 (除回车外)
+            // @yinheli from pull request
+            if (e.keyCode != 108 && e.keyCode >= 96 && e.keyCode <= 111) return true;
             // 输入法
             if (e.keyCode == 229 || e.keyCode === 0) return true;
             return false;
@@ -1166,7 +1244,7 @@ _p[13] = {
                     e.preventDefault();
                     // safari下Space触发hotbox,然而这时Space已在receiver上留下作案痕迹,因此抹掉
                     if (kity.Browser.safari) {
-                        eceiverElement.innerHTML = "";
+                        receiverElement.innerHTML = "";
                     }
                     return fsm.jump("hotbox", "space-trigger");
                 }
@@ -1329,6 +1407,12 @@ _p[15] = {
                     action: function() {
                         if (command.indexOf("Append") === 0) {
                             minder.execCommand(command, "分支主题");
+                            // provide in input runtime
+                            function afterAppend() {
+                                runtime.editText();
+                                minder.off("layoutallfinish", afterAppend);
+                            }
+                            minder.on("layoutallfinish", afterAppend);
                         } else {
                             minder.execCommand(command);
                             fsm.jump("normal", "command-executed");
