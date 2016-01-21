@@ -18,6 +18,8 @@ define(function(require, exports, module) {
             //'全选:Ctrl+A:SelectAll'
         ];
 
+        var AppendLock = 0;
+
         buttons.forEach(function(button) {
             var parts = button.split(':');
             var label = parts.shift();
@@ -29,11 +31,14 @@ define(function(require, exports, module) {
                 key: key,
                 action: function() {
                     if (command.indexOf('Append') === 0) {
+                        AppendLock++;
                         minder.execCommand(command, '分支主题');
 
                         // provide in input runtime
                         function afterAppend () {
-                            runtime.editText();
+                            if (!--AppendLock) {
+                                runtime.editText();
+                            }
                             minder.off('layoutallfinish', afterAppend);
                         }
                         minder.on('layoutallfinish', afterAppend);
