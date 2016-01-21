@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.49 - 2016-01-19
+ * kityminder-editor - v1.0.50 - 2016-01-21
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2016 ; Licensed 
@@ -1395,6 +1395,7 @@ _p[15] = {
             var fsm = this.fsm;
             var main = hotbox.state("main");
             var buttons = [ "前移:Alt+Up:ArrangeUp", "下级:Tab|Insert:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "上级:Shift+Tab|Shift+Insert:AppendParentNode" ];
+            var AppendLock = 0;
             buttons.forEach(function(button) {
                 var parts = button.split(":");
                 var label = parts.shift();
@@ -1406,10 +1407,13 @@ _p[15] = {
                     key: key,
                     action: function() {
                         if (command.indexOf("Append") === 0) {
+                            AppendLock++;
                             minder.execCommand(command, "分支主题");
                             // provide in input runtime
                             function afterAppend() {
-                                runtime.editText();
+                                if (!--AppendLock) {
+                                    runtime.editText();
+                                }
                                 minder.off("layoutallfinish", afterAppend);
                             }
                             minder.on("layoutallfinish", afterAppend);
