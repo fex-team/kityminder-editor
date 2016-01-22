@@ -1,9 +1,9 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.38 - 2015-10-13
+ * kityminder-editor - v1.0.51 - 2016-01-22
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
- * Copyright (c) 2015 ; Licensed 
+ * Copyright (c) 2016 ; Licensed 
  * ====================================================
  */
 
@@ -241,90 +241,141 @@ _p[6] = {
             var receiver = this.receiver;
             var MimeType = this.MimeType;
             var kmencode = MimeType.getMimeTypeProtocol("application/km"), decode = Data.getRegisterProtocol("json").decode;
-            function encode(node) {
-                var obj = minder.exportNode(node);
-                return kmencode(Data.getRegisterProtocol("json").encode(obj));
+            var _selectedNodes = [];
+            /*
+		 * 增加对多节点赋值粘贴的处理
+		 */
+            function encode(nodes) {
+                var _nodes = [];
+                for (var i = 0, l = nodes.length; i < l; i++) {
+                    _nodes.push(minder.exportNode(nodes[i]));
+                }
+                return kmencode(Data.getRegisterProtocol("json").encode(_nodes));
             }
             var beforeCopy = function(e) {
-                var clipBoardEvent = e;
-                var state = fsm.state();
-                switch (state) {
-                  case "input":
-                    {
-                        break;
-                    }
-
-                  case "normal":
-                    {
-                        var node = minder.getSelectedNode();
-                        if (node) {
-                            clipBoardEvent.clipboardData.setData("text/plain", encode(node));
+                if (document.activeElement == receiver.element) {
+                    var clipBoardEvent = e;
+                    var state = fsm.state();
+                    switch (state) {
+                      case "input":
+                        {
+                            break;
                         }
-                        e.preventDefault();
-                        break;
+
+                      case "normal":
+                        {
+                            var nodes = [].concat(minder.getSelectedNodes());
+                            if (nodes.length) {
+                                // 这里由于被粘贴复制的节点的id信息也都一样，故做此算法
+                                // 这里有个疑问，使用node.getParent()或者node.parent会离奇导致出现非选中节点被渲染成选中节点，因此使用isAncestorOf，而没有使用自行回溯的方式
+                                if (nodes.length > 1) {
+                                    var targetLevel;
+                                    nodes.sort(function(a, b) {
+                                        return a.getLevel() - b.getLevel();
+                                    });
+                                    targetLevel = nodes[0].getLevel();
+                                    if (targetLevel !== nodes[nodes.length - 1].getLevel()) {
+                                        var plevel, pnode, idx = 0, l = nodes.length, pidx = l - 1;
+                                        pnode = nodes[pidx];
+                                        while (pnode.getLevel() !== targetLevel) {
+                                            idx = 0;
+                                            while (idx < l && nodes[idx].getLevel() === targetLevel) {
+                                                if (nodes[idx].isAncestorOf(pnode)) {
+                                                    nodes.splice(pidx, 1);
+                                                    break;
+                                                }
+                                                idx++;
+                                            }
+                                            pidx--;
+                                            pnode = nodes[pidx];
+                                        }
+                                    }
+                                }
+                                var str = encode(nodes);
+                                clipBoardEvent.clipboardData.setData("text/plain", str);
+                            }
+                            e.preventDefault();
+                            break;
+                        }
                     }
                 }
             };
             var beforeCut = function(e) {
-                if (minder.getStatus() !== "normal") {
-                    e.preventDefault();
-                    return;
-                }
-                var clipBoardEvent = e;
-                var state = fsm.state();
-                switch (state) {
-                  case "input":
-                    {
-                        break;
-                    }
-
-                  case "normal":
-                    {
-                        var node = minder.getSelectedNode();
-                        if (node) {
-                            clipBoardEvent.clipboardData.setData("text/plain", encode(node));
-                            minder.execCommand("RemoveNode");
-                        }
+                if (document.activeElement == receiver.element) {
+                    if (minder.getStatus() !== "normal") {
                         e.preventDefault();
-                        break;
+                        return;
+                    }
+                    var clipBoardEvent = e;
+                    var state = fsm.state();
+                    switch (state) {
+                      case "input":
+                        {
+                            break;
+                        }
+
+                      case "normal":
+                        {
+                            var nodes = minder.getSelectedNodes();
+                            if (nodes.length) {
+                                clipBoardEvent.clipboardData.setData("text/plain", encode(nodes));
+                                minder.execCommand("removenode");
+                            }
+                            e.preventDefault();
+                            break;
+                        }
                     }
                 }
             };
             var beforePaste = function(e) {
-                if (minder.getStatus() !== "normal") {
-                    e.preventDefault();
-                    return;
-                }
-                var clipBoardEvent = e;
-                var state = fsm.state();
-                var textData = clipBoardEvent.clipboardData.getData("text/plain");
-                switch (state) {
-                  case "input":
-                    {
-                        // input状态下如果格式为application/km则不进行paste操作
-                        if (!MimeType.isPureText(textData)) {
-                            e.preventDefault();
-                            return;
-                        }
-                        break;
-                    }
-
-                  case "normal":
-                    {
-                        /*
-					 * 针对normal状态下通过对选中节点粘贴导入子节点文本进行单独处理
-					 */
-                        var node = minder.getSelectedNode();
-                        if (MimeType.whichMimeType(textData) === "application/km") {
-                            minder.execCommand("AppendChildNode");
-                            node = minder.getSelectedNode();
-                            minder.importNode(node, decode(MimeType.getPureText(textData)));
-                            minder.refresh();
-                        } else {
-                            minder.Text2Children(node, textData);
-                        }
+                if (document.activeElement == receiver.element) {
+                    if (minder.getStatus() !== "normal") {
                         e.preventDefault();
-                        break;
+                        return;
+                    }
+                    var clipBoardEvent = e;
+                    var state = fsm.state();
+                    var textData = clipBoardEvent.clipboardData.getData("text/plain");
+                    switch (state) {
+                      case "input":
+                        {
+                            // input状态下如果格式为application/km则不进行paste操作
+                            if (!MimeType.isPureText(textData)) {
+                                e.preventDefault();
+                                return;
+                            }
+                            break;
+                        }
+
+                      case "normal":
+                        {
+                            /*
+						 * 针对normal状态下通过对选中节点粘贴导入子节点文本进行单独处理
+						 */
+                            var sNodes = minder.getSelectedNodes();
+                            if (MimeType.whichMimeType(textData) === "application/km") {
+                                var nodes = decode(MimeType.getPureText(textData));
+                                var _node;
+                                sNodes.forEach(function(node) {
+                                    // 由于粘贴逻辑中为了排除子节点重新排序导致逆序，因此复制的时候倒过来
+                                    for (var i = nodes.length - 1; i >= 0; i--) {
+                                        _node = minder.createNode(null, node);
+                                        minder.importNode(_node, nodes[i]);
+                                        _selectedNodes.push(_node);
+                                        node.appendChild(_node);
+                                    }
+                                });
+                                minder.select(_selectedNodes, true);
+                                _selectedNodes = [];
+                                minder.refresh();
+                            } else {
+                                sNodes.forEach(function(node) {
+                                    minder.Text2Children(node, textData);
+                                });
+                            }
+                            e.preventDefault();
+                            break;
+                        }
                     }
                 }
             };
@@ -333,9 +384,9 @@ _p[6] = {
 		 * @Editor: Naixor
 		 * @Date: 2015.9.24
 		 */
-            receiver.element.addEventListener("copy", beforeCopy);
-            receiver.element.addEventListener("cut", beforeCut);
-            receiver.element.addEventListener("paste", beforePaste);
+            document.addEventListener("copy", beforeCopy);
+            document.addEventListener("cut", beforeCut);
+            document.addEventListener("paste", beforePaste);
         }
         return module.exports = ClipboardRuntime;
     }
@@ -403,20 +454,96 @@ _p[8] = {
                 });
             }
             var downX, downY;
+            var editorRect;
             var MOUSE_HAS_DOWN = 0;
             var MOUSE_HAS_UP = 1;
             var flag = MOUSE_HAS_UP;
+            var maxX, maxY, osx, osy;
+            var freeHorizen = false, freeVirtical = false;
+            var frame;
+            function move(direction, speed) {
+                if (!direction) {
+                    frame && kity.releaseFrame(frame);
+                    frame = null;
+                    return;
+                }
+                if (!frame) {
+                    frame = kity.requestFrame(function(direction, speed, minder) {
+                        return function(frame) {
+                            switch (direction) {
+                              case "left":
+                                minder._viewDragger.move({
+                                    x: -speed,
+                                    y: 0
+                                }, 0);
+                                break;
+
+                              case "top":
+                                minder._viewDragger.move({
+                                    x: 0,
+                                    y: -speed
+                                }, 0);
+                                break;
+
+                              case "right":
+                                minder._viewDragger.move({
+                                    x: speed,
+                                    y: 0
+                                }, 0);
+                                break;
+
+                              case "bottom":
+                                minder._viewDragger.move({
+                                    x: 0,
+                                    y: speed
+                                }, 0);
+                                break;
+
+                              default:
+                                return;
+                            }
+                            frame.next();
+                        };
+                    }(direction, speed, minder));
+                }
+            }
             minder.on("mousedown", function(e) {
                 flag = MOUSE_HAS_DOWN;
-                downX = e.clientX;
-                downY = e.clientY;
+                downX = e.originEvent.clientX;
+                downY = e.originEvent.clientY;
+                maxX = minder.getPaper().container.clientWidth;
+                maxY = minder.getPaper().container.clientHeight;
+                editorRect = minder.getPaper().container.getBoundingClientRect();
             });
             minder.on("mousemove", function(e) {
-                if (fsm.state() != "drag" && flag == MOUSE_HAS_DOWN && minder.getSelectedNode() || (Math.abs(downX - e.clientX) > 10 || Math.abs(downY - e.clientY) > 10)) {
-                    if (fsm.state() == "hotbox") {
-                        hotbox.active(Hotbox.STATE_IDLE);
+                if (flag == MOUSE_HAS_DOWN && minder.getSelectedNode() && (Math.abs(downX - e.originEvent.clientX) > 10 || Math.abs(downY - e.originEvent.clientY) > 10)) {
+                    if (fsm.state() === "drag") {
+                        osx = e.originEvent.clientX;
+                        osy = e.originEvent.clientY - editorRect.top;
+                        if (osx < 10) {
+                            move("right", 10 - osx);
+                        } else if (osx > maxX - 10) {
+                            move("left", 10 + osx - maxX);
+                        } else {
+                            freeHorizen = true;
+                        }
+                        if (osy < 10) {
+                            move("bottom", osy);
+                        } else if (osy > maxY - 10) {
+                            move("top", 10 + osy - maxY);
+                        } else {
+                            freeVirtical = true;
+                        }
+                        if (freeHorizen && freeVirtical) {
+                            freeHorizen = freeVirtical = false;
+                            move(false);
+                        }
+                    } else {
+                        if (fsm.state() == "hotbox") {
+                            hotbox.active(Hotbox.STATE_IDLE);
+                        }
+                        return fsm.jump("drag", "user-drag");
                     }
-                    return fsm.jump("drag", "user-drag");
                 }
             });
             document.body.onmouseup = function(e) {
@@ -730,6 +857,7 @@ _p[12] = {
             var hotbox = this.hotbox;
             var receiver = this.receiver;
             var receiverElement = receiver.element;
+            var isGecko = window.kity.Browser.gecko;
             // setup everything to go
             setupReciverElement();
             setupFsm();
@@ -752,6 +880,11 @@ _p[12] = {
                     }
                 });
                 // lost focus to commit
+                receiver.onblur(function(e) {
+                    if (fsm.state() == "input") {
+                        fsm.jump("normal", "input-commit");
+                    }
+                });
                 minder.on("beforemousedown", function() {
                     if (fsm.state() == "input") {
                         fsm.jump("normal", "input-commit");
@@ -790,12 +923,41 @@ _p[12] = {
                     action: editText
                 });
             }
+            /**
+         * 增加对字体的鉴别，以保证用户在编辑状态ctrl/cmd + b/i所触发的加粗斜体与显示一致
+         * @editor Naixor
+         * @Date 2015-12-2
+         */
             // edit for the selected node
             function editText() {
-                receiverElement.innerText = minder.queryCommandValue("text");
+                var node = minder.getSelectedNode();
+                if (!node) {
+                    return;
+                }
+                var textContainer = receiverElement;
+                receiverElement.innerText = "";
+                if (node.getData("font-weight") === "bold") {
+                    var b = document.createElement("b");
+                    textContainer.appendChild(b);
+                    textContainer = b;
+                }
+                if (node.getData("font-style") === "italic") {
+                    var i = document.createElement("i");
+                    textContainer.appendChild(i);
+                    textContainer = i;
+                }
+                textContainer.innerText = minder.queryCommandValue("text");
+                if (isGecko) {
+                    receiver.fixFFCaretDisappeared();
+                }
                 fsm.jump("input", "input-request");
                 receiver.selectAll();
             }
+            /**
+         * 增加对字体的鉴别，以保证用户在编辑状态ctrl/cmd + b/i所触发的加粗斜体与显示一致
+         * @editor Naixor
+         * @Date 2015-12-2
+         */
             function enterInputMode() {
                 var node = minder.getSelectedNode();
                 if (node) {
@@ -803,6 +965,8 @@ _p[12] = {
                     receiverElement.style.fontSize = fontSize + "px";
                     receiverElement.style.minWidth = 0;
                     receiverElement.style.minWidth = receiverElement.clientWidth + "px";
+                    receiverElement.style.fontWeight = node.getData("font-weight") || "";
+                    receiverElement.style.fontStyle = node.getData("font-style") || "";
                     receiverElement.classList.add("input");
                     receiverElement.focus();
                 }
@@ -818,9 +982,10 @@ _p[12] = {
                 var text = "";
                 var TAB_CHAR = "	", ENTER_CHAR = "\n", STR_CHECK = /\S/, SPACE_CHAR = " ", // 针对FF,SG,BD,LB,IE等浏览器下SPACE的charCode存在为32和160的情况做处理
                 SPACE_CHAR_REGEXP = new RegExp("( |" + String.fromCharCode(160) + ")"), BR = document.createElement("br");
+                var isBold = false, isItalic = false;
                 for (var str, _divChildNodes, space_l, space_num, tab_num, i = 0, l = textNodes.length; i < l; i++) {
                     str = textNodes[i];
-                    switch (str.toString()) {
+                    switch (Object.prototype.toString.call(str)) {
                       // 正常情况处理
                         case "[object HTMLBRElement]":
                         {
@@ -831,7 +996,14 @@ _p[12] = {
                       case "[object Text]":
                         {
                             // SG下会莫名其妙的加上&nbsp;影响后续判断，干掉！
-                            str = str.wholeText.replace("&nbsp;", " ");
+                            /**
+                         * FF下的wholeText会导致如下问题：
+                         *     |123| -> 在一个节点中输入一段字符，此时TextNode为[#Text 123]
+                         *     提交并重新编辑，在后面追加几个字符
+                         *     |123abc| -> 此时123为一个TextNode为[#Text 123, #Text abc]，但是对这两个任意取值wholeText均为全部内容123abc
+                         * 上述BUG仅存在在FF中，故将wholeText更改为textContent
+                         */
+                            str = str.textContent.replace("&nbsp;", " ");
                             if (!STR_CHECK.test(str)) {
                                 space_l = str.length;
                                 while (space_l--) {
@@ -847,11 +1019,48 @@ _p[12] = {
                             break;
                         }
 
+                      // ctrl + b/i 会给字体加上<b>/<i>标签来实现黑体和斜体
+                        case "[object HTMLElement]":
+                        {
+                            switch (str.nodeName) {
+                              case "B":
+                                {
+                                    isBold = true;
+                                    break;
+                                }
+
+                              case "I":
+                                {
+                                    isItalic = true;
+                                    break;
+                                }
+
+                              default:
+                                {}
+                            }
+                            [].splice.apply(textNodes, [ i, 1 ].concat([].slice.call(str.childNodes)));
+                            l = textNodes.length;
+                            i--;
+                            break;
+                        }
+
                       // 被增加span标签的情况会被处理成正常情况并会推交给上面处理
                         case "[object HTMLSpanElement]":
                         {
                             [].splice.apply(textNodes, [ i, 1 ].concat([].slice.call(str.childNodes)));
+                            l = textNodes.length;
                             i--;
+                            break;
+                        }
+
+                      // 若标签为image标签，则判断是否为合法url，是将其加载进来
+                        case "[object HTMLImageElement]":
+                        {
+                            if (str.src) {
+                                if (/http(|s):\/\//.test(str.src)) {
+                                    minder.execCommand("Image", str.src, str.alt);
+                                } else {}
+                            }
                             break;
                         }
 
@@ -871,19 +1080,44 @@ _p[12] = {
 
                       default:
                         {
-                            text += "";
+                            if (str && str.childNodes.length) {
+                                _divChildNodes = [];
+                                for (var di = 0, l = str.childNodes.length; di < l; di++) {
+                                    _divChildNodes.push(str.childNodes[di]);
+                                }
+                                _divChildNodes.push(BR);
+                                [].splice.apply(textNodes, [ i, 1 ].concat(_divChildNodes));
+                                l = textNodes.length;
+                                i--;
+                            } else {
+                                if (str && str.textContent !== undefined) {
+                                    text += str.textContent;
+                                } else {
+                                    text += "";
+                                }
+                            }
                         }
                     }
                 }
                 text = text.replace(/^\n*|\n*$/g, "");
                 text = text.replace(new RegExp("(\n|\r|\n\r)( |" + String.fromCharCode(160) + "){4}", "g"), "$1	");
-                minder.execCommand("text", text);
+                minder.getSelectedNode().setText(text);
+                if (isBold) {
+                    minder.queryCommandState("bold") || minder.execCommand("bold");
+                } else {
+                    minder.queryCommandState("bold") && minder.execCommand("bold");
+                }
+                if (isItalic) {
+                    minder.queryCommandState("italic") || minder.execCommand("italic");
+                } else {
+                    minder.queryCommandState("italic") && minder.execCommand("italic");
+                }
                 exitInputMode();
                 return text;
             }
             /**
          * 判断节点的文本信息是否是
-         * @Desc: 从其他节点复制文字到另一个节点时部分浏览器(chrome)会自动包裹一个span标签，这样试用一下逻辑出来的就不是text节点二是span节点因此导致undefined的情况发生
+         * @Desc: 从其他节点复制文字到另一个节点时部分浏览器(chrome)会自动包裹一个span标签，这样使用以下逻辑出来的就不是text节点二是span节点因此导致undefined的情况发生
          * @Notice: 此处逻辑应该拆分到 kityminder-core/core/data中去，单独增加一个对某个节点importJson的事件
          * @Editor: Naixor
          * @Date: 2015.9.16
@@ -902,9 +1136,13 @@ _p[12] = {
                             return node;
                         }
                         importText(node, json, minder);
-                        minder.refresh();
+                        minder.fire("contentchange");
+                        minder.getRoot().renderTree();
+                        minder.layout(300);
                     });
                 } catch (e) {
+                    minder.fire("contentchange");
+                    minder.getRoot().renderTree();
                     // 无法被转换成脑图节点则不处理
                     if (e.toString() !== "Error: Invalid local format") {
                         throw e;
@@ -920,6 +1158,16 @@ _p[12] = {
              * @Date: 2015.9.16
              */
                 var textNodes = [].slice.call(receiverElement.childNodes);
+                /**
+             * @Desc: 增加setTimeout的原因：ie下receiverElement.innerHTML=""会导致后
+             * 		  面commitInputText中使用textContent报错，不要问我什么原因！
+             * @Editor: Naixor
+             * @Date: 2015.12.14
+             */
+                setTimeout(function() {
+                    // 解决过大内容导致SVG窜位问题
+                    receiverElement.innerHTML = "";
+                }, 0);
                 var node = minder.getSelectedNode();
                 textNodes = commitInputText(textNodes);
                 commitInputNode(node, textNodes);
@@ -966,15 +1214,18 @@ _p[13] = {
             if (e.keyCode >= 65 && e.keyCode <= 90) return true;
             // 0-9 以及其上面的符号
             if (e.keyCode >= 48 && e.keyCode <= 57) return true;
+            // 小键盘区域 (除回车外)
+            // @yinheli from pull request
+            if (e.keyCode != 108 && e.keyCode >= 96 && e.keyCode <= 111) return true;
             // 输入法
-            if (e.keyCode == 229) return true;
+            if (e.keyCode == 229 || e.keyCode === 0) return true;
             return false;
         }
         /**
      * @Desc: 下方使用receiver.enable()和receiver.disable()通过
      *        修改div contenteditable属性的hack来解决开启热核后依然无法屏蔽浏览器输入的bug;
      *        特别: win下FF对于此种情况必须要先blur在focus才能解决，但是由于这样做会导致用户
-     *             输入法状态丢失，因此对FF咱不做处理
+     *             输入法状态丢失，因此对FF暂不做处理
      * @Editor: Naixor
      * @Date: 2015.09.14
      */
@@ -987,38 +1238,44 @@ _p[13] = {
             var hotbox = this.hotbox;
             // normal -> *
             receiver.listen("normal", function(e) {
+                // 为了防止处理进入edit模式而丢失处理的首字母,此时receiver必须为enable
                 receiver.enable();
                 // normal -> hotbox
-                if ((e.type == "keydown" || e.type == "keyup") && e.is("Space")) {
+                if (e.is("Space")) {
                     e.preventDefault();
-                    return fsm.jump("hotbox", "space-trigger");
-                }
-                if (e.keyCode === 229 || e.keyCode === 0) {
-                    e.preventDefault();
-                    return;
-                }
-                // normal -> input
-                if (e.type !== "keypress" && isIntendToInput(e)) {
-                    if (minder.getSelectedNode()) {
-                        /**
-                     * @Desc: 这里单独处理下Win系统下，FF的div内输入法中文状态下输入内容会被全部拦截而导致的显示错误
-                     * @Editor: Naixor
-                     * @Date: 2015.09.14
-                     */
-                        if (kity.Browser.platform === "Win") {
-                            if (kity.Browser.gecko) {
-                                receiverElement.innerHTML = minder.getSelectedNode().data.text;
-                                receiver.selectAll();
-                            }
-                        }
-                        return fsm.jump("input", "user-input");
-                    } else {
+                    // safari下Space触发hotbox,然而这时Space已在receiver上留下作案痕迹,因此抹掉
+                    if (kity.Browser.safari) {
                         receiverElement.innerHTML = "";
                     }
+                    return fsm.jump("hotbox", "space-trigger");
                 }
-                // normal -> normal
-                if (e.type == "keydown") {
-                    return fsm.jump("normal", "shortcut-handle", e);
+                /**
+             * check
+             * @editor Naixor
+             * @Date 2015-12-2
+             */
+                switch (e.type) {
+                  case "keydown":
+                    {
+                        if (minder.getSelectedNode()) {
+                            if (isIntendToInput(e)) {
+                                return fsm.jump("input", "user-input");
+                            }
+                        } else {
+                            receiverElement.innerHTML = "";
+                        }
+                        // normal -> normal shortcut
+                        fsm.jump("normal", "shortcut-handle", e);
+                        break;
+                    }
+
+                  case "keyup":
+                    {
+                        break;
+                    }
+
+                  default:
+                    {}
                 }
             });
             // hotbox -> normal
@@ -1138,7 +1395,8 @@ _p[15] = {
             var hotbox = this.hotbox;
             var fsm = this.fsm;
             var main = hotbox.state("main");
-            var buttons = [ "前移:Alt+Up:ArrangeUp", "下级:Tab:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "上级:Shift+Tab|Shift+Insert:AppendParentNode" ];
+            var buttons = [ "前移:Alt+Up:ArrangeUp", "下级:Tab|Insert:AppendChildNode", "同级:Enter:AppendSiblingNode", "后移:Alt+Down:ArrangeDown", "删除:Delete|Backspace:RemoveNode", "上级:Shift+Tab|Shift+Insert:AppendParentNode" ];
+            var AppendLock = 0;
             buttons.forEach(function(button) {
                 var parts = button.split(":");
                 var label = parts.shift();
@@ -1150,9 +1408,16 @@ _p[15] = {
                     key: key,
                     action: function() {
                         if (command.indexOf("Append") === 0) {
+                            AppendLock++;
                             minder.execCommand(command, "分支主题");
                             // provide in input runtime
-                            runtime.editText();
+                            function afterAppend() {
+                                if (!--AppendLock) {
+                                    runtime.editText();
+                                }
+                                minder.off("layoutallfinish", afterAppend);
+                            }
+                            minder.on("layoutallfinish", afterAppend);
                         } else {
                             minder.execCommand(command);
                             fsm.jump("normal", "command-executed");
@@ -1340,13 +1605,34 @@ _p[18] = {
                 },
                 disable: function() {
                     element.setAttribute("contenteditable", false);
+                },
+                /**
+             * @Desc: hack FF下div contenteditable的光标丢失BUG
+             * @Editor: Naixor
+             * @Date: 2015.10.15
+             */
+                fixFFCaretDisappeared: function() {
+                    element.removeAttribute("contenteditable");
+                    element.setAttribute("contenteditable", "true");
+                    element.blur();
+                    element.focus();
+                },
+                /**
+             * 以此事件代替通过mouse事件来判断receiver丢失焦点的事件
+             * @editor Naixor
+             * @Date 2015-12-2
+             */
+                onblur: function(handler) {
+                    element.onblur = handler;
                 }
             };
             receiver.selectAll();
             minder.on("beforemousedown", receiver.selectAll);
             minder.on("receiverfocus", receiver.selectAll);
             minder.on("readonly", function() {
-                receiver.disable();
+                // 屏蔽minder的事件接受，删除receiver和hotbox
+                minder.disable();
+                editor.receiver.element.parentElement.removeChild(editor.receiver.element);
                 editor.hotbox.$container.removeChild(editor.hotbox.$element);
             });
             // 侦听器，接收到的事件会派发给所有侦听器
@@ -1627,7 +1913,17 @@ _p[23] = {
                 hashCode |= SHIFT_MASK;
             }
             // Shift, Control, Alt KeyCode ignored.
-            if ([ 16, 17, 18, 91 ].indexOf(keyEvent.keyCode) == -1) {
+            if ([ 16, 17, 18, 91 ].indexOf(keyEvent.keyCode) === -1) {
+                /**
+             * 解决浏览器输入法状态下对keyDown的keyCode判断不准确的问题,使用keyIdentifier,
+             * 可以解决chrome和safari下的各种问题,其他浏览器依旧有问题,然而那并不影响我们对特
+             * 需判断的按键进行判断(比如Space在safari输入法态下就是229,其他的就不是)
+             * @editor Naixor
+             * @Date 2015-12-2
+             */
+                if (keyEvent.keyCode === 229 && keyEvent.keyIdentifier) {
+                    return hashCode |= parseInt(keyEvent.keyIdentifier.substr(2), 16);
+                }
                 hashCode |= keyEvent.keyCode;
             }
             return hashCode;
@@ -1755,27 +2051,27 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
   'use strict';
 
   $templateCache.put('ui/directive/appendNode/appendNode.html',
-    "<div class=\"km-btn-group append-group\"><div class=\"km-btn-item append-child-node\" ng-disabled=\"minder.queryCommandState('AppendChildNode') === -1\" ng-click=\"execCommand('AppendChildNode')\" title=\"{{ 'appendchildnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendchildnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-parent-node\" ng-disabled=\"minder.queryCommandState('AppendParentNode') === -1\" ng-click=\"execCommand('AppendParentNode')\" title=\"{{ 'appendparentnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendparentnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-sibling-node\" ng-disabled=\"minder.queryCommandState('AppendSiblingNode') === -1\" ng-click=\"execCommand('AppendSiblingNode')\" title=\"{{ 'appendsiblingnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendsiblingnode' | lang:'ui/command' }}</span></div></div>"
+    "<div class=\"km-btn-group append-group\"><div class=\"km-btn-item append-child-node\" ng-disabled=\"minder.queryCommandState('AppendChildNode') === -1\" ng-click=\"minder.queryCommandState('AppendChildNode') === -1 || execCommand('AppendChildNode')\" title=\"{{ 'appendchildnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendchildnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-parent-node\" ng-disabled=\"minder.queryCommandState('AppendParentNode') === -1\" ng-click=\"minder.queryCommandState('AppendParentNode') === -1 || execCommand('AppendParentNode')\" title=\"{{ 'appendparentnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendparentnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item append-sibling-node\" ng-disabled=\"minder.queryCommandState('AppendSiblingNode') === -1\" ng-click=\"minder.queryCommandState('AppendSiblingNode') === -1 ||execCommand('AppendSiblingNode')\" title=\"{{ 'appendsiblingnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'appendsiblingnode' | lang:'ui/command' }}</span></div></div>"
   );
 
 
   $templateCache.put('ui/directive/arrange/arrange.html',
-    "<div class=\"km-btn-group arrange-group\"><div class=\"km-btn-item arrange-up\" ng-disabled=\"minder.queryCommandState('ArrangeUp') === -1\" ng-click=\"minder.execCommand('ArrangeUp')\" title=\"{{ 'arrangeup' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangeup' | lang:'ui/command' }}</span></div><div class=\"km-btn-item arrange-down\" ng-disabled=\"minder.queryCommandState('ArrangeDown') === -1\" ng-click=\"minder.execCommand('ArrangeDown');\" title=\"{{ 'arrangedown' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangedown' | lang:'ui/command' }}</span></div></div>"
+    "<div class=\"km-btn-group arrange-group\"><div class=\"km-btn-item arrange-up\" ng-disabled=\"minder.queryCommandState('ArrangeUp') === -1\" ng-click=\"minder.queryCommandState('ArrangeUp') === -1 || minder.execCommand('ArrangeUp')\" title=\"{{ 'arrangeup' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangeup' | lang:'ui/command' }}</span></div><div class=\"km-btn-item arrange-down\" ng-disabled=\"minder.queryCommandState('ArrangeDown') === -1\" ng-click=\"minder.queryCommandState('ArrangeDown') === -1 || minder.execCommand('ArrangeDown');\" title=\"{{ 'arrangedown' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'arrangedown' | lang:'ui/command' }}</span></div></div>"
   );
 
 
   $templateCache.put('ui/directive/colorPanel/colorPanel.html',
-    "<div class=\"color-wrap\" ng-disabled=\"minder.queryCommandState('background') === -1\"><span colorpicker class=\"color-item\" ng-model=\"hexPicker\" ng-style=\"{ 'background-color': customColor }\" title=\"{{ hexPicker }}\"></span></div>"
+    "<div class=\"bg-color-wrap\"><span class=\"quick-bg-color\" ng-click=\"minder.queryCommandState('background') === -1 || minder.execCommand('background', bgColor)\" ng-disabled=\"minder.queryCommandState('background') === -1\"></span> <span color-picker class=\"bg-color\" set-color=\"setDefaultBg()\" ng-disabled=\"minder.queryCommandState('background') === -1\"><span class=\"caret\"></span></span> <span class=\"bg-color-preview\" ng-style=\"{ 'background-color': bgColor }\" ng-click=\"minder.queryCommandState('background') === -1 || minder.execCommand('background', bgColor)\" ng-disabled=\"minder.queryCommandState('background') === -1\"></span></div>"
   );
 
 
   $templateCache.put('ui/directive/expandLevel/expandLevel.html',
-    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default expand\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"minder.execCommand('expand')\"></button> <button type=\"button\" class=\"btn btn-default expand-caption dropdown-toggle\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'expandtoleaf' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'expandtoleaf' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"level in levels\"><a href ng-click=\"minder.execCommand('ExpandToLevel', level)\">{{ 'expandtolevel' + level | lang:'ui/command' }}</a></li></ul></div>"
+    "<div class=\"btn-group-vertical\" dropdown is-open=\"isopen\"><button type=\"button\" class=\"btn btn-default expand\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" ng-class=\"{'active': isopen}\" ng-click=\"minder.execCommand('ExpandToLevel', 9999)\"></button> <button type=\"button\" class=\"btn btn-default expand-caption dropdown-toggle\" title=\"{{ 'expandtoleaf' | lang:'ui' }}\" dropdown-toggle><span class=\"caption\">{{ 'expandtoleaf' | lang:'ui' }}</span> <span class=\"caret\"></span> <span class=\"sr-only\">{{ 'expandtoleaf' | lang:'ui' }}</span></button><ul class=\"dropdown-menu\" role=\"menu\"><li ng-repeat=\"level in levels\"><a href ng-click=\"minder.execCommand('ExpandToLevel', level)\">{{ 'expandtolevel' + level | lang:'ui/command' }}</a></li></ul></div>"
   );
 
 
   $templateCache.put('ui/directive/fontOperator/fontOperator.html',
-    "<div class=\"font-operator\"><div class=\"dropdown font-family-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontfamily') === -1\"><a href class=\"current-font-family\" title=\"{{ 'fontfamily' | lang: 'ui' }}\">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontFamilyList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontfamily', f.val)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontfamily') }\" ng-style=\"{'font-family': f.val }\">{{ f.name }}</a></li></ul></div><div class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-size\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || '字号' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></div><span class=\"s-btn-icon font-bold\" ng-click=\"minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\"></span> <span class=\"s-btn-icon font-italics\" ng-click=\"minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"></span><div class=\"font-color-wrap\"><span colorpicker class=\"font-color\" ng-model=\"hexPicker\" ng-style=\"{ 'background-color': customColor }\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\" title=\"{{ hexPicker }}\"></span></div><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></div>"
+    "<div class=\"font-operator\"><div class=\"dropdown font-family-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontfamily') === -1\"><a href class=\"current-font-family\" title=\"{{ 'fontfamily' | lang: 'ui' }}\">{{ getFontfamilyName(minder.queryCommandValue('fontfamily')) || '字体' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontFamilyList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontfamily', f.val)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontfamily') }\" ng-style=\"{'font-family': f.val }\">{{ f.name }}</a></li></ul></div><div class=\"dropdown font-size-list\" dropdown><div class=\"dropdown-toggle current-font-item\" dropdown-toggle ng-disabled=\"minder.queryCommandState('fontsize') === -1\"><a href class=\"current-font-size\" title=\"{{ 'fontsize' | lang: 'ui' }}\">{{ minder.queryCommandValue('fontsize') || '字号' }}</a> <span class=\"caret\"></span></div><ul class=\"dropdown-menu font-list\"><li ng-repeat=\"f in fontSizeList\" class=\"font-item-wrap\"><a ng-click=\"minder.execCommand('fontsize', f)\" class=\"font-item\" ng-class=\"{ 'font-item-selected' : f == minder.queryCommandValue('fontsize') }\" ng-style=\"{'font-size': f + 'px'}\">{{ f }}</a></li></ul></div><span class=\"s-btn-icon font-bold\" ng-click=\"minder.queryCommandState('bold') === -1 || minder.execCommand('bold')\" ng-class=\"{'font-bold-selected' : minder.queryCommandState('bold') == 1}\" ng-disabled=\"minder.queryCommandState('bold') === -1\"></span> <span class=\"s-btn-icon font-italics\" ng-click=\"minder.queryCommandState('italic') === -1 || minder.execCommand('italic')\" ng-class=\"{'font-italics-selected' : minder.queryCommandState('italic') == 1}\" ng-disabled=\"minder.queryCommandState('italic') === -1\"></span><div class=\"font-color-wrap\"><span class=\"quick-font-color\" ng-click=\"minder.queryCommandState('forecolor') === -1 || minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\">A</span> <span color-picker class=\"font-color\" set-color=\"setDefaultColor()\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"><span class=\"caret\"></span></span> <span class=\"font-color-preview\" ng-style=\"{ 'background-color': foreColor }\" ng-click=\"minder.queryCommandState('forecolor') === -1 || minder.execCommand('forecolor', foreColor)\" ng-disabled=\"minder.queryCommandState('forecolor') === -1\"></span></div><color-panel minder=\"minder\" class=\"inline-directive\"></color-panel></div>"
   );
 
 
@@ -1800,7 +2096,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/layout/layout.html',
-    "<div class=\"readjust-layout\"><a ng-click=\"minder.execCommand('resetlayout')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('resetlayout') === -1\"><span class=\"btn-icon reset-layout-icon\"></span> <span class=\"btn-label\">{{ 'resetlayout' | lang: 'ui/command' }}</span></a></div>"
+    "<div class=\"readjust-layout\"><a ng-click=\"minder.queryCommandState('resetlayout') === -1 || minder.execCommand('resetlayout')\" class=\"btn-wrap\" ng-disabled=\"minder.queryCommandState('resetlayout') === -1\"><span class=\"btn-icon reset-layout-icon\"></span> <span class=\"btn-label\">{{ 'resetlayout' | lang: 'ui/command' }}</span></a></div>"
   );
 
 
@@ -1835,17 +2131,17 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/operation/operation.html',
-    "<div class=\"km-btn-group operation-group\"><div class=\"km-btn-item edit-node\" ng-disabled=\"minder.queryCommandState('text') === -1\" ng-click=\"editNode()\" title=\"{{ 'editnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'editnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item remove-node\" ng-disabled=\"minder.queryCommandState('RemoveNode') === -1\" ng-click=\"minder.execCommand('RemoveNode');\" title=\"{{ 'removenode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'removenode' | lang:'ui/command' }}</span></div></div>"
+    "<div class=\"km-btn-group operation-group\"><div class=\"km-btn-item edit-node\" ng-disabled=\"minder.queryCommandState('text') === -1\" ng-click=\"minder.queryCommandState('text') === -1 || editNode()\" title=\"{{ 'editnode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'editnode' | lang:'ui/command' }}</span></div><div class=\"km-btn-item remove-node\" ng-disabled=\"minder.queryCommandState('RemoveNode') === -1\" ng-click=\"minder.queryCommandState('RemoveNode') === -1 || minder.execCommand('RemoveNode');\" title=\"{{ 'removenode' | lang:'ui/command' }}\"><i class=\"km-btn-icon\"></i> <span class=\"km-btn-caption\">{{ 'removenode' | lang:'ui/command' }}</span></div></div>"
   );
 
 
   $templateCache.put('ui/directive/priorityEditor/priorityEditor.html',
-    "<ul class=\"km-priority tool-group\" ng-disabled=\"commandDisabled\"><li class=\"km-priority-item tool-group-item\" ng-repeat=\"p in priorities\" ng-click=\"minder.execCommand('priority', p)\" ng-class=\"{ active: commandValue == p }\" title=\"{{ getPriorityTitle(p) }}\"><div class=\"km-priority-icon tool-group-icon priority-{{p}}\"></div></li></ul>"
+    "<ul class=\"km-priority tool-group\" ng-disabled=\"commandDisabled\"><li class=\"km-priority-item tool-group-item\" ng-repeat=\"p in priorities\" ng-click=\"commandDisabled || minder.execCommand('priority', p)\" ng-class=\"{ active: commandValue == p }\" title=\"{{ getPriorityTitle(p) }}\"><div class=\"km-priority-icon tool-group-icon priority-{{p}}\"></div></li></ul>"
   );
 
 
   $templateCache.put('ui/directive/progressEditor/progressEditor.html',
-    "<ul class=\"km-progress tool-group\" ng-disabled=\"commandDisabled\"><li class=\"km-progress-item tool-group-item\" ng-repeat=\"p in progresses\" ng-click=\"minder.execCommand('progress', p)\" ng-class=\"{ active: commandValue == p }\" title=\"{{ getProgressTitle(p) }}\"><div class=\"km-progress-icon tool-group-icon progress-{{p}}\"></div></li></ul>"
+    "<ul class=\"km-progress tool-group\" ng-disabled=\"commandDisabled\"><li class=\"km-progress-item tool-group-item\" ng-repeat=\"p in progresses\" ng-click=\"commandDisabled || minder.execCommand('progress', p)\" ng-class=\"{ active: commandValue == p }\" title=\"{{ getProgressTitle(p) }}\"><div class=\"km-progress-icon tool-group-icon progress-{{p}}\"></div></li></ul>"
   );
 
 
@@ -1870,7 +2166,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/styleOperator/styleOperator.html',
-    "<div class=\"style-operator\"><a ng-click=\"minder.execCommand('clearstyle')\" class=\"btn-wrap clear-style\" ng-disabled=\"minder.queryCommandState('clearstyle') === -1;\"><span class=\"btn-icon clear-style-icon\"></span> <span class=\"btn-label\">{{ 'clearstyle' | lang: 'ui' }}</span></a><div class=\"s-btn-group-vertical\"><a class=\"s-btn-wrap\" href ng-click=\"minder.execCommand('copystyle')\" ng-disabled=\"minder.queryCommandState('copystyle') === -1;\"><span class=\"s-btn-icon copy-style-icon\"></span> <span class=\"s-btn-label\">{{ 'copystyle' | lang: 'ui' }}</span></a> <a class=\"s-btn-wrap paste-style-wrap\" href ng-click=\"minder.execCommand('pastestyle')\" ng-disabled=\"minder.queryCommandState('pastestyle') === -1;\"><span class=\"s-btn-icon paste-style-icon\"></span> <span class=\"s-btn-label\">{{ 'pastestyle' | lang: 'ui' }}</span></a></div></div>"
+    "<div class=\"style-operator\"><a ng-click=\"minder.queryCommandState('clearstyle') === -1 || minder.execCommand('clearstyle')\" class=\"btn-wrap clear-style\" ng-disabled=\"minder.queryCommandState('clearstyle') === -1\"><span class=\"btn-icon clear-style-icon\"></span> <span class=\"btn-label\">{{ 'clearstyle' | lang: 'ui' }}</span></a><div class=\"s-btn-group-vertical\"><a class=\"s-btn-wrap\" href ng-click=\"minder.queryCommandState('copystyle') === -1 || minder.execCommand('copystyle')\" ng-disabled=\"minder.queryCommandState('copystyle') === -1\"><span class=\"s-btn-icon copy-style-icon\"></span> <span class=\"s-btn-label\">{{ 'copystyle' | lang: 'ui' }}</span></a> <a class=\"s-btn-wrap paste-style-wrap\" href ng-click=\"minder.queryCommandState('pastestyle') === -1 || minder.execCommand('pastestyle')\" ng-disabled=\"minder.queryCommandState('pastestyle') === -1\"><span class=\"s-btn-icon paste-style-icon\"></span> <span class=\"s-btn-label\">{{ 'pastestyle' | lang: 'ui' }}</span></a></div></div>"
   );
 
 
@@ -1890,7 +2186,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/directive/undoRedo/undoRedo.html',
-    "<div class=\"km-btn-group do-group\"><div class=\"km-btn-item undo\" ng-disabled=\"editor.history.hasUndo() == false\" ng-click=\"editor.history.undo();\" title=\"{{ 'undo' | lang:'ui' }}\"><i class=\"km-btn-icon\"></i></div><div class=\"km-btn-item redo\" ng-disabled=\"editor.history.hasRedo() == false\" ng-click=\"editor.history.redo()\" title=\"{{ 'redo' | lang:'ui' }}\"><i class=\"km-btn-icon\"></i></div></div>"
+    "<div class=\"km-btn-group do-group\"><div class=\"km-btn-item undo\" ng-disabled=\"editor.history.hasUndo() == false\" ng-click=\"editor.history.hasUndo() == false || editor.history.undo();\" title=\"{{ 'undo' | lang:'ui' }}\"><i class=\"km-btn-icon\"></i></div><div class=\"km-btn-item redo\" ng-disabled=\"editor.history.hasRedo() == false\" ng-click=\"editor.history.hasRedo() == false || editor.history.redo()\" title=\"{{ 'redo' | lang:'ui' }}\"><i class=\"km-btn-icon\"></i></div></div>"
   );
 
 
@@ -2661,11 +2957,12 @@ angular.module('kityminderEditor')
                 $linkUrl.focus();
                 $linkUrl[0].setSelectionRange(0, $scope.url.length);
             }
-
+            editor.receiver.selectAll();
         };
 
         $scope.cancel = function () {
             $modalInstance.dismiss('cancel');
+            editor.receiver.selectAll();
         };
 
     }]);
@@ -2683,11 +2980,12 @@ angular.module('kityminderEditor')
                 return;
             }
             $modalInstance.close($scope.value);
-
+            editor.receiver.selectAll();
         };
 
         $scope.cancel = function () {
             $modalInstance.dismiss('cancel');
+            editor.receiver.selectAll();
         };
 
         setTimeout(function() {
@@ -2792,8 +3090,8 @@ angular.module('kityminderEditor')
                             if(json.data[i].objURL) {
                                 $scope.list.push({
                                     title: json.data[i].fromPageTitleEnc,
-                                    src: json.data[i].objURL,
-                                    url: json.data[i].fromURL
+                                    src: json.data[i].middleURL,
+                                    url: json.data[i].middleURL
                                 });
                             }
                         }
@@ -2809,7 +3107,7 @@ angular.module('kityminderEditor')
             var targetItem = $('#img-item'+ (this.$index));
             var targetImg = $('#img-'+ (this.$index));
 
-            targetItem.siblings('.selected').removeClass('selected')
+            targetItem.siblings('.selected').removeClass('selected');
             targetItem.addClass('selected');
 
             $scope.data.url = targetImg.attr('src');
@@ -2840,16 +3138,18 @@ angular.module('kityminderEditor')
                 $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
             }
 
+            editor.receiver.selectAll();
         };
 
         $scope.cancel = function () {
             $modalInstance.dismiss('cancel');
+            editor.receiver.selectAll();
         };
 
         function getImageData(){
             var key = $scope.data.searchKeyword2;
-            var keepOriginName = '1';
-            var url = "http://image.baidu.com/i?ct=201326592&cl=2&lm=-1&st=-1&tn=baiduimagejson&istype=2&rn=3200&fm=index&pv=&word=" + key + "&ie=utf-8&oe=utf-8&keeporiginname=" + keepOriginName + "&" + +new Date + "&callback=JSON_CALLBACK";
+            var currentTime = new Date();
+            var url = 'http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&fp=result&queryWord='+ key +'&cl=2&lm=-1&ie=utf-8&oe=utf-8&st=-1&ic=0&word='+ key +'&face=0&istype=2&nc=1&pn=60&rn=60&gsm=3c&'+ currentTime.getTime() +'=&callback=JSON_CALLBACK';
 
             return $http.jsonp(url);
         }
@@ -2915,22 +3215,21 @@ angular.module('kityminderEditor')
 				var minder = scope.minder;
 				var currentTheme = minder.getThemeItems();
 
-				scope.hexPicker = scope.hexPicker || currentTheme['background'] ;
-
-
-				scope.$on('colorpicker-selected', function(e, msg) {
-                    e.stopPropagation();
-
-					// colorPicker 的 bug ： 初次选择 value 为 undefined
-					minder.execCommand('background', msg.value);
-
-					scope.customColor = msg.value;
+				scope.$on('colorPicked', function(event, color) {
+                    event.stopPropagation();
+					scope.bgColor = color;
+					minder.execCommand('background', color);
 				});
 
-				minder.on('interactchange', function() {
-                    scope.customColor = minder.queryCommandValue('background') || '#000000';
-                    scope.$apply();
-				});
+				scope.setDefaultBg = function() {
+                    var currentNode = minder.getSelectedNode();
+                    var bgColor = minder.getNodeStyle(currentNode, 'background');
+
+                    // 有可能是 kity 的颜色类
+                    return typeof bgColor === 'object' ? bgColor.toHEX() : bgColor;
+                };
+
+                scope.bgColor = scope.setDefaultBg() || '#fff';
 
 			}
 		}
@@ -2962,8 +3261,6 @@ angular.module('kityminderEditor')
 			link: function(scope) {
 				var minder = scope.minder;
 				var currentTheme = minder.getThemeItems();
-
-				scope.hexPicker = scope.hexPicker || currentTheme['main-color'] ;
 
 				scope.fontSizeList = [10, 12, 16, 18, 24, 32, 48];
                 scope.fontFamilyList = [{
@@ -3004,15 +3301,22 @@ angular.module('kityminderEditor')
                     val: 'sans-serif'
                 }];
 
-				scope.$on('colorpicker-selected', function(e, msg) {
-					minder.execCommand('forecolor', msg.value);
-					scope.customColor = msg.value;
-				});
+                scope.$on('colorPicked', function(event, color) {
+                    event.stopPropagation();
 
-				minder.on('interactchange', function() {
-					scope.customColor = minder.queryCommandValue('forecolor') || '#000000';
-                    scope.$apply();
-				});
+                    scope.foreColor = color;
+                    minder.execCommand('forecolor', color);
+                });
+
+                scope.setDefaultColor = function() {
+                    var currentNode = minder.getSelectedNode();
+                    var fontColor = minder.getNodeStyle(currentNode, 'color');
+
+                    // 有可能是 kity 的颜色类
+                    return typeof fontColor === 'object' ? fontColor.toHEX() : fontColor;
+                };
+
+                scope.foreColor = scope.setDefaultColor() || '#000';
 
                 scope.getFontfamilyName = function(val) {
                     var fontName = '';
@@ -3315,6 +3619,38 @@ angular.module('kityminderEditor')
 
                 var contentView = new kity.Box(), visibleView = new kity.Box();
 
+                /**
+                 * 增加一个对天盘图情况缩略图的处理,
+                 * @Editor: Naixor line 104~129
+                 * @Date: 2015.11.3
+                 */
+                var pathHandler = getPathHandler(minder.getTheme());
+
+                // 主题切换事件
+                minder.on('themechange', function(e) {
+                    pathHandler = getPathHandler(e.theme);
+                });
+
+                function getPathHandler(theme) {
+                    switch (theme) {
+                        case "tianpan":
+                        case "tianpan-compact":
+                            return function(nodePathData, x, y, width, height) {
+                                var r = width >> 1;
+                                nodePathData.push('M', x, y + r,
+                                    'a', r, r, 0, 1, 1, 0, 0.01,
+                                    'z');
+                            }
+                        default: {
+                            return function(nodePathData, x, y, width, height) {
+                                nodePathData.push('M', x, y,
+                                    'h', width, 'v', height,
+                                    'h', -width, 'z');
+                            }
+                        }
+                    }
+                }
+
                 navigate();
 
                 function navigate() {
@@ -3352,7 +3688,6 @@ angular.module('kityminderEditor')
                     });
                 }
 
-
                 function updateContentView() {
 
                     var view = minder.getRenderContainer().getBoundaryBox();
@@ -3372,9 +3707,7 @@ angular.module('kityminderEditor')
 
                     minder.getRoot().traverse(function(node) {
                         var box = node.getLayoutBox();
-                        nodePathData.push('M', box.x, box.y,
-                            'h', box.width, 'v', box.height,
-                            'h', -box.width, 'z');
+                        pathHandler(nodePathData, box.x, box.y, box.width, box.height);
                         if (node.getConnection() && node.parent && node.parent.isExpanded()) {
                             connectionThumbData.push(node.getConnection().getPathData());
                         }
@@ -3494,6 +3827,7 @@ angular.module('kityminderEditor')
 
                 $scope.closeNoteEditor = function() {
                     valueTransfer.noteEditorOpen = false;
+					editor.receiver.selectAll();
                 };
 
 
@@ -3825,7 +4159,7 @@ angular.module('kityminderEditor')
                 }
 
                 $('body').on('keydown', function(e) {
-                    if (e.keyCode == 70 && (e.ctrlKey || e.metaKey)) {
+                    if (e.keyCode == 70 && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
                         enterSearch();
 
                         $scope.$apply();
@@ -3864,7 +4198,7 @@ angular.module('kityminderEditor')
                             searchSequence.push({node:node});
                         }
                         var note = node.getData('note');
-                        if (note && note.indexOf(keyword) != -1) {
+                        if (note && note.toLowerCase().indexOf(keyword) != -1) {
                             searchSequence.push({node: node, keyword: keyword});
                         }
                     }
@@ -4080,7 +4414,7 @@ angular.module('kityminderEditor')
 					}
 
 					return style;
-				}
+				};
 
 				// 维护 theme key 列表以保证列表美观（不按字母顺序排序）
 				$scope.themeKeyList = [
@@ -4100,6 +4434,8 @@ angular.module('kityminderEditor')
 					'fresh-soil-compat',
 					'snow',
 					'snow-compact',
+					'tianpan',
+					'tianpan-compact',
 					'fish',
 					'wire'
 				];
