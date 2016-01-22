@@ -38,6 +38,7 @@ define(function(require, exports, module) {
         }
 
         var downX, downY;
+        var editorRect;
         var MOUSE_HAS_DOWN = 0;
         var MOUSE_HAS_UP = 1;
         var flag = MOUSE_HAS_UP;
@@ -82,44 +83,43 @@ define(function(require, exports, module) {
             downY = e.originEvent.clientY;
             maxX = minder.getPaper().container.clientWidth;
             maxY = minder.getPaper().container.clientHeight;
+            editorRect = minder.getPaper().container.getBoundingClientRect();
         });
 
         minder.on('mousemove', function(e) {
-            if (fsm.state() === 'drag' && flag == MOUSE_HAS_DOWN && minder.getSelectedNode()
-                && (Math.abs(downX - e.originEvent.clientX) > 10
-                    || Math.abs(downY - e.originEvent.clientY) > 10)) {
-                osx = e.originEvent.offsetX;
-                osy = e.originEvent.offsetY;
-                if (osx < 10) {
-                    move('right', 10 - osx);
-                } else if (osx > maxX - 10) {
-                    move('left', 10 + osx - maxX);
-                } else {
-                    freeHorizen = true;
-                }
-                if (osy < 10) {
-                    move('bottom', osy);
-                } else if (osy > maxY - 10) {
-                    move('top', 10 + osy - maxY);
-                } else {
-                    freeVirtical = true;
-                }
-                if (freeHorizen && freeVirtical) {
-                    freeHorizen = freeVirtical = false;
-                    move(false);
-                }
-            }
-            if (fsm.state() != 'drag'
-                && flag == MOUSE_HAS_DOWN
+            if (flag == MOUSE_HAS_DOWN
                 && minder.getSelectedNode()
                 && (Math.abs(downX - e.originEvent.clientX) > 10
-                || Math.abs(downY - e.originEvent.clientY) > 10)) {
+                    || Math.abs(downY - e.originEvent.clientY) > 10)) {
+                if (fsm.state() === 'drag') {
+                    osx = e.originEvent.clientX;
+                    osy = e.originEvent.clientY - editorRect.top;
 
-                if (fsm.state() == 'hotbox') {
-                    hotbox.active(Hotbox.STATE_IDLE);
+                    if (osx < 10) {
+                        move('right', 10 - osx);
+                    } else if (osx > maxX - 10) {
+                        move('left', 10 + osx - maxX);
+                    } else {
+                        freeHorizen = true;
+                    }
+                    if (osy < 10) {
+                        move('bottom', osy);
+                    } else if (osy > maxY - 10) {
+                        move('top', 10 + osy - maxY);
+                    } else {
+                        freeVirtical = true;
+                    }
+                    if (freeHorizen && freeVirtical) {
+                        freeHorizen = freeVirtical = false;
+                        move(false);
+                    }
+                } else {
+                    if (fsm.state() == 'hotbox') {
+                        hotbox.active(Hotbox.STATE_IDLE);
+                    }
+
+                    return fsm.jump('drag', 'user-drag');
                 }
-
-                return fsm.jump('drag', 'user-drag');
             }
         });
 
