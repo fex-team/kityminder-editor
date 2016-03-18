@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.50 - 2016-01-21
+ * kityminder-editor - v1.0.51 - 2016-01-22
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2016 ; Licensed 
@@ -427,7 +427,7 @@ _p[7] = {
 /**
  * @fileOverview
  *
- * 用于拖拽节点时屏蔽键盘事件
+ * 用于拖拽节点是屏蔽键盘事件
  *
  * @author: techird
  * @copyright: Baidu FEX, 2014
@@ -454,6 +454,7 @@ _p[8] = {
                 });
             }
             var downX, downY;
+            var editorRect;
             var MOUSE_HAS_DOWN = 0;
             var MOUSE_HAS_UP = 1;
             var flag = MOUSE_HAS_UP;
@@ -512,35 +513,37 @@ _p[8] = {
                 downY = e.originEvent.clientY;
                 maxX = minder.getPaper().container.clientWidth;
                 maxY = minder.getPaper().container.clientHeight;
+                editorRect = minder.getPaper().container.getBoundingClientRect();
             });
             minder.on("mousemove", function(e) {
-                if (fsm.state() === "drag" && flag == MOUSE_HAS_DOWN && minder.getSelectedNode() && (Math.abs(downX - e.originEvent.clientX) > 10 || Math.abs(downY - e.originEvent.clientY) > 10)) {
-                    osx = e.originEvent.offsetX;
-                    osy = e.originEvent.offsetY;
-                    if (osx < 10) {
-                        move("right", 10 - osx);
-                    } else if (osx > maxX - 10) {
-                        move("left", 10 + osx - maxX);
+                if (flag == MOUSE_HAS_DOWN && minder.getSelectedNode() && (Math.abs(downX - e.originEvent.clientX) > 10 || Math.abs(downY - e.originEvent.clientY) > 10)) {
+                    if (fsm.state() === "drag") {
+                        osx = e.originEvent.clientX;
+                        osy = e.originEvent.clientY - editorRect.top;
+                        if (osx < 10) {
+                            move("right", 10 - osx);
+                        } else if (osx > maxX - 10) {
+                            move("left", 10 + osx - maxX);
+                        } else {
+                            freeHorizen = true;
+                        }
+                        if (osy < 10) {
+                            move("bottom", osy);
+                        } else if (osy > maxY - 10) {
+                            move("top", 10 + osy - maxY);
+                        } else {
+                            freeVirtical = true;
+                        }
+                        if (freeHorizen && freeVirtical) {
+                            freeHorizen = freeVirtical = false;
+                            move(false);
+                        }
                     } else {
-                        freeHorizen = true;
+                        if (fsm.state() == "hotbox") {
+                            hotbox.active(Hotbox.STATE_IDLE);
+                        }
+                        return fsm.jump("drag", "user-drag");
                     }
-                    if (osy < 10) {
-                        move("bottom", osy);
-                    } else if (osy > maxY - 10) {
-                        move("top", 10 + osy - maxY);
-                    } else {
-                        freeVirtical = true;
-                    }
-                    if (freeHorizen && freeVirtical) {
-                        freeHorizen = freeVirtical = false;
-                        move(false);
-                    }
-                }
-                if (fsm.state() != "drag" && flag == MOUSE_HAS_DOWN && minder.getSelectedNode() && (Math.abs(downX - e.originEvent.clientX) > 10 || Math.abs(downY - e.originEvent.clientY) > 10)) {
-                    if (fsm.state() == "hotbox") {
-                        hotbox.active(Hotbox.STATE_IDLE);
-                    }
-                    return fsm.jump("drag", "user-drag");
                 }
             });
             document.body.onmouseup = function(e) {
@@ -877,7 +880,7 @@ _p[12] = {
                     }
                 });
                 // lost focus to commit
-                receiver.onblur(function() {
+                receiver.onblur(function(e) {
                     if (fsm.state() == "input") {
                         fsm.jump("normal", "input-commit");
                     }
@@ -928,8 +931,11 @@ _p[12] = {
             // edit for the selected node
             function editText() {
                 var node = minder.getSelectedNode();
+                if (!node) {
+                    return;
+                }
                 var textContainer = receiverElement;
-                receiverElement.innerHTML = "";
+                receiverElement.innerText = "";
                 if (node.getData("font-weight") === "bold") {
                     var b = document.createElement("b");
                     textContainer.appendChild(b);
@@ -1095,7 +1101,7 @@ _p[12] = {
                 }
                 text = text.replace(/^\n*|\n*$/g, "");
                 text = text.replace(new RegExp("(\n|\r|\n\r)( |" + String.fromCharCode(160) + "){4}", "g"), "$1	");
-                minder.execCommand("text", text);
+                minder.getSelectedNode().setText(text);
                 if (isBold) {
                     minder.queryCommandState("bold") || minder.execCommand("bold");
                 } else {
@@ -1130,10 +1136,13 @@ _p[12] = {
                             return node;
                         }
                         importText(node, json, minder);
+                        minder.fire("contentchange");
                         minder.getRoot().renderTree();
                         minder.layout(300);
                     });
                 } catch (e) {
+                    minder.fire("contentchange");
+                    minder.getRoot().renderTree();
                     // 无法被转换成脑图节点则不处理
                     if (e.toString() !== "Error: Invalid local format") {
                         throw e;
@@ -1162,12 +1171,6 @@ _p[12] = {
                 var node = minder.getSelectedNode();
                 textNodes = commitInputText(textNodes);
                 commitInputNode(node, textNodes);
-                if (node.type == "root") {
-                    var rootText = minder.getRoot().getText();
-                    minder.fire("initChangeRoot", {
-                        text: rootText
-                    });
-                }
             }
             function exitInputMode() {
                 receiverElement.classList.remove("input");
@@ -1211,8 +1214,6 @@ _p[13] = {
             if (e.keyCode >= 65 && e.keyCode <= 90) return true;
             // 0-9 以及其上面的符号
             if (e.keyCode >= 48 && e.keyCode <= 57) return true;
-            // 小键盘区域 (除回车外)
-            if (e.keyCode != 108 && e.keyCode >= 96 && e.keyCode <= 111) return true;
             // 小键盘区域 (除回车外)
             // @yinheli from pull request
             if (e.keyCode != 108 && e.keyCode >= 96 && e.keyCode <= 111) return true;

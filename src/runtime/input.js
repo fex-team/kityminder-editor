@@ -48,7 +48,7 @@ define(function(require, exports, module) {
             });
 
             // lost focus to commit
-            receiver.onblur(function () {
+            receiver.onblur(function (e) {
                 if (fsm.state() == 'input') {
                     fsm.jump('normal', 'input-commit');
                 }
@@ -112,8 +112,11 @@ define(function(require, exports, module) {
          // edit for the selected node
         function editText() {
             var node = minder.getSelectedNode();
+            if (!node) {
+                return;
+            }
             var textContainer = receiverElement;
-            receiverElement.innerHTML = "";
+            receiverElement.innerText = "";
             if (node.getData('font-weight') === 'bold') {
                 var b = document.createElement('b');
                 textContainer.appendChild(b);
@@ -147,7 +150,6 @@ define(function(require, exports, module) {
                 receiverElement.style.minWidth = receiverElement.clientWidth + 'px';
                 receiverElement.style.fontWeight = node.getData('font-weight') || '';
                 receiverElement.style.fontStyle = node.getData('font-style') || '';
-
                 receiverElement.classList.add('input');
                 receiverElement.focus();
             }
@@ -177,6 +179,7 @@ define(function(require, exports, module) {
                     space_l, space_num, tab_num,
                     i = 0, l = textNodes.length; i < l; i++) {
                 str = textNodes[i];
+
                 switch (Object.prototype.toString.call(str)) {
                     // 正常情况处理
                     case '[object HTMLBRElement]': {
@@ -280,7 +283,7 @@ define(function(require, exports, module) {
 
             text = text.replace(/^\n*|\n*$/g, '');
             text = text.replace(new RegExp('(\n|\r|\n\r)(\u0020|' + String.fromCharCode(160) + '){4}', 'g'), '$1\t');
-            minder.execCommand('text', text);
+            minder.getSelectedNode().setText(text);
             if (isBold) {
                 minder.queryCommandState('bold') || minder.execCommand('bold');
             } else {
@@ -319,10 +322,14 @@ define(function(require, exports, module) {
                         return node;
                     }
                     importText(node, json, minder);
+                    minder.fire("contentchange");
                     minder.getRoot().renderTree();
                     minder.layout(300);
                 });
             } catch (e) {
+                minder.fire("contentchange");
+                minder.getRoot().renderTree();
+
                 // 无法被转换成脑图节点则不处理
                 if (e.toString() !== 'Error: Invalid local format') {
                     throw e;
@@ -339,6 +346,7 @@ define(function(require, exports, module) {
              * @Date: 2015.9.16
              */
             var textNodes = [].slice.call(receiverElement.childNodes);
+
             /**
              * @Desc: 增加setTimeout的原因：ie下receiverElement.innerHTML=""会导致后
              * 		  面commitInputText中使用textContent报错，不要问我什么原因！
@@ -358,7 +366,6 @@ define(function(require, exports, module) {
                 var rootText = minder.getRoot().getText();
                 minder.fire('initChangeRoot', {text: rootText});
             }
-
         }
 
         function exitInputMode() {
