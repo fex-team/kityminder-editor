@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.51 - 2016-01-22
+ * kityminder-editor - v1.0.52 - 2016-03-19
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2016 ; Licensed 
@@ -427,7 +427,7 @@ _p[7] = {
 /**
  * @fileOverview
  *
- * 用于拖拽节点是屏蔽键盘事件
+ * 用于拖拽节点时屏蔽键盘事件
  *
  * @author: techird
  * @copyright: Baidu FEX, 2014
@@ -1171,6 +1171,12 @@ _p[12] = {
                 var node = minder.getSelectedNode();
                 textNodes = commitInputText(textNodes);
                 commitInputNode(node, textNodes);
+                if (node.type == "root") {
+                    var rootText = minder.getRoot().getText();
+                    minder.fire("initChangeRoot", {
+                        text: rootText
+                    });
+                }
             }
             function exitInputMode() {
                 receiverElement.classList.remove("input");
@@ -1214,6 +1220,8 @@ _p[13] = {
             if (e.keyCode >= 65 && e.keyCode <= 90) return true;
             // 0-9 以及其上面的符号
             if (e.keyCode >= 48 && e.keyCode <= 57) return true;
+            // 小键盘区域 (除回车外)
+            if (e.keyCode != 108 && e.keyCode >= 96 && e.keyCode <= 111) return true;
             // 小键盘区域 (除回车外)
             // @yinheli from pull request
             if (e.keyCode != 108 && e.keyCode >= 96 && e.keyCode <= 111) return true;
