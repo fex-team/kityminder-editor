@@ -38,7 +38,6 @@ define(function(require, exports, module) {
         }
 
         var downX, downY;
-        var editorRect;
         var MOUSE_HAS_DOWN = 0;
         var MOUSE_HAS_UP = 1;
         var flag = MOUSE_HAS_UP;
@@ -48,8 +47,9 @@ define(function(require, exports, module) {
 
         function move(direction, speed) {
             if (!direction) {
+                freeHorizen = freeVirtical = false;
                 frame && kity.releaseFrame(frame);
-                frame = null;
+                frame = null;    
                 return;
             }
             if (!frame) {
@@ -72,7 +72,7 @@ define(function(require, exports, module) {
                                 return;
                         }
                         frame.next();
-                    }
+                    };
                 })(direction, speed, minder));
             }
         }
@@ -83,49 +83,50 @@ define(function(require, exports, module) {
             downY = e.originEvent.clientY;
             maxX = minder.getPaper().container.clientWidth;
             maxY = minder.getPaper().container.clientHeight;
-            editorRect = minder.getPaper().container.getBoundingClientRect();
         });
 
         minder.on('mousemove', function(e) {
-            if (flag == MOUSE_HAS_DOWN
-                && minder.getSelectedNode()
+            if (fsm.state() === 'drag' && flag == MOUSE_HAS_DOWN && minder.getSelectedNode()
                 && (Math.abs(downX - e.originEvent.clientX) > 10
                     || Math.abs(downY - e.originEvent.clientY) > 10)) {
-                if (fsm.state() === 'drag') {
-                    osx = e.originEvent.clientX;
-                    osy = e.originEvent.clientY - editorRect.top;
-
-                    if (osx < 10) {
-                        move('right', 10 - osx);
-                    } else if (osx > maxX - 10) {
-                        move('left', 10 + osx - maxX);
-                    } else {
-                        freeHorizen = true;
-                    }
-                    if (osy < 10) {
-                        move('bottom', osy);
-                    } else if (osy > maxY - 10) {
-                        move('top', 10 + osy - maxY);
-                    } else {
-                        freeVirtical = true;
-                    }
-                    if (freeHorizen && freeVirtical) {
-                        freeHorizen = freeVirtical = false;
-                        move(false);
-                    }
+                osx = e.originEvent.offsetX;
+                osy = e.originEvent.offsetY;
+                if (osx < 10) {
+                    move('right', 10 - osx);
+                } else if (osx > maxX - 10) {
+                    move('left', 10 + osx - maxX);
                 } else {
-                    if (fsm.state() == 'hotbox') {
-                        hotbox.active(Hotbox.STATE_IDLE);
-                    }
-
-                    return fsm.jump('drag', 'user-drag');
+                    freeHorizen = true;
                 }
+                if (osy < 10) {
+                    move('bottom', osy);
+                } else if (osy > maxY - 10) {
+                    move('top', 10 + osy - maxY);
+                } else {
+                    freeVirtical = true;
+                }
+                if (freeHorizen && freeVirtical) {
+                    move(false);
+                }
+            }
+            if (fsm.state() != 'drag'
+                && flag == MOUSE_HAS_DOWN
+                && minder.getSelectedNode()
+                && (Math.abs(downX - e.originEvent.clientX) > 10
+                || Math.abs(downY - e.originEvent.clientY) > 10)) {
+
+                if (fsm.state() == 'hotbox') {
+                    hotbox.active(Hotbox.STATE_IDLE);
+                }
+
+                return fsm.jump('drag', 'user-drag');
             }
         });
 
         document.body.onmouseup = function(e) {
             flag = MOUSE_HAS_UP;
             if (fsm.state() == 'drag') {
+                move(false);
                 return fsm.jump('normal', 'drag-finish');
             }
         };
