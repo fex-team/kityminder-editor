@@ -51,6 +51,20 @@ angular.module('kityminderEditor')
             $scope.data.title = targetImg.attr('alt');
         };
 
+        // 自动上传图片，后端需要直接返回图片 URL
+        $scope.uploadImage = function() {
+            var fileInput = $('#upload-image');
+            if (!fileInput.val()) {
+                return;
+            }
+            if (/^.*\.(jpg|JPG|jpeg|JPEG|gif|GIF|png|PNG)$/.test(fileInput.val())) {
+                var file = fileInput[0].files[0];
+                uploadFile($scope, file);
+            } else {
+                alert("后缀只能是 jpg、gif 及 png");
+            }
+        }
+
         $scope.shortCut = function(e) {
             e.stopPropagation();
 
@@ -71,8 +85,11 @@ angular.module('kityminderEditor')
                 $scope.urlPassed = false;
 
                 var $imageUrl = $('#image-url');
-                $imageUrl.focus();
-                $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
+                if ($imageUrl) {
+                    $imageUrl.focus();
+                    $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
+                }
+
             }
 
             editor.receiver.selectAll();
@@ -83,11 +100,26 @@ angular.module('kityminderEditor')
             editor.receiver.selectAll();
         };
 
-        function getImageData(){
+        function getImageData() {
             var key = $scope.data.searchKeyword2;
             var currentTime = new Date();
             var url = 'http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&fp=result&queryWord='+ key +'&cl=2&lm=-1&ie=utf-8&oe=utf-8&st=-1&ic=0&word='+ key +'&face=0&istype=2&nc=1&pn=60&rn=60&gsm=3c&'+ currentTime.getTime() +'=&callback=JSON_CALLBACK';
 
             return $http.jsonp(url);
+        }
+
+        function uploadFile($scope, file) {
+            var url = '/upload.php';
+            var xhr = new XMLHttpRequest();
+            var fd = new FormData();
+            xhr.open("POST", url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    $scope.data.url = xhr.responseText;
+                }
+            };
+            fd.append("upload_file", file);
+            xhr.send(fd);
+
         }
     }]);

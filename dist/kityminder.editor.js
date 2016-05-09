@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.51 - 2016-01-22
+ * kityminder-editor - v1.0.51 - 2016-05-09
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2016 ; Licensed 
@@ -427,7 +427,7 @@ _p[7] = {
 /**
  * @fileOverview
  *
- * 用于拖拽节点是屏蔽键盘事件
+ * 用于拖拽节点时屏蔽键盘事件
  *
  * @author: techird
  * @copyright: Baidu FEX, 2014
@@ -454,7 +454,6 @@ _p[8] = {
                 });
             }
             var downX, downY;
-            var editorRect;
             var MOUSE_HAS_DOWN = 0;
             var MOUSE_HAS_UP = 1;
             var flag = MOUSE_HAS_UP;
@@ -463,6 +462,7 @@ _p[8] = {
             var frame;
             function move(direction, speed) {
                 if (!direction) {
+                    freeHorizen = freeVirtical = false;
                     frame && kity.releaseFrame(frame);
                     frame = null;
                     return;
@@ -513,42 +513,40 @@ _p[8] = {
                 downY = e.originEvent.clientY;
                 maxX = minder.getPaper().container.clientWidth;
                 maxY = minder.getPaper().container.clientHeight;
-                editorRect = minder.getPaper().container.getBoundingClientRect();
             });
             minder.on("mousemove", function(e) {
-                if (flag == MOUSE_HAS_DOWN && minder.getSelectedNode() && (Math.abs(downX - e.originEvent.clientX) > 10 || Math.abs(downY - e.originEvent.clientY) > 10)) {
-                    if (fsm.state() === "drag") {
-                        osx = e.originEvent.clientX;
-                        osy = e.originEvent.clientY - editorRect.top;
-                        if (osx < 10) {
-                            move("right", 10 - osx);
-                        } else if (osx > maxX - 10) {
-                            move("left", 10 + osx - maxX);
-                        } else {
-                            freeHorizen = true;
-                        }
-                        if (osy < 10) {
-                            move("bottom", osy);
-                        } else if (osy > maxY - 10) {
-                            move("top", 10 + osy - maxY);
-                        } else {
-                            freeVirtical = true;
-                        }
-                        if (freeHorizen && freeVirtical) {
-                            freeHorizen = freeVirtical = false;
-                            move(false);
-                        }
+                if (fsm.state() === "drag" && flag == MOUSE_HAS_DOWN && minder.getSelectedNode() && (Math.abs(downX - e.originEvent.clientX) > 10 || Math.abs(downY - e.originEvent.clientY) > 10)) {
+                    osx = e.originEvent.offsetX;
+                    osy = e.originEvent.offsetY;
+                    if (osx < 10) {
+                        move("right", 10 - osx);
+                    } else if (osx > maxX - 10) {
+                        move("left", 10 + osx - maxX);
                     } else {
-                        if (fsm.state() == "hotbox") {
-                            hotbox.active(Hotbox.STATE_IDLE);
-                        }
-                        return fsm.jump("drag", "user-drag");
+                        freeHorizen = true;
                     }
+                    if (osy < 10) {
+                        move("bottom", osy);
+                    } else if (osy > maxY - 10) {
+                        move("top", 10 + osy - maxY);
+                    } else {
+                        freeVirtical = true;
+                    }
+                    if (freeHorizen && freeVirtical) {
+                        move(false);
+                    }
+                }
+                if (fsm.state() != "drag" && flag == MOUSE_HAS_DOWN && minder.getSelectedNode() && (Math.abs(downX - e.originEvent.clientX) > 10 || Math.abs(downY - e.originEvent.clientY) > 10)) {
+                    if (fsm.state() == "hotbox") {
+                        hotbox.active(Hotbox.STATE_IDLE);
+                    }
+                    return fsm.jump("drag", "user-drag");
                 }
             });
             document.body.onmouseup = function(e) {
                 flag = MOUSE_HAS_UP;
                 if (fsm.state() == "drag") {
+                    move(false);
                     return fsm.jump("normal", "drag-finish");
                 }
             };
@@ -1171,6 +1169,12 @@ _p[12] = {
                 var node = minder.getSelectedNode();
                 textNodes = commitInputText(textNodes);
                 commitInputNode(node, textNodes);
+                if (node.type == "root") {
+                    var rootText = minder.getRoot().getText();
+                    minder.fire("initChangeRoot", {
+                        text: rootText
+                    });
+                }
             }
             function exitInputMode() {
                 receiverElement.classList.remove("input");
@@ -2202,7 +2206,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/dialog/image/image.tpl.html',
-    "<div class=\"modal-header\"><h3 class=\"modal-title\">图片</h3></div><div class=\"modal-body\"><tabset><tab heading=\"图片搜索\"><form class=\"form-inline\"><div class=\"form-group\"><label for=\"search-keyword\">关键词：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.searchKeyword2\" id=\"search-keyword\" placeholder=\"请输入搜索的关键词\"></div><button class=\"btn btn-primary\" ng-click=\"searchImage()\">百度一下</button></form><div class=\"search-result\" id=\"search-result\"><ul><li ng-repeat=\"image in list\" id=\"{{ 'img-item' + $index }}\" ng-class=\"{'selected' : isSelected}\" ng-click=\"selectImage($event)\"><img id=\"{{ 'img-' + $index }}\" ng-src=\"{{ image.src || '' }}\" alt=\"{{ image.title }}\" onerror=\"this.parentNode.removeChild(this)\"> <span>{{ image.title }}</span></li></ul></div></tab><tab heading=\"插入图片\" active=\"true\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"image-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.url\" ng-blur=\"urlPassed = data.R_URL.test(data.url)\" ng-focus=\"this.value = data.url\" ng-keydown=\"shortCut($event)\" id=\"image-url\" placeholder=\"必填：以 http(s):// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"选填：鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" alt=\"{{ data.title }}\"></div></form></tab></tabset></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
+    "<div class=\"modal-header\"><h3 class=\"modal-title\">图片</h3></div><div class=\"modal-body\"><tabset><tab heading=\"图片搜索\"><form class=\"form-inline\"><div class=\"form-group\"><label for=\"search-keyword\">关键词：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.searchKeyword2\" id=\"search-keyword\" placeholder=\"请输入搜索的关键词\"></div><button class=\"btn btn-primary\" ng-click=\"searchImage()\">百度一下</button></form><div class=\"search-result\" id=\"search-result\"><ul><li ng-repeat=\"image in list\" id=\"{{ 'img-item' + $index }}\" ng-class=\"{'selected' : isSelected}\" ng-click=\"selectImage($event)\"><img id=\"{{ 'img-' + $index }}\" ng-src=\"{{ image.src || '' }}\" alt=\"{{ image.title }}\" onerror=\"this.parentNode.removeChild(this)\"> <span>{{ image.title }}</span></li></ul></div></tab><tab heading=\"插入图片地址\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"image-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.url\" ng-blur=\"urlPassed = data.R_URL.test(data.url)\" ng-focus=\"this.value = data.url\" ng-keydown=\"shortCut($event)\" id=\"image-url\" placeholder=\"必填：以 http(s):// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"选填：鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" alt=\"{{ data.title }}\"></div></form></tab><tab heading=\"上传图片\" active=\"true\"><form><div class=\"form-group\"><input type=\"file\" name=\"upload-image\" id=\"upload-image\" class=\"upload-image\" onchange=\"angular.element(this).scope().uploadImage()\"><label for=\"upload-image\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"17\" viewbox=\"0 0 20 17\"><path d=\"M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z\"></svg> <span>选择文件&hellip;</span></label></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"选填：鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" alt=\"{{ data.title }}\"></div></form></tab></tabset></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
   );
 
 }]);
@@ -3114,6 +3118,17 @@ angular.module('kityminderEditor')
             $scope.data.title = targetImg.attr('alt');
         };
 
+        // 自动上传图片，后端需要直接返回图片 URL
+        $scope.uploadImage = function() {
+            var fileInput = $('#upload-image');
+            if (/^.*\.(jpg|JPG|jpeg|JPEG|gif|GIF|png|PNG)$/.test(fileInput.val())) {
+                var file = fileInput[0].files[0];
+                uploadFile($scope, file);
+            } else {
+                alert("后缀只能是 jpg、gif 及 png");
+            }
+        }
+
         $scope.shortCut = function(e) {
             e.stopPropagation();
 
@@ -3134,8 +3149,11 @@ angular.module('kityminderEditor')
                 $scope.urlPassed = false;
 
                 var $imageUrl = $('#image-url');
-                $imageUrl.focus();
-                $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
+                if ($imageUrl) {
+                    $imageUrl.focus();
+                    $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
+                }
+
             }
 
             editor.receiver.selectAll();
@@ -3146,12 +3164,27 @@ angular.module('kityminderEditor')
             editor.receiver.selectAll();
         };
 
-        function getImageData(){
+        function getImageData(file) {
             var key = $scope.data.searchKeyword2;
             var currentTime = new Date();
             var url = 'http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&fp=result&queryWord='+ key +'&cl=2&lm=-1&ie=utf-8&oe=utf-8&st=-1&ic=0&word='+ key +'&face=0&istype=2&nc=1&pn=60&rn=60&gsm=3c&'+ currentTime.getTime() +'=&callback=JSON_CALLBACK';
 
             return $http.jsonp(url);
+        }
+
+        function uploadFile($scope, file) {
+            var url = '/upload.php';
+            var xhr = new XMLHttpRequest();
+            var fd = new FormData();
+            xhr.open("POST", url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    $scope.data.url = xhr.responseText;
+                }
+            };
+            fd.append("upload_file", file);
+            xhr.send(fd);
+
         }
     }]);
 angular.module('kityminderEditor')
