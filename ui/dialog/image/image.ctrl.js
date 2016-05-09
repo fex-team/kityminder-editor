@@ -114,8 +114,12 @@ angular.module('kityminderEditor')
             var fd = new FormData();
             xhr.open("POST", url, true);
             xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    $scope.data.url = xhr.responseText;
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        $scope.data.url = xhr.responseText;
+                    } else {
+                        alert(xhr.responseText); 
+                    }
                 }
             };
             fd.append("upload_file", file);
