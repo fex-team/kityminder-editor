@@ -40,6 +40,7 @@ define(function(require, exports, module) {
         var downX, downY;
         var MOUSE_HAS_DOWN = 0;
         var MOUSE_HAS_UP = 1;
+        var BOUND_CHECK = 20;
         var flag = MOUSE_HAS_UP;
         var maxX, maxY, osx, osy;
         var freeHorizen = false, freeVirtical = false;
@@ -49,7 +50,7 @@ define(function(require, exports, module) {
             if (!direction) {
                 freeHorizen = freeVirtical = false;
                 frame && kity.releaseFrame(frame);
-                frame = null;    
+                frame = null;
                 return;
             }
             if (!frame) {
@@ -87,21 +88,21 @@ define(function(require, exports, module) {
 
         minder.on('mousemove', function(e) {
             if (fsm.state() === 'drag' && flag == MOUSE_HAS_DOWN && minder.getSelectedNode()
-                && (Math.abs(downX - e.originEvent.clientX) > 10
-                    || Math.abs(downY - e.originEvent.clientY) > 10)) {
+                && (Math.abs(downX - e.originEvent.clientX) > BOUND_CHECK
+                || Math.abs(downY - e.originEvent.clientY) > BOUND_CHECK)) {
                 osx = e.originEvent.offsetX;
                 osy = e.originEvent.offsetY;
-                if (osx < 10) {
-                    move('right', 10 - osx);
-                } else if (osx > maxX - 10) {
-                    move('left', 10 + osx - maxX);
+                if (osx < BOUND_CHECK) {
+                    move('right', BOUND_CHECK - osx);
+                } else if (osx > maxX - BOUND_CHECK) {
+                    move('left', BOUND_CHECK + osx - maxX);
                 } else {
                     freeHorizen = true;
                 }
-                if (osy < 10) {
+                if (osy < BOUND_CHECK) {
                     move('bottom', osy);
-                } else if (osy > maxY - 10) {
-                    move('top', 10 + osy - maxY);
+                } else if (osy > maxY - BOUND_CHECK) {
+                    move('top', BOUND_CHECK + osy - maxY);
                 } else {
                     freeVirtical = true;
                 }
@@ -109,13 +110,13 @@ define(function(require, exports, module) {
                     move(false);
                 }
             }
-            if (fsm.state() != 'drag'
-                && flag == MOUSE_HAS_DOWN
+            if (fsm.state() !== 'drag'
+                && flag === MOUSE_HAS_DOWN
                 && minder.getSelectedNode()
-                && (Math.abs(downX - e.originEvent.clientX) > 10
-                || Math.abs(downY - e.originEvent.clientY) > 10)) {
+                && (Math.abs(downX - e.originEvent.clientX) > BOUND_CHECK
+                || Math.abs(downY - e.originEvent.clientY) > BOUND_CHECK)) {
 
-                if (fsm.state() == 'hotbox') {
+                if (fsm.state() === 'hotbox') {
                     hotbox.active(Hotbox.STATE_IDLE);
                 }
 
@@ -123,14 +124,13 @@ define(function(require, exports, module) {
             }
         });
 
-        document.body.onmouseup = function(e) {
+        window.addEventListener('mouseup', function () {
             flag = MOUSE_HAS_UP;
-            if (fsm.state() == 'drag') {
+            if (fsm.state() === 'drag') {
                 move(false);
                 return fsm.jump('normal', 'drag-finish');
             }
-        };
-
+        }, false);
     }
 
     return module.exports = DragRuntime;
