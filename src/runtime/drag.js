@@ -42,7 +42,7 @@ define(function(require, exports, module) {
         var MOUSE_HAS_UP = 1;
         var BOUND_CHECK = 20;
         var flag = MOUSE_HAS_UP;
-        var maxX, maxY, osx, osy;
+        var maxX, maxY, osx, osy, containerY;
         var freeHorizen = false, freeVirtical = false;
         var frame;
 
@@ -80,18 +80,21 @@ define(function(require, exports, module) {
 
         minder.on('mousedown', function(e) {
             flag = MOUSE_HAS_DOWN;
+            var rect = minder.getPaper().container.getBoundingClientRect();
             downX = e.originEvent.clientX;
             downY = e.originEvent.clientY;
-            maxX = minder.getPaper().container.clientWidth;
-            maxY = minder.getPaper().container.clientHeight;
+            containerY = rect.top;
+            maxX = rect.width;
+            maxY = rect.height;
         });
 
         minder.on('mousemove', function(e) {
             if (fsm.state() === 'drag' && flag == MOUSE_HAS_DOWN && minder.getSelectedNode()
                 && (Math.abs(downX - e.originEvent.clientX) > BOUND_CHECK
                     || Math.abs(downY - e.originEvent.clientY) > BOUND_CHECK)) {
-                osx = e.originEvent.offsetX;
-                osy = e.originEvent.offsetY;
+                osx = e.originEvent.clientX;
+                osy = e.originEvent.clientY - containerY;
+
                 if (osx < BOUND_CHECK) {
                     move('right', BOUND_CHECK - osx);
                 } else if (osx > maxX - BOUND_CHECK) {
