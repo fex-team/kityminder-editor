@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.54 - 2016-05-19
+ * kityminder-editor - v1.0.55 - 2016-05-26
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2016 ; Licensed 
@@ -458,7 +458,7 @@ _p[8] = {
             var MOUSE_HAS_UP = 1;
             var BOUND_CHECK = 20;
             var flag = MOUSE_HAS_UP;
-            var maxX, maxY, osx, osy;
+            var maxX, maxY, osx, osy, containerY;
             var freeHorizen = false, freeVirtical = false;
             var frame;
             function move(direction, speed) {
@@ -510,15 +510,17 @@ _p[8] = {
             }
             minder.on("mousedown", function(e) {
                 flag = MOUSE_HAS_DOWN;
+                var rect = minder.getPaper().container.getBoundingClientRect();
                 downX = e.originEvent.clientX;
                 downY = e.originEvent.clientY;
-                maxX = minder.getPaper().container.clientWidth;
-                maxY = minder.getPaper().container.clientHeight;
+                containerY = rect.top;
+                maxX = rect.width;
+                maxY = rect.height;
             });
             minder.on("mousemove", function(e) {
                 if (fsm.state() === "drag" && flag == MOUSE_HAS_DOWN && minder.getSelectedNode() && (Math.abs(downX - e.originEvent.clientX) > BOUND_CHECK || Math.abs(downY - e.originEvent.clientY) > BOUND_CHECK)) {
-                    osx = e.originEvent.offsetX;
-                    osy = e.originEvent.offsetY;
+                    osx = e.originEvent.clientX;
+                    osy = e.originEvent.clientY - containerY;
                     if (osx < BOUND_CHECK) {
                         move("right", BOUND_CHECK - osx);
                     } else if (osx > maxX - BOUND_CHECK) {
