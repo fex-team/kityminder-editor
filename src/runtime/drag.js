@@ -50,7 +50,7 @@ define(function(require, exports, module) {
             if (!direction) {
                 freeHorizen = freeVirtical = false;
                 frame && kity.releaseFrame(frame);
-                frame = null;
+                frame = null;    
                 return;
             }
             if (!frame) {
@@ -91,7 +91,7 @@ define(function(require, exports, module) {
         minder.on('mousemove', function(e) {
             if (fsm.state() === 'drag' && flag == MOUSE_HAS_DOWN && minder.getSelectedNode()
                 && (Math.abs(downX - e.originEvent.clientX) > BOUND_CHECK
-                || Math.abs(downY - e.originEvent.clientY) > BOUND_CHECK)) {
+                    || Math.abs(downY - e.originEvent.clientY) > BOUND_CHECK)) {
                 osx = e.originEvent.clientX;
                 osy = e.originEvent.clientY - containerY;
 

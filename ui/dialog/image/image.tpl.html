@@ -20,7 +20,7 @@
                 </ul>
             </div>
         </tab>
-        <tab heading="插入图片" active="true">
+        <tab heading="外链图片">
             <form>
                 <div class="form-group" ng-class="{true: 'has-success', false: 'has-error'}[urlPassed]">
                     <label for="image-url">链接地址：</label>
@@ -40,6 +40,23 @@
                 <div class="form-group">
                     <label for="image-preview">图片预览：</label>
                     <img class="image-preview" id="image-preview" ng-src="{{ data.url }}" alt="{{ data.title }}"/>
+                </div>
+            </form>
+        </tab>
+        <tab heading="上传图片" active="true">
+            <form>
+                <div class="form-group">
+                    <!-- 这里不能用 ng-change -->
+                    <input type="file" name="upload-image" id="upload-image" class="upload-image" accept=".jpg,.JPG,jpeg,JPEG,.png,.PNG,.gif,.GIF" onchange="angular.element(this).scope().uploadImage()"/>
+                    <label for="upload-image" class="btn btn-primary"><span>选择文件&hellip;</span></label>
+                </div>
+                <div class="form-group" ng-class="{'has-success' : titlePassed}">
+                    <label for="image-title">提示文本：</label>
+                    <input type="text" class="form-control" ng-model="data.title" ng-blur="titlePassed = true" id="image-title" placeholder="选填：鼠标在图片上悬停时提示的文本">
+                </div>
+                <div class="form-group">
+                    <label for="image-preview">图片预览：</label>
+                    <img class="image-preview" id="image-preview" ng-src="{{ data.url }}" title="{{ data.title }}" alt="{{ data.title }}"/>
                 </div>
             </form>
         </tab>

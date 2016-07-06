@@ -91,6 +91,14 @@ div.minder-editor-container {
 .panel-body {
   padding: 10px;
 }
+.upload-image {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
 .top-tab .nav-tabs {
   background-color: #e1e1e1;
   border: 0;

@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.55 - 2016-05-26
+ * kityminder-editor - v1.0.55 - 2016-07-06
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2016 ; Licensed 
@@ -368,6 +368,15 @@ _p[6] = {
                                 minder.select(_selectedNodes, true);
                                 _selectedNodes = [];
                                 minder.refresh();
+                            } else if (clipBoardEvent.clipboardData && clipBoardEvent.clipboardData.items[0].type.indexOf("image") > -1) {
+                                var imageFile = clipBoardEvent.clipboardData.items[0].getAsFile();
+                                var serverService = angular.element(document.body).injector().get("server");
+                                return serverService.uploadImage(imageFile).then(function(json) {
+                                    var resp = json.data;
+                                    if (resp.errno === 0) {
+                                        minder.execCommand("image", resp.data.url);
+                                    }
+                                });
                             } else {
                                 sNodes.forEach(function(node) {
                                     minder.Text2Children(node, textData);
@@ -2211,7 +2220,7 @@ angular.module('kityminderEditor').run(['$templateCache', function($templateCach
 
 
   $templateCache.put('ui/dialog/image/image.tpl.html',
-    "<div class=\"modal-header\"><h3 class=\"modal-title\">图片</h3></div><div class=\"modal-body\"><tabset><tab heading=\"图片搜索\"><form class=\"form-inline\"><div class=\"form-group\"><label for=\"search-keyword\">关键词：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.searchKeyword2\" id=\"search-keyword\" placeholder=\"请输入搜索的关键词\"></div><button class=\"btn btn-primary\" ng-click=\"searchImage()\">百度一下</button></form><div class=\"search-result\" id=\"search-result\"><ul><li ng-repeat=\"image in list\" id=\"{{ 'img-item' + $index }}\" ng-class=\"{'selected' : isSelected}\" ng-click=\"selectImage($event)\"><img id=\"{{ 'img-' + $index }}\" ng-src=\"{{ image.src || '' }}\" alt=\"{{ image.title }}\" onerror=\"this.parentNode.removeChild(this)\"> <span>{{ image.title }}</span></li></ul></div></tab><tab heading=\"插入图片\" active=\"true\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"image-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.url\" ng-blur=\"urlPassed = data.R_URL.test(data.url)\" ng-focus=\"this.value = data.url\" ng-keydown=\"shortCut($event)\" id=\"image-url\" placeholder=\"必填：以 http(s):// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"选填：鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" alt=\"{{ data.title }}\"></div></form></tab></tabset></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
+    "<div class=\"modal-header\"><h3 class=\"modal-title\">图片</h3></div><div class=\"modal-body\"><tabset><tab heading=\"图片搜索\"><form class=\"form-inline\"><div class=\"form-group\"><label for=\"search-keyword\">关键词：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.searchKeyword2\" id=\"search-keyword\" placeholder=\"请输入搜索的关键词\"></div><button class=\"btn btn-primary\" ng-click=\"searchImage()\">百度一下</button></form><div class=\"search-result\" id=\"search-result\"><ul><li ng-repeat=\"image in list\" id=\"{{ 'img-item' + $index }}\" ng-class=\"{'selected' : isSelected}\" ng-click=\"selectImage($event)\"><img id=\"{{ 'img-' + $index }}\" ng-src=\"{{ image.src || '' }}\" alt=\"{{ image.title }}\" onerror=\"this.parentNode.removeChild(this)\"> <span>{{ image.title }}</span></li></ul></div></tab><tab heading=\"外链图片\"><form><div class=\"form-group\" ng-class=\"{true: 'has-success', false: 'has-error'}[urlPassed]\"><label for=\"image-url\">链接地址：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.url\" ng-blur=\"urlPassed = data.R_URL.test(data.url)\" ng-focus=\"this.value = data.url\" ng-keydown=\"shortCut($event)\" id=\"image-url\" placeholder=\"必填：以 http(s):// 开头\"></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"选填：鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" alt=\"{{ data.title }}\"></div></form></tab><tab heading=\"上传图片\" active=\"true\"><form><div class=\"form-group\"><input type=\"file\" name=\"upload-image\" id=\"upload-image\" class=\"upload-image\" accept=\".jpg,.JPG,jpeg,JPEG,.png,.PNG,.gif,.GIF\" onchange=\"angular.element(this).scope().uploadImage()\"><label for=\"upload-image\" class=\"btn btn-primary\"><span>选择文件&hellip;</span></label></div><div class=\"form-group\" ng-class=\"{'has-success' : titlePassed}\"><label for=\"image-title\">提示文本：</label><input type=\"text\" class=\"form-control\" ng-model=\"data.title\" ng-blur=\"titlePassed = true\" id=\"image-title\" placeholder=\"选填：鼠标在图片上悬停时提示的文本\"></div><div class=\"form-group\"><label for=\"image-preview\">图片预览：</label><img class=\"image-preview\" id=\"image-preview\" ng-src=\"{{ data.url }}\" title=\"{{ data.title }}\" alt=\"{{ data.title }}\"></div></form></tab></tabset></div><div class=\"modal-footer\"><button class=\"btn btn-primary\" ng-click=\"ok()\">确定</button> <button class=\"btn btn-warning\" ng-click=\"cancel()\">取消</button></div>"
   );
 
 }]);
@@ -2229,32 +2238,71 @@ angular.module('kityminderEditor').service('commandBinder', function() {
 	};
 });
 angular.module('kityminderEditor')
-	.service('config',  function() {
+	.provider('config',  function() {
 
-		return {
-			_default: {
+		this.config = {
+			// 右侧面板最小宽度
+			ctrlPanelMin: 250,
 
-                // 右侧面板最小宽度
-				ctrlPanelMin: 250,
+			// 右侧面板宽度
+			ctrlPanelWidth: parseInt(window.localStorage.__dev_minder_ctrlPanelWidth) || 250,
 
-                // 右侧面板宽度
-				ctrlPanelWidth: parseInt(window.localStorage.__dev_minder_ctrlPanelWidth) || 250,
+			// 分割线宽度
+			dividerWidth: 3,
 
-				// 分割线宽度
-                dividerWidth: 3,
+			// 默认语言
+			defaultLang: 'zh-cn',
 
-                // 默认语言
-				defaultLang: 'zh-cn',
+			// 放大缩小比例
+			zoom: [10, 20, 30, 50, 80, 100, 120, 150, 200],
 
-                // 放大缩小比例
-                zoom: [10, 20, 30, 50, 80, 100, 120, 150, 200]
-			},
-			getConfig: function(key) {
-				return key == undefined ? this._default : (this._default[key] || null);
-			},
-			setConfig: function(obj) {
-				this._default = obj;
-			}
+            // 图片上传接口
+            imageUpload: 'server/imageUpload.php'
+		};
+
+		this.set = function(key, value) {
+            var supported = Object.keys(this.config);
+            var configObj = {};
+
+            // 支持全配置
+            if (typeof key === 'object') {
+                configObj = key;
+            }
+            else {
+                configObj[key] = value;
+            }
+
+            for (var i in configObj) {
+                if (configObj.hasOwnProperty(i) && supported.indexOf(i) !== -1) {
+                    this.config[i] = configObj[i];
+                }
+                else {
+                    console.error('Unsupported config key: ', key, ', please choose in :', supported.join(', '));
+                    return false;
+                }
+            }
+
+            return true;
+		};
+
+		this.$get = function () {
+			var me = this;
+
+			return {
+				get: function (key) {
+                    if (arguments.length === 0) {
+                        return me.config;
+                    }
+
+					if (me.config.hasOwnProperty(key)) {
+						return me.config[key];
+					}
+
+					console.warn('Missing config key pair for : ', key);
+					return '';
+				}
+
+			};
 		}
 	});
 angular.module('kityminderEditor')
@@ -2893,6 +2941,32 @@ angular.module('kityminderEditor').service('revokeDialog', ['$modal', 'minder.se
 
     return {};
 }]);
+/**
+ * @fileOverview
+ *
+ *  与后端交互的服务
+ *
+ * @author: zhangbobell
+ * @email : zhangbobell@163.com
+ *
+ * @copyright: Baidu FEX, 2015
+ */
+angular.module('kityminderEditor')
+    .service('server', ['config', '$http',  function(config, $http) {
+
+        return {
+            uploadImage: function(file) {
+                var url = config.get('imageUpload');
+                var fd = new FormData();
+                fd.append('upload_file', file);
+
+                return $http.post(url, fd, {
+                    transformRequest: angular.identity,
+                    headers: {'Content-Type': undefined}
+                });
+            }
+        }
+    }]);
 angular.module('kityminderEditor')
     .service('valueTransfer', function() {
         return {};
@@ -2913,7 +2987,7 @@ angular.module('kityminderEditor')
 angular.module('kityminderEditor')
 	.filter('lang', ['config', 'lang.zh-cn', function(config, lang) {
 		return function(text, block) {
-			var defaultLang = config.getConfig('defaultLang');
+			var defaultLang = config.get('defaultLang');
 
 			if (lang[defaultLang] == undefined) {
 				return '未发现对应语言包，请检查 lang.xxx.service.js!';
@@ -3071,14 +3145,13 @@ angular.module('kityminderEditor')
 
     }]);
 angular.module('kityminderEditor')
-    .controller('image.ctrl', ['$http', '$scope', '$modalInstance', 'image', function($http, $scope, $modalInstance, image) {
-
+    .controller('image.ctrl', ['$http', '$scope', '$modalInstance', 'image', 'server', function($http, $scope, $modalInstance, image, server) {
 
         $scope.data = {
             list: [],
             url: image.url || '',
             title: image.title || '',
-            R_URL: /^https?\:\/\/(\w+\.)+\w+/
+            R_URL: /^https?\:\/\/\w+/
         };
 
         setTimeout(function() {
@@ -3123,6 +3196,25 @@ angular.module('kityminderEditor')
             $scope.data.title = targetImg.attr('alt');
         };
 
+        // 自动上传图片，后端需要直接返回图片 URL
+        $scope.uploadImage = function() {
+            var fileInput = $('#upload-image');
+            if (!fileInput.val()) {
+                return;
+            }
+            if (/^.*\.(jpg|JPG|jpeg|JPEG|gif|GIF|png|PNG)$/.test(fileInput.val())) {
+                var file = fileInput[0].files[0];
+                return server.uploadImage(file).then(function (json) {
+                    var resp = json.data;
+                    if (resp.errno === 0) {
+                        $scope.data.url = resp.data.url;
+                    }
+                });
+            } else {
+                alert("后缀只能是 jpg、gif 及 png");
+            }
+        };
+
         $scope.shortCut = function(e) {
             e.stopPropagation();
 
@@ -3143,8 +3235,11 @@ angular.module('kityminderEditor')
                 $scope.urlPassed = false;
 
                 var $imageUrl = $('#image-url');
-                $imageUrl.focus();
-                $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
+                if ($imageUrl) {
+                    $imageUrl.focus();
+                    $imageUrl[0].setSelectionRange(0, $scope.data.url.length);
+                }
+
             }
 
             editor.receiver.selectAll();
@@ -3155,7 +3250,7 @@ angular.module('kityminderEditor')
             editor.receiver.selectAll();
         };
 
-        function getImageData(){
+        function getImageData() {
             var key = $scope.data.searchKeyword2;
             var currentTime = new Date();
             var url = 'http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&fp=result&queryWord='+ key +'&cl=2&lm=-1&ie=utf-8&oe=utf-8&st=-1&ic=0&word='+ key +'&face=0&istype=2&nc=1&pn=60&rn=60&gsm=3c&'+ currentTime.getTime() +'=&callback=JSON_CALLBACK';
@@ -3456,7 +3551,7 @@ angular.module('kityminderEditor')
 
 						scope.editor = editor;
 						scope.minder = minder;
-                        scope.config = config.getConfig();
+                        scope.config = config.get();
 
                         //scope.minder.setDefaultOptions(scope.config);
 						scope.$apply();
@@ -3472,7 +3567,7 @@ angular.module('kityminderEditor')
 					window.editor = scope.editor = editor;
 					window.minder = scope.minder = editor.minder;
 
-                    scope.config = config.getConfig();
+                    scope.config = config.get();
 
                     //scope.minder.setDefaultOptions(config.getConfig());
 
@@ -3548,7 +3643,7 @@ angular.module('kityminderEditor')
                 minder: '='
             },
             link: function(scope) {
-                minder.setDefaultOptions({zoom: config.getConfig('zoom')});
+                minder.setDefaultOptions({zoom: config.get('zoom')});
 
                 scope.isNavOpen = !memory.get('navigator-hidden');
 

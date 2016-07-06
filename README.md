@@ -45,6 +45,16 @@ KityMinder Editor 是一款强大、简洁、体验优秀的脑图编辑工具�
 ## 构建
 运行 `grunt build`，完成后 `dist` 目录里就是可用运行的 kityminder-editor
 
+## 初始化配置
+用户可以根据需要，配置 `kityminder-editor`, 具体使用方法如下：
+```
+angular.module('kityminderDemo', ['kityminderEditor'])
+    .config(function (configProvider) {
+        configProvider.set('imageUpload', 'path/to/image/upload/handler');
+    });
+
+```
+
 ## 数据导入导出
 由于 kityminder-editor 是基于 kityminder-core 搭建的，而 kityminder-core 内置了五种常见
 格式的导入或导出，在创建编辑器实例之后，可以使用四个接口进行数据的导入导出。

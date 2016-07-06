@@ -151,7 +151,19 @@ define(function(require, exports, module) {
 							_selectedNodes = [];
 
 							minder.refresh();
-						} else {
+						}
+                        else if (clipBoardEvent.clipboardData && clipBoardEvent.clipboardData.items[0].type.indexOf('image') > -1) {
+                            var imageFile = clipBoardEvent.clipboardData.items[0].getAsFile();
+                            var serverService = angular.element(document.body).injector().get('server');
+
+                            return serverService.uploadImage(imageFile).then(function (json) {
+                                    var resp = json.data;
+                                    if (resp.errno === 0) {
+                                        minder.execCommand('image', resp.data.url);
+                                    }
+                                });
+                        }
+                        else {
 							sNodes.forEach(function(node) {
 								minder.Text2Children(node, textData);						
 							});
