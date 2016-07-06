@@ -16,7 +16,7 @@ angular.module('kityminderEditor')
                 minder: '='
             },
             link: function(scope) {
-                minder.setDefaultOptions({zoom: config.getConfig('zoom')});
+                minder.setDefaultOptions({zoom: config.get('zoom')});
 
                 scope.isNavOpen = !memory.get('navigator-hidden');
 

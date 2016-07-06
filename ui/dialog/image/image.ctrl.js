@@ -1,12 +1,11 @@
 angular.module('kityminderEditor')
-    .controller('image.ctrl', ['$http', '$scope', '$modalInstance', 'image', function($http, $scope, $modalInstance, image) {
-
+    .controller('image.ctrl', ['$http', '$scope', '$modalInstance', 'image', 'server', function($http, $scope, $modalInstance, image, server) {
 
         $scope.data = {
             list: [],
             url: image.url || '',
             title: image.title || '',
-            R_URL: /^https?\:\/\/(\w+\.)+\w+/
+            R_URL: /^https?\:\/\/\w+/
         };
 
         setTimeout(function() {
@@ -59,11 +58,18 @@ angular.module('kityminderEditor')
             }
             if (/^.*\.(jpg|JPG|jpeg|JPEG|gif|GIF|png|PNG)$/.test(fileInput.val())) {
                 var file = fileInput[0].files[0];
-                uploadFile($scope, file);
+                return server.uploadImage(file).then(function (json) {
+                    var resp = json.data;
+                    if (resp.errno === 0) {
+                        $scope.data.url = resp.data.url;
+                    }
+                });
             } else {
                 alert("后缀只能是 jpg、gif 及 png");
             }
-        }
+        };
+
+        // $scope.uploadFile = uploadFile;
 
         $scope.shortCut = function(e) {
             e.stopPropagation();
@@ -108,22 +114,8 @@ angular.module('kityminderEditor')
             return $http.jsonp(url);
         }
 
-        function uploadFile($scope, file) {
-            var url = '/upload.php';
-            var xhr = new XMLHttpRequest();
-            var fd = new FormData();
-            xhr.open("POST", url, true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4) {
-                    if (xhr.status == 200) {
-                        $scope.data.url = xhr.responseText;
-                    } else {
-                        alert(xhr.responseText); 
-                    }
-                }
-            };
-            fd.append("upload_file", file);
-            xhr.send(fd);
-
-        }
+        // function uploadFile(file) {
+        //     var url = config.get('imageUpload');
+        //     return $http.post(url, {upload_file: file});
+        // }
     }]);

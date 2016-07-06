@@ -43,7 +43,7 @@ angular.module('kityminderEditor')
 
 						scope.editor = editor;
 						scope.minder = minder;
-                        scope.config = config.getConfig();
+                        scope.config = config.get();
 
                         //scope.minder.setDefaultOptions(scope.config);
 						scope.$apply();
@@ -59,7 +59,7 @@ angular.module('kityminderEditor')
 					window.editor = scope.editor = editor;
 					window.minder = scope.minder = editor.minder;
 
-                    scope.config = config.getConfig();
+                    scope.config = config.get();
 
                     //scope.minder.setDefaultOptions(config.getConfig());
 

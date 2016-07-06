@@ -47,8 +47,8 @@
             <form>
                 <div class="form-group">
                     <!-- 这里不能用 ng-change -->
-                    <input type="file" name="upload-image" id="upload-image" class="upload-image" onchange="angular.element(this).scope().uploadImage()"/>
-                    <label for="upload-image"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17"><path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"/></svg> <span>选择文件&hellip;</span></label>
+                    <input type="file" name="upload-image" id="upload-image" class="upload-image" accept=".jpg,.JPG,jpeg,JPEG,.png,.PNG,.gif,.GIF" onchange="angular.element(this).scope().uploadImage()"/>
+                    <label for="upload-image" class="btn btn-primary"><span>选择文件&hellip;</span></label>
                 </div>
                 <div class="form-group" ng-class="{'has-success' : titlePassed}">
                     <label for="image-title">提示文本：</label>
@@ -56,7 +56,7 @@
                 </div>
                 <div class="form-group">
                     <label for="image-preview">图片预览：</label>
-                    <img class="image-preview" id="image-preview" ng-src="{{ data.url }}" alt="{{ data.title }}"/>
+                    <img class="image-preview" id="image-preview" ng-src="{{ data.url }}" title="{{ data.title }}" alt="{{ data.title }}"/>
                 </div>
             </form>
         </tab>
