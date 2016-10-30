@@ -61,7 +61,7 @@ define(function(require, exports, module) {
             });
 
             minder.on('dblclick', function() {
-                if (minder.getSelectedNode()) {
+                if (minder.getSelectedNode() && minder._status !== 'readonly') {
                     editText();
                 }
             });
