@@ -1,9 +1,9 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.56 - 2016-07-06
+ * kityminder-editor - v1.0.56 - 2017-01-19
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
- * Copyright (c) 2016 ; Licensed 
+ * Copyright (c) 2017 ; Licensed 
  * ====================================================
  */
 
@@ -3006,7 +3006,7 @@ angular.module('kityminderEditor')
 angular.module('kityminderEditor')
     .controller('hyperlink.ctrl', ["$scope", "$modalInstance", "link", function ($scope, $modalInstance, link) {
 
-        $scope.R_URL = /(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/;
+        $scope.R_URL = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
 
         $scope.url = link.url || '';
         $scope.title = link.title || '';
