@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.56 - 2017-01-19
+ * kityminder-editor - v1.0.57 - 2017-01-19
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2017 ; Licensed 
@@ -901,7 +901,7 @@ _p[12] = {
                     }
                 });
                 minder.on("dblclick", function() {
-                    if (minder.getSelectedNode()) {
+                    if (minder.getSelectedNode() && minder._status !== "readonly") {
                         editText();
                     }
                 });
