@@ -40,7 +40,7 @@
         "angular-bootstrap": "~0.12.1",
         "angular-ui-codemirror": "~0.2.3",
         "codemirror": "~4.8.0",
-        "marked": "~0.3.3",
+        "marked": "~0.3.6",
         "kity": "~2.0.0",
         "hotbox": "~1.0.2",
         "kityminder-core": "~1.4.3",
