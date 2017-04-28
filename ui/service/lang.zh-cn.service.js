@@ -332,7 +332,7 @@ angular.module('kityminderEditor')
                     'insertlink': '插入链接',
                     'insertimage': '插入图片',
                     'insertnote': '插入备注',
-					'removelink': '移除已有连接',
+					'removelink': '移除已有链接',
 					'removeimage': '移除已有图片',
 					'removenote': '移除已有备注',
 					'resetlayout': '整理',
