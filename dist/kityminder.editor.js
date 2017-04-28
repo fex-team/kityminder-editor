@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.59 - 2017-03-08
+ * kityminder-editor - v1.0.60 - 2017-04-28
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2017 ; Licensed 
@@ -2639,7 +2639,7 @@ angular.module('kityminderEditor')
                     'insertlink': '插入链接',
                     'insertimage': '插入图片',
                     'insertnote': '插入备注',
-					'removelink': '移除已有连接',
+					'removelink': '移除已有链接',
 					'removeimage': '移除已有图片',
 					'removenote': '移除已有备注',
 					'resetlayout': '整理',
