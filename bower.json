@@ -1,6 +1,6 @@
 {
     "name": "kityminder-editor",
-    "version": "1.0.60",
+    "version": "1.0.61",
     "authors": [
         "fex<fex@baidu.com>"
     ],
@@ -43,7 +43,6 @@
         "marked": "git://github.com/chjj/marked.git#master",
         "kity": "~2.0.0",
         "hotbox": "~1.0.2",
-        "kityminder-core": "~1.4.3",
         "color-picker": "~1.0.2"
     },
     "overrides": {

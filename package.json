@@ -1,10 +1,11 @@
 {
   "name": "kityminder-editor",
-  "version": "1.0.60",
+  "version": "1.0.61",
   "description": "A powerful mind map editor",
   "main": "kityminder.editor.js",
   "scripts": {
     "init": "npm i -g wr && npm install -g less && npm install -g bower && bower install && npm install",
+    "build": "grunt build",
     "dev": "npm run watch",
     "watch": "wr --exec \"lessc --source-map less/editor.less dist/kityminder.editor.css && grunt build\" less ui"
   },
@@ -46,5 +47,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "kityminder-core": "^1.4.46"
   }
 }
