@@ -1,6 +1,6 @@
 {
   "name": "kityminder-editor",
-  "version": "1.0.62",
+  "version": "1.0.63",
   "description": "A powerful mind map editor",
   "main": "kityminder.editor.js",
   "scripts": {
@@ -52,6 +52,6 @@
     }
   },
   "dependencies": {
-    "kityminder-core": "^1.4.47"
+    "kityminder-core": "^1.4.48"
   }
 }
