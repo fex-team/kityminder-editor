@@ -7,7 +7,8 @@
     "init": "npm i -g wr && npm install -g less && npm install -g bower && bower install && npm install",
     "build": "grunt build",
     "dev": "grunt dev",
-    "watch": "wr --exec \"lessc --source-map less/editor.less dist/kityminder.editor.css && grunt build\" less ui"
+    "watch": "wr --exec \"lessc --source-map less/editor.less dist/kityminder.editor.css && grunt build\" less ui",
+    "postinstall": "bower install"
   },
   "repository": {
     "type": "git",
@@ -46,12 +47,12 @@
     "load-grunt-tasks": "^3.1.0",
     "uglify-js": "^2.8.29"
   },
+  "dependencies": {
+    "kityminder-core": "^1.4.50"
+  },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "dependencies": {
-    "kityminder-core": "^1.4.48"
   }
 }

@@ -41,7 +41,6 @@
         "angular-ui-codemirror": "~0.2.3",
         "codemirror": "~4.8.0",
         "marked": "git://github.com/chjj/marked.git#master",
-        "kity": "~2.0.0",
         "hotbox": "~1.0.2",
         "color-picker": "~1.0.2"
     },
