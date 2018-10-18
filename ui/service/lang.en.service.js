@@ -158,6 +158,8 @@ angular.module('kityminderEditor')
 					'move_success': '{0} 移动成功到 {1}',
 
 					'command': {
+						'exportPNG': '导出为PNG图片',
+						'exportSVG': '导出为SVG图片',
 						'appendsiblingnode': '插入同级主题',
                         'appendparentnode': '插入上级主题',
 						'appendchildnode': '插入下级主题',
@@ -179,6 +181,8 @@ angular.module('kityminderEditor')
 
 					'search':'搜索',
 
+                    'export': '导出',
+
 					'expandtoleaf': '展开',
 
 					'back': '返回',
@@ -187,6 +191,7 @@ angular.module('kityminderEditor')
 					'redo': '重做 (Ctrl + Y)',
 
 					'tabs': {
+						'file': '文件',
 						'idea': '思路',
 						'appearence': '外观',
 						'view': '视图'
