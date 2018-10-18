@@ -1,8 +1,8 @@
 angular.module('kityminderEditor')
-.service('lang.zh-cn', function() {
+.service('lang.de', function() {
 return {
 
-'zh-cn':
+'de':
 
 {
 
@@ -12,27 +12,27 @@ return {
 
 'default':
 
-'思维导图',
+'Mind Map',
 
 'tianpan':
 
-'天盘图',
+'Tianpan Karte',
 
 'structure':
 
-'组织结构图',
+'Organigramm',
 
 'filetree':
 
-'目录组织图',
+'Verzeichnis-Organigramm',
 
 'right':
 
-'逻辑结构图',
+'Logisches Strukturdiagramm',
 
 'fish-bone':
 
-'鱼骨头图'
+'Fischknochenfigur'
 },
 
 'theme':
@@ -41,89 +41,92 @@ return {
 
 'classic':
 
-'脑图经典',
+'Der Mind Map-Klassiker',
 
 'classic-compact':
 
-'紧凑经典',
+'Kompakter Klassiker',
 
 'snow':
 
-'温柔冷光',
+'sanftes kaltes Licht',
 
 'snow-compact':
 
-'紧凑冷光',
+'Kompaktes Kaltlicht',
 
 'fish':
 
-'鱼骨图',
+'Fischknochenkarte',
 
 'wire':
 
-'线框',
+'Drahtgitter'
 
 'fresh-red':
 
-'清新红',
+'Frisches Rot',
 
 'fresh-soil':
 
-'泥土黄',
+'Boden gelb',
 
 'fresh-green':
 
-'文艺绿',
+'Literarisches Grün',
 
 'fresh-blue':
 
-'天空蓝',
+'Himmelblau',
 
 'fresh-purple':
 
-'浪漫紫',
+'Romantisches Lila',
 
 'fresh-pink':
 
-'脑残粉',
+'Gehirnpulver',
 
 'fresh-red-compat':
 
-'紧凑红',
+'Kompakt rot',
 
 'fresh-soil-compat':
 
-'紧凑黄',
+'Kompakt gelb',
 
 'fresh-green-compat':
 
-'紧凑绿',
+'Kompaktgrün',
 
 'fresh-blue-compat':
 
-'紧凑蓝',
+'Kompakt blau',
 
 'fresh-purple-compat':
 
-'紧凑紫',
+'Kompaktes Lila',
 
 'fresh-pink-compat':
 
-'紧凑粉',
-'tianpan':'经典天盘',
+'Kompaktes Pulver',
+
+'tianpan':
+
+'Klassisches Zifferblatt',
 
 'tianpan-compact':
 
-'紧凑天盘'
+'Kompakter Tag'
 },
 
 'maintopic':
 
-'中心主题',
+'Zentrierthema',
 
 'topic':
 
-'分支主题',
+'Branchenthema',
 
 'panels':
 
@@ -131,71 +134,71 @@ return {
 
 'history':
 
-'历史',
+'Geschichte',
 
 'template':
 
-'模板',
+'Vorlage',
 
 'theme':
 
-'皮肤',
+'Haut',
 
 'layout':
 
-'布局',
+'Layout',
 
 'style':
 
-'样式',
+'Stil',
 
 'font':
 
-'文字',
+'Text',
 
 'color':
 
-'颜色',
+'Farbe',
 
 'background':
 
-'背景',
+'Hintergrund',
 
 'insert':
 
-'插入',
+'Einfügen',
 
 'arrange':
 
-'调整',
+'Anpassung',
 
 'nodeop':
 
-'当前',
+'aktuell',
 
 'priority':
 
-'优先级',
+'Priorität',
 
 'progress':
 
-'进度',
+'Fortschritt',
 
 'resource':
 
-'资源',
+'Ressourcen',
 
 'note':
 
-'备注',
+'Bemerkungen',
 
 'attachment':
 
-'附件',
+'Anlage',
 
 'word':
 
-'文字'
+'Text'
 },
 
 'error_message':
@@ -204,209 +207,208 @@ return {
 
 'title':
 
-'哎呀，脑图出错了',
-
+'Oh, die Mind Map ist falsch',
 
 'err_load':
 
-'加载脑图失败',
+'Laden der Mind Map fehlgeschlagen',
 
 'err_save':
 
-'保存脑图失败',
+'Save Mind Map failed',
 
 'err_network':
 
-'网络错误',
+'Netzwerkfehler',
 
 'err_doc_resolve':
 
-'文档解析失败',
+'Dokumentanalyse fehlgeschlagen',
 
 'err_unknown':
 
-'发生了奇怪的错误',
+'Ein seltsamer Fehler ist aufgetreten',
 
 'err_localfile_read':
 
-'文件读取错误',
+'Datei Lesefehler',
 
 'err_download':
 
-'文件下载失败',
+'Dateidownload fehlgeschlagen',
 
 'err_remove_share':
 
-'取消分享失败',
+'Abbrechen der Freigabe fehlgeschlagen',
 
 'err_create_share':
 
-'分享失败',
+'Misserfolg',
 
 'err_mkdir':
 
-'目录创建失败',
+'Verzeichniserstellung fehlgeschlagen',
 
 'err_ls':
 
-'读取目录失败',
+'Verzeichnis lesen fehlgeschlagen',
 
 'err_share_data':
 
-'加载分享内容出错',
+'Fehler beim Laden freigegebener Inhalte',
 
 'err_share_sync_fail':
 
-'分享内容同步失败',
+'Content-Synchronisierung fehlgeschlagen',
 
 'err_move_file':
 
-'文件移动失败',
+'Dateiverschiebung fehlgeschlagen',
 
 'err_rename':
 
-'重命名失败',
+'Umbenennen fehlgeschlagen',
 
 
 'unknownreason':
 
-'可能是外星人篡改了代码...',
+'Vielleicht haben Aliens den Code gefälscht ...',
 
 'pcs_code':
 
 {
 3:
-"不支持此接口",
+'Diese Schnittstelle wird nicht unterstützt',
 4:
-"没有权限执行此操作",
+'Es gibt keine Erlaubnis, diese Operation durchzuführen',
 5:
-"IP未授权",
+'IP ist nicht autorisiert',
 110:
-"用户会话已过期，请重新登录",
+'Benutzersitzung ist abgelaufen, bitte loggen Sie sich erneut ein',
 31001:
-"数据库查询错误",
+'Datenbankabfragefehler',
 31002:
-"数据库连接错误",
+'Datenbankverbindungsfehler',
 31003:
-"数据库返回空结果",
+'Die Datenbank gibt ein leeres Ergebnis zurück',
 31021:
-"网络错误",
+'Netzwerkfehler',
 31022:
-"暂时无法连接服务器",
+'Verbindung zum Server kann nicht vorübergehend hergestellt werden',
 31023:
-"输入参数错误",
+'Eingabeparameterfehler',
 31024:
-"app id为空",
+'App-ID ist leer',
 31025:
-"后端存储错误",
+'Backend-Speicherfehler',
 31041:
-"用户的cookie不是合法的百度cookie",
+'Benutzer-Cookie ist kein legaler Baidu-Cookie',
 31042:
-"用户未登陆",
+'Benutzer ist nicht eingeloggt',
 31043:
-"用户未激活",
+'Benutzer ist nicht aktiviert',
 31044:
-"用户未授权",
+'Benutzer ist nicht berechtigt',
 31045:
-"用户不存在",
+'Benutzer existiert nicht',
 31046:
-"用户已经存在",
+'Benutzer existiert bereits',
 31061:
-"文件已经存在",
+'Die Datei existiert bereits',
 31062:
-"文件名非法",
+'Der Dateiname ist illegal',
 31063:
-"文件父目录不存在",
+'Das übergeordnete Dateiverzeichnis existiert nicht',
 31064:
-"无权访问此文件",
+'Kein Zugriff auf diese Datei',
 31065:
-"目录已满",
+'Das Verzeichnis ist voll',
 31066:
-"文件不存在",
+'Die Datei existiert nicht',
 31067:
-"文件处理出错",
+'Dateiverarbeitungsfehler',
 31068:
-"文件创建失败",
+'Dateierstellung fehlgeschlagen',
 31069:
-"文件拷贝失败",
+'Dateikopie fehlgeschlagen',
 31070:
-"文件删除失败",
+'Dateilöschung fehlgeschlagen',
 31071:
-"不能读取文件元信息",
+'Datei-Meta-Informationen können nicht gelesen werden',
 31072:
-"文件移动失败",
+'Dateibewegung fehlgeschlagen',
 31073:
-"文件重命名失败",
+'Datei umbenennen fehlgeschlagen',
 31079:
-"未找到文件MD5，请使用上传API上传整个文件。",
+'Datei MD5 wurde nicht gefunden, bitte verwenden Sie die Upload-API, um die gesamte Datei hochzuladen.',
 31081:
-"superfile创建失败",
+'Superfile Erstellung fehlgeschlagen',
 31082:
-"superfile 块列表为空",
+'Die Liste der untersten Blöcke ist leer',
 31083:
-"superfile 更新失败",
+'Superfile-Update fehlgeschlagen',
 31101:
-"tag系统内部错误",
+'Tag System interner Fehler',
 31102:
-"tag参数错误",
+'Tag Parameter Fehler',
 31103:
-"tag系统错误",
+'Tag Systemfehler',
 31110:
-"未授权设置此目录配额",
+'Nicht autorisiert, dieses Verzeichniskontingent festzulegen',
 31111:
-"配额管理只支持两级目录",
+'Kontingentverwaltung unterstützt nur zwei Ebenen von Verzeichnissen',
 31112:
-"超出配额",
+'Out of Quote',
 31113:
-"配额不能超出目录祖先的配额",
+'Das Kontingent darf die Quote der Katalog-Vorfahren nicht überschreiten',
 31114:
-"配额不能比子目录配额小",
+'Kontingente dürfen nicht kleiner sein als Unterverzeichniskontingente'
 31141:
-"请求缩略图服务失败",
+'Miniaturansicht-Service fehlgeschlagen',
 31201:
-"签名错误",
+'Signaturfehler',
 31202:
-"文件不存在",
+'Die Datei existiert nicht',
 31203:
-"设置acl失败",
+'Einstellung acl ist fehlgeschlagen',
 31204:
-"请求acl验证失败",
+'Anfrage acl Verifizierung fehlgeschlagen',
 31205:
-"获取acl失败",
+'Get acl fehlgeschlagen',
 31206:
-"acl不存在",
+'acl existiert nicht',
 31207:
-"bucket已存在",
+'Bucket existiert bereits',
 31208:
-"用户请求错误",
+'Benutzeranforderungsfehler',
 31209:
-"服务器错误",
+'Serverfehler',
 31210:
-"服务器不支持",
+'Server unterstützt nicht',
 31211:
-"禁止访问",
+'Kein Zugang',
 31212:
-"服务不可用",
+'Service nicht verfügbar',
 31213:
-"重试出错",
+'Wiederholungsfehler',
 31214:
-"上传文件data失败",
+'Dateidaten hochladen fehlgeschlagen',
 31215:
-"上传文件meta失败",
+'Upload Datei Meta fehlgeschlagen',
 31216:
-"下载文件data失败",
+'Herunterladen von Dateidaten fehlgeschlagen',
 31217:
-"下载文件meta失败",
+'Download Datei Meta fehlgeschlagen',
 31218:
-"容量超出限额",
+'Kapazität überschreitet das Limit',
 31219:
-"请求数超出限额",
+'Die Anzahl der Anfragen überschreitet das Limit',
 31220:
-"流量超出限额",
+'Flow überschreitet das Limit',
 31298:
-"服务器返回值KEY非法",
+'Der Server hat einen Wert zurückgegeben, der KEY ist ungültig',
 31299:
-"服务器返回值KEY不存在"
+'Server Rückgabewert KEY existiert nicht'
 }
 },
 
@@ -416,49 +418,48 @@ return {
 
 'shared_file_title':
 
-'[分享的] {0} (只读)',
+'[geteilt] {0} (nur lesen)',
 
 'load_share_for_edit':
 
-'正在加载分享的文件...',
+'Laden freigegebener Dateien ...',
 
 'share_sync_success':
 
-'分享内容已同步',
+'Freigegebener Inhalt wurde synchronisiert',
 
 'recycle_clear_confirm':
 
-'确认清空回收站么？清空后的文件无法恢复。',
+'Sind Sie sicher, den Papierkorb zu leeren? Die geleerte Datei kann nicht wiederhergestellt werden. ',
 
 
 'fullscreen_exit_hint':
 
-'按 Esc 或 F11 退出全屏',
-
+'Drücken Sie Esc oder F11, um den Vollbildmodus zu beenden',
 
 'error_detail':
 
-'详细信息',
+'Details',
 
 'copy_and_feedback':
 
-'复制并反馈',
+'Kopieren und Feedback',
 
 'move_file_confirm':
 
-'确定把 "{0}" 移动到 "{1}" 吗？',
+'Verschieben Sie '{0}' in '{1}'? ',
 
 'rename':
 
-'重命名',
+'umbenennen',
 
 'rename_success':
 
-'{0} 重命名成功',
+'{0} erfolgreich umbenannt',
 
 'move_success':
 
-'{0} 移动成功到 {1}',
+'{0} wurde erfolgreich nach {1} verschoben',
 
 
 'command':
@@ -467,106 +468,105 @@ return {
 
 'exportPNG':
 
-'导出为PNG图片',
+'Export als PNG-Bild',
 
 'exportSVG':
 
-'导出为SVG图片',
+'Nach SVG-Bild exportieren',
 
 'appendsiblingnode':
 
-'插入同级主题',
+'Das gleiche Thema einfügen',
 
 'appendparentnode':
 
-'插入上级主题',
+'Überlegenes Thema einfügen',
 
 'appendchildnode':
 
-'插入下级主题',
+'Untergeordnetes Thema einfügen',
 
 'removenode':
 
-'删除',
+'Löschen',
 
 'editnode':
 
-'编辑',
+'Bearbeiten',
 
 'arrangeup':
 
-'上移',
+'Aufwärts',
 
 'arrangedown':
 
-'下移',
+'Unten',
 
 'resetlayout':
 
-'整理布局',
+'Layout organisieren',
 
 'expandtoleaf':
 
-'展开全部节点',
+'Alle Knoten erweitern',
 
 'expandtolevel1':
 
-'展开到一级节点',
+'Erweitern auf Level 1 Knoten',
 
 'expandtolevel2':
 
-'展开到二级节点',
+'Erweitern zum sekundären Knoten',
 
 'expandtolevel3':
 
-'展开到三级节点',
+'Erweitern zu einem Knoten der dritten Ebene',
 
 'expandtolevel4':
 
-'展开到四级节点',
+'Erweitern zu einem vierstufigen Knoten',
 
 'expandtolevel5':
 
-'展开到五级节点',
+'Erweitern zu einem fünfstufigen Knoten',
 
 'expandtolevel6':
 
-'展开到六级节点',
+'Erweitern zu einem sechsstufigen Knoten',
 
 'fullscreen':
 
-'全屏',
+'Vollbild',
 
 'outline':
 
-'大纲'
+'Gliederung'
 },
 
-'search':'搜索',
-
+'search':'suchen',
 
 'export':
 
-'导出',
+'exportieren',
 
 
 'expandtoleaf':
 
-'展开',
+'Erweitern',
 
 
 'back':
 
-'返回',
+'Zurück',
 
 
 'undo':
 
-'撤销 (Ctrl + Z)',
+'Rückgängig (Strg + Z)',
 
 'redo':
 
-'重做 (Ctrl + Y)',
+'Wiederholen (Strg + Y)',
 
 
 'tabs':
@@ -575,19 +575,19 @@ return {
 
 'file':
 
-'文件',
+'Datei',
 
 'idea':
 
-'思路',
+'Gedanken',
 
 'appearence':
 
-'外观',
+'Aussehen',
 
 'view':
 
-'视图'
+'Ansicht'
 },
 
 
@@ -597,23 +597,23 @@ return {
 
 'new':
 
-'新建 (Ctrl + Alt + N)',
+'Neu (Strg + Alt + N)',
 
 'save':
 
-'保存 (Ctrl + S)',
+'Speichern (Strg + S)',
 
 'share':
 
-'分享 (Ctrl + Alt + S)',
+'Teilen (Strg + Alt + S)',
 
 'feedback':
 
-'反馈问题（F1）',
+'Rückmeldungsfrage (F1)',
 
 'editshare':
 
-'编辑'
+'Bearbeiten'
 },
 
 
@@ -624,571 +624,569 @@ return {
 
 'mainmenutext':
 
-'百度脑图', // 主菜单按钮文本
+'Baidu Mind Map', // Hauptmenübutton Text
 
 
 'newtab':
 
-'新建',
+'Neu',
 
 'opentab':
 
-'打开',
+'Offen',
 
 'savetab':
 
-'保存',
+'Speichern',
 
 'sharetab':
 
-'分享',
+'Teilen',
 
 'preferencetab':
 
-'设置',
+'Einstellungen',
 
 'helptab':
 
-'帮助',
+'Hilfe',
 
 'feedbacktab':
 
-'反馈',
+'Feedback',
 
 'recenttab':
 
-'最近使用',
+'Kürzlich verwendet',
 
 'netdisktab':
 
-'百度云存储',
+'Baidu Cloud Speicher',
 
 'localtab':
 
-'本地文件',
+'lokale Datei',
 
 'drafttab':
 
-'草稿箱',
+'Entwurfsbox',
 
 'downloadtab':
 
-'导出到本地',
+'Exportieren nach lokal',
 
 'createsharetab':
 
-'当前脑图',
+'aktuelle Mind Map',
 
 'managesharetab':
 
-'已分享',
+'Geteilt',
 
 
 'newheader':
 
-'新建脑图',
+'Neue Mind Map',
 
 'openheader':
 
-'打开',
+'Öffnen',
 
 'saveheader':
 
-'保存到',
+'Speichern in',
 
 'draftheader':
 
-'草稿箱',
+'Entwurfsbox',
 
 'shareheader':
 
-'分享我的脑图',
+'Teilen Sie meine Gehirnkarte',
 
 'downloadheader':
 
-'导出到指定格式',
+'Export in das angegebene Format',
 
 'preferenceheader':
 
-'偏好设置',
+'Präferenzen',
 
 'helpheader':
 
-'帮助',
+'Hilfe':
 
 'feedbackheader':
 
-'反馈'
+'Feedback'
 },
 
 
 'mydocument':
 
-'我的文档',
+'Meine Dokumente',
 
 'emptydir':
 
-'目录为空！',
+'Das Verzeichnis ist leer! ',
 
 'pickfile':
 
-'选择文件...',
+'Datei auswählen ...',
 
 'acceptfile':
 
-'支持的格式：{0}',
+'Unterstütztes Format: {0}',
 
 'dropfile':
 
-'或将文件拖至此处',
+'Oder ziehe die Datei hier',
 
 'unsupportedfile':
 
-'不支持的文件格式',
+'Nicht unterstütztes Dateiformat',
 
 'untitleddoc':
 
-'未命名文档',
+'Unbenanntes Dokument',
 
 'overrideconfirm':
 
-'{0} 已存在，确认覆盖吗？',
+'{0} existiert bereits, Überschreiben bestätigen? ',
 
 'checklogin':
 
-'检查登录状态中...',
+'Login-Status prüfen ...',
 
 'loggingin':
 
-'正在登录...',
+'Registrierung ...',
 
 'recent':
 
-'最近打开',
+'Vor kurzem eröffnet',
 
 'clearrecent':
 
-'清空',
+'Leer',
 
 'clearrecentconfirm':
 
-'确认清空最近文档列表？',
+'Löschen Sie die Liste der letzten Dokumente? ',
 
 'cleardraft':
 
-'清空',
+'Leer',
 
 'cleardraftconfirm':
 
-'确认清空草稿箱？',
-
+'Leere Entwürfe bestätigen? ',
 
 'none_share':
 
-'不分享',
+'Nicht teilen',
 
 'public_share':
 
-'公开分享',
+'öffentlicher Austausch',
 
 'password_share':
 
-'私密分享',
+'Privates Teilen',
 
 'email_share':
 
-'邮件邀请',
+'Mail-Einladung',
 
 'url_share':
 
-'脑图 URL 地址：',
+'URL der Mind Map:',
 
 'sns_share':
 
-'社交网络分享：',
+'Social Network Sharing':
 
 'sns_share_text':
 
-'“{0}” - 我用百度脑图制作的思维导图，快看看吧！（地址：{1}）',
+'' {0} '- Ich benutze die Mind Map, die von Baidu Mind Map erstellt wurde, schau sie dir an! (Adresse: {1}) ',
 
 'none_share_description':
 
-'不分享当前脑图',
+'Teilen Sie nicht die aktuelle Mind Map',
 
 'public_share_description':
 
-'创建任何人可见的分享',
+'Erstellen Sie eine Freigabe, die für alle sichtbar ist',
 
 'share_button_text':
 
-'创建',
+'Erstellen',
 
 'password_share_description':
 
-'创建需要密码才可见的分享',
+'Erstellen Sie eine Freigabe, für die ein Kennwort erforderlich ist, um sichtbar zu sein',
 
 'email_share_description':
 
-'创建指定人可见的分享，您还可以允许他们编辑',
+'Erstellen Sie eine Freigabe, die für die angegebene Person sichtbar ist, und erlauben Sie ihnen, sie zu bearbeiten',
 
 'ondev':
 
-'敬请期待！',
+'Bitte freuen Sie sich auf! ',
 
 'create_share_failed':
 
-'分享失败：{0}',
+'Fehler beim Teilen: {0}',
 
 'remove_share_failed':
 
-'删除失败：{1}',
+'Löschen fehlgeschlagen: {1}',
 
 'copy':
 
-'复制',
+'Kopieren',
 
 'copied':
 
-'已复制',
+'Kopiert',
 
 'shared_tip':
 
-'当前脑图被 {0}  分享，你可以修改之后保存到自己的网盘上或再次分享',
+'Die aktuelle Mind Map wird von {0} geteilt, Sie können sie auf Ihrer eigenen Netzwerkfestplatte speichern oder sie erneut teilen'
 
 'current_share':
 
-'当前脑图',
+'aktuelle Mind Map',
 
 'manage_share':
 
-'我的分享',
+'Mein Anteil',
 
 'share_remove_action':
 
-'不分享该脑图',
+'Teilen Sie nicht die Mind Map',
 
 'share_view_action':
 
-'打开分享地址',
+'Open-Sharing-Adresse',
 
 'share_edit_action':
 
-'编辑分享的文件',
-
+'Gemeinsame Dateien bearbeiten',
 
 'login':
 
-'登录',
+'Einloggen',
 
 'logout':
 
-'注销',
+'Abmelden',
 
 'switchuser':
 
-'切换账户',
+'Konto wechseln',
 
 'userinfo':
 
-'个人信息',
+'persönliche Informationen',
 
 'gotonetdisk':
 
-'我的网盘',
+'Mein Weblaufwerk',
 
 'requirelogin':
 
-'请 <a class="login-button">登录</a> 后使用',
+'Bitte <a class='login-button'> anmelden </a> und verwenden',
 
 'saveas':
 
-'保存为',
+'Speichern unter',
 
 'filename':
 
-'文件名',
+'Dateiname':
 
 'fileformat':
 
-'保存格式',
+'Dateiformat':
 
 'save':
 
-'保存',
+'Speichern',
 
 'mkdir':
 
-'新建目录',
+'Neues Verzeichnis',
 
 'recycle':
 
-'回收站',
+'Papierkorb',
 
 'newdir':
 
-'未命名目录',
+'Unbenanntes Verzeichnis',
 
 
 'bold':
 
-'加粗',
+'Fett',
 
 'italic':
 
-'斜体',
+'Kursiv',
 
 'forecolor':
 
-'字体颜色',
+'Schriftfarbe',
 
 'fontfamily':
 
-'字体',
+'Schriftart',
 
 'fontsize':
 
-'字号',
+'Schriftgröße',
 
 'layoutstyle':
 
-'主题',
+'Thema',
 
 'node':
 
-'节点操作',
+'Knotenoperation',
 
 'saveto':
 
-'另存为',
+'Speichern unter',
 
 'hand':
 
-'允许拖拽',
+'Ziehen erlauben',
 
 'camera':
 
-'定位根节点',
+'Suchen Sie den Stammknoten',
 
 'zoom-in':
 
-'放大（Ctrl+）',
+'Vergrößern (Strg +)',
 
 'zoom-out':
 
-'缩小（Ctrl-）',
+'Verkleinern (Strg)',
 
 'markers':
 
-'标签',
+'Tag',
 
 'resource':
 
-'资源',
+'Ressourcen',
 
 'help':
 
-'帮助',
+'Hilfe',
 
 'preference':
 
-'偏好设置',
+'Präferenzen',
 
 'expandnode':
 
-'展开到叶子',
+'Auf das Blatt erweitern',
 
 'collapsenode':
 
-'收起到一级节点',
+'einen Level-1-Knoten erhalten',
 
 'template':
 
-'模板',
+'Vorlage',
 
 'theme':
 
-'皮肤',
+'Haut',
 
 'clearstyle':
 
-'清除样式',
+'Klare Stil',
 
 'copystyle':
 
-'复制样式',
+'Stil kopieren',
 
 'pastestyle':
 
-'粘贴样式',
+'Stil einfügen',
 
 'appendsiblingnode':
 
-'同级主题',
+
+'Gleiches Thema',
 
 'appendchildnode':
 
-'下级主题',
+'Untergeordnetes Thema',
 
 'arrangeup':
 
-'前调',
+'Voreinstellung',
 
 'arrangedown':
 
-'后调',
+
+'Nachstimmen',
 
 'editnode':
 
-'编辑',
+'Bearbeiten',
 
 'removenode':
 
-'移除',
+'Entfernen',
 
 'priority':
 
-'优先级',
+'Priorität',
 
-'progress':
+'priority':
 
 {
-
 'p1':
 
-'未开始',
+'Nicht begonnen',
 
 'p2':
 
-'完成 1/8',
+'1/8 fertiggestellt',
 
 'p3':
 
-'完成 1/4',
+'1/4 fertiggestellt',
 
 'p4':
 
-'完成 3/8',
+'3/8 fertiggestellt',
 
 'p5':
 
-'完成一半',
+'1/2 fertiggestellt',
 
 'p6':
 
-'完成 5/8',
+'5/8 fertiggestellt',
 
 'p7':
 
-'完成 3/4',
+'3/4 fertiggestellt',
 
 'p8':
 
-'完成 7/8',
+'7/8 fertiggestellt',
 
 'p9':
 
-'已完成',
+'Abgeschlossen',
 
 'p0':
 
-'清除进度'
+'Klarer Fortschritt'
 },
 
 'link':
 
-'链接',
+'Verbindung',
 
 'image':
 
-'图片',
+'Bild',
 
 'note':
 
-'备注',
+'Bemerkungen',
 
 'insertlink':
 
-'插入链接',
+'Link einfügen',
 
 'insertimage':
 
-'插入图片',
+'Bild einfügen',
 
 'insertnote':
 
-'插入备注',
+'Notiz einfügen',
 
 'removelink':
 
-'移除已有链接',
+'Bestehende Links entfernen',
 
 'removeimage':
 
-'移除已有图片',
+'Bestehendes Bild entfernen',
 
 'removenote':
 
-'移除已有备注',
+'Bestehende Notizen entfernen',
 
 'resetlayout':
 
-'整理',
-
+Organisieren,
 
 'justnow':
 
-'刚刚',
+'gerade begonnen',
 
 'minutesago':
 
-'{0} 分钟前',
+'Vor {0} Minuten',
 
 'hoursago':
 
-'{0} 小时前',
+'Vor {0} Stunden',
 
 'yesterday':
 
-'昨天',
+'Gestern',
 
 'daysago':
 
-'{0} 天前',
+Vor {0} Tagen,
 
 'longago':
 
-'很久之前',
+'Vor langer Zeit',
 
 
 'redirect':
 
-'您正在打开连接 {0}，百度脑图不能保证连接的安全性，是否要继续？',
+'Sie öffnen die Verbindung {0}, Baidu Mind Map kann die Sicherheit der Verbindung nicht garantieren. Möchten Sie fortfahren? ',
 
 'navigator':
 
-'导航器',
-
+'Navigator',
 
 'unsavedcontent':
 
-'当前文件还没有保存到网盘：\n\n{0}\n\n虽然未保存的数据会缓存在草稿箱，但是清除浏览器缓存会导致草稿箱清除。',
+'Die aktuelle Datei wurde nicht auf dem Netzlaufwerk gespeichert: \ n \ n {0} \ n \ n Obwohl nicht gespeicherte Daten in den Entwürfen zwischengespeichert werden, werden beim Löschen des Browsercaches die Entwürfe gelöscht. ',
 
 
 'shortcuts':
 
-'快捷键',
+'Verknüpfung',
 
 'contact':
 
-'联系与反馈',
+'Kontakt und Feedback',
 
 'email':
 
-'邮件组',
+
+'Mail-Gruppe',
 
 'qq_group':
 
-'QQ 群',
+'QQ-Gruppe',
 
 'github_issue':
 
@@ -1196,50 +1194,46 @@ return {
 
 'baidu_tieba':
 
-'贴吧',
-
+'贴 吧',
 
 'clipboardunsupported':
 
-'您的浏览器不支持剪贴板，请使用快捷键复制',
-
+'Ihr Browser unterstützt keine Zwischenablage, bitte verwenden Sie die Tastenkombination zum Kopieren',
 
 'load_success':
 
-'{0} 加载成功',
+'{0} erfolgreich geladen',
 
 'save_success':
 
-'{0} 已保存于 {1}',
-
+'{0} wurde in {1} gespeichert,
 'autosave_success':
 
-'{0} 已自动保存于 {1}',
-
+'{0} wurde automatisch in {1} gespeichert,
 
 'selectall':
 
-'全选',
+'Alles auswählen',
 
 'selectrevert':
 
-'反选',
+'umgekehrte Wahl',
 
 'selectsiblings':
 
-'选择兄弟节点',
+'Wähle Bruderknoten',
 
 'selectlevel':
 
-'选择同级节点',
+'Wählen Sie einen Peer-Knoten',
 
 'selectpath':
 
-'选择路径',
+'Wähle einen Weg',
 
 'selecttree':
 
-'选择子树'
+'Teilbaum auswählen'
 },
 
 'popupcolor':
@@ -1248,15 +1242,15 @@ return {
 
 'clearColor':
 
-'清空颜色',
+'Leere Farbe',
 
 'standardColor':
 
-'标准颜色',
+'Standardfarbe',
 
 'themeColor':
 
-'主题颜色'
+'Themenfarbe'
 },
 
 'dialogs':
@@ -1270,31 +1264,30 @@ return {
 'static':
 
 {
-
 'lang_input_text':
 
-'文本内容：',
+'Textinhalt:',
 
 'lang_input_url':
 
-'链接地址：',
+'Linkadresse:',
 
 'lang_input_title':
 
-'标题：',
+'Titel:',
 
 'lang_input_target':
 
-'是否在新窗口：'
+'Ob im neuen Fenster:'
 },
 
 'priority':
 
-'优先级',
+'Priorität',
 
 'none':
 
-'无',
+Nein,
 
 'progress':
 
@@ -1302,43 +1295,43 @@ return {
 
 'title':
 
-'进度',
+'Fortschritt',
 
 'notdone':
 
-'未完成',
+'unvollendet',
 
 'done1':
 
-'完成 1/8',
+'1/8 fertiggestellt',
 
 'done2':
 
-'完成 1/4',
+'1/4 fertiggestellt',
 
 'done3':
 
-'完成 3/8',
+'3/8 fertiggestellt',
 
 'done4':
 
-'完成 1/2',
+'1/2 fertiggestellt',
 
 'done5':
 
-'完成 5/8',
+'5/8 fertiggestellt',
 
 'done6':
 
-'完成 3/4',
+'3/4 fertiggestellt',
 
 'done7':
 
-'完成 7/8',
+'7/8 fertiggestellt',
 
 'done':
 
-'已完成'
+'abgeschlossen'
 }
 },
 
@@ -1367,11 +1360,11 @@ return {
 
 'hyperlink':
 
-'链接...',
+'Verbindung ...',
 
 'unhyperlink':
 
-'移除链接'
+'Link entfernen'
 },
 
 'image':
@@ -1380,11 +1373,12 @@ return {
 
 'image':
 
-'图片...',
+
+'Bild ...',
 
 'removeimage':
 
-'移除图片'
+'Bild entfernen'
 },
 
 'marker':
@@ -1393,7 +1387,7 @@ return {
 
 'marker':
 
-'进度/优先级...'
+'Fortschritt / Priorität ...'
 },
 
 'resource':
@@ -1402,7 +1396,7 @@ return {
 
 'resource':
 
-'资源...'
+'Ressourcen ...'
 }
 }
 }
