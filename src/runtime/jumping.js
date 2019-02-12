@@ -116,15 +116,17 @@ define(function(require, exports, module) {
                 }
             } else if (e.type == 'keyup' && e.is('Esc')) {
                 e.preventDefault();
-                if (compositionLock) {
-                    compositionLock = false;
-                }
-                else {
+                if (!compositionLock) {
                     return fsm.jump('normal', 'input-cancel');
                 }
             }
             else if (e.type == 'compositionstart') {
                 compositionLock = true;
+            }
+            else if (e.type == 'compositionend') {
+                setTimeout(function () {
+                    compositionLock = false;
+                });
             }
         });
 

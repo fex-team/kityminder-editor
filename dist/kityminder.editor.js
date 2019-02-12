@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.65 - 2019-02-12
+ * kityminder-editor - v1.0.66 - 2019-02-12
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
  * Copyright (c) 2019 ; Licensed 
@@ -1323,13 +1323,15 @@ _p[13] = {
                     }
                 } else if (e.type == "keyup" && e.is("Esc")) {
                     e.preventDefault();
-                    if (compositionLock) {
-                        compositionLock = false;
-                    } else {
+                    if (!compositionLock) {
                         return fsm.jump("normal", "input-cancel");
                     }
                 } else if (e.type == "compositionstart") {
                     compositionLock = true;
+                } else if (e.type == "compositionend") {
+                    setTimeout(function() {
+                        compositionLock = false;
+                    });
                 }
             });
             //////////////////////////////////////////////
