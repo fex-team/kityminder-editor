@@ -24,9 +24,11 @@ define(function(require, exports, module) {
          * @Editor: Naixor
          * @Date: 2015.09.14
          */
-        element.setAttribute("tabindex", -1);
+        element.setAttribute('tabindex', -1);
         element.classList.add('receiver');
         element.onkeydown = element.onkeypress = element.onkeyup = dispatchKeyEvent;
+        element.addEventListener('compositionstart', dispatchKeyEvent);
+        // element.addEventListener('compositionend', dispatchKeyEvent);
         this.container.appendChild(element);
 
         // receiver 对象

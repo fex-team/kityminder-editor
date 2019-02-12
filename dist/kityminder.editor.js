@@ -1,9 +1,9 @@
 /*!
  * ====================================================
- * kityminder-editor - v1.0.63 - 2018-03-27
+ * kityminder-editor - v1.0.65 - 2019-02-12
  * https://github.com/fex-team/kityminder-editor
  * GitHub: https://github.com/fex-team/kityminder-editor 
- * Copyright (c) 2018 ; Licensed 
+ * Copyright (c) 2019 ; Licensed 
  * ====================================================
  */
 
@@ -1254,6 +1254,7 @@ _p[13] = {
             var container = this.container;
             var receiverElement = receiver.element;
             var hotbox = this.hotbox;
+            var compositionLock = false;
             // normal -> *
             receiver.listen("normal", function(e) {
                 // 为了防止处理进入edit模式而丢失处理的首字母,此时receiver必须为enable
@@ -1322,7 +1323,13 @@ _p[13] = {
                     }
                 } else if (e.type == "keyup" && e.is("Esc")) {
                     e.preventDefault();
-                    return fsm.jump("normal", "input-cancel");
+                    if (compositionLock) {
+                        compositionLock = false;
+                    } else {
+                        return fsm.jump("normal", "input-cancel");
+                    }
+                } else if (e.type == "compositionstart") {
+                    compositionLock = true;
                 }
             });
             //////////////////////////////////////////////
@@ -1599,6 +1606,8 @@ _p[18] = {
             element.setAttribute("tabindex", -1);
             element.classList.add("receiver");
             element.onkeydown = element.onkeypress = element.onkeyup = dispatchKeyEvent;
+            element.addEventListener("compositionstart", dispatchKeyEvent);
+            // element.addEventListener('compositionend', dispatchKeyEvent);
             this.container.appendChild(element);
             // receiver 对象
             var receiver = {
