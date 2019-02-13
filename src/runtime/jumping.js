@@ -71,7 +71,7 @@ define(function(require, exports, module) {
              */
             switch (e.type) {
                 case 'keydown': {
-                    if (minder.getSelectedNode()) {
+                    if (minder.getSelectedNode() && minder._status !== "readonly") {
                         if (isIntendToInput(e)) {
                             return fsm.jump('input', 'user-input');
                         };
