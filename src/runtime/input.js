@@ -366,6 +366,8 @@ define(function(require, exports, module) {
                 var rootText = minder.getRoot().getText();
                 minder.fire('initChangeRoot', {text: rootText});
             }
+
+            minder.layout(300);
         }
 
         function exitInputMode() {
